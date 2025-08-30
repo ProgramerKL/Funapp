@@ -583,6 +583,12 @@
                     <li><span>Accuracy</span> <span class="stat-value">76%</span></li>
                     <li><span>Threat</span> <span class="stat-value" id="playerThreat">MODERATE</span></li>
                 </ul>
+                
+                <div id="playerPowerStatus" style="margin-top: 15px; padding: 8px; background: rgba(255,0,128,0.1); border-radius: 5px; border: 1px solid rgba(255,0,128,0.3); display: none;">
+                    <div style="font-size: 0.8rem; color: var(--neon-pink); font-weight: 600; text-transform: uppercase;">Active Power</div>
+                    <div id="playerPowerName" style="font-size: 0.9rem; color: white; margin-top: 3px;"></div>
+                    <div id="playerPowerTime" style="font-size: 0.7rem; color: var(--neon-blue); margin-top: 2px;"></div>
+                </div>
             </div>
             
             <div class="canvas-area">
@@ -595,16 +601,39 @@
                         <div style="color: #39ff14; font-weight: bold;">AI: <span id="aiLivesHUD">5</span></div>
                     </div>
                     
-                    <!-- Backup simple display -->
-                    <div style="position: absolute; top: 5px; left: 5px; color: white; font-size: 20px; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px;">
-                        Player Lives: <span id="playerLivesBackup" style="color: #ff0080;">5</span><br>
-                        AI Lives: <span id="aiLivesBackup" style="color: #39ff14;">5</span>
+                    
+                    <!-- New Game Button - Always visible -->
+                    <div style="position: absolute; top: 5px; right: 5px;">
+                        <button class="cyber-btn primary" onclick="resetGame()" style="font-size: 14px; padding: 8px 16px;">NEW GAME</button>
                     </div>
                     
                     <div class="game-over-overlay" id="gameOverOverlay">
                         <div class="game-over-title" id="gameOverTitle">NEURAL LINK SEVERED</div>
                         <div class="game-over-text" id="gameOverText">Your consciousness has been disconnected from the matrix</div>
                         <button class="cyber-btn primary" onclick="resetGame()">RECONNECT</button>
+                    </div>
+                    
+                    <!-- Difficulty Settings Overlay -->
+                    <div class="game-over-overlay" id="difficultyOverlay">
+                        <div class="game-over-title" style="color: var(--neon-blue);">AI THREAT LEVEL</div>
+                        <div class="game-over-text">Select the neural network difficulty</div>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                            <button class="cyber-btn" onclick="setDifficulty('easy')" style="width: 250px;">
+                                <span style="color: var(--electric-green);">EASY</span> - Training Mode
+                            </button>
+                            <button class="cyber-btn" onclick="setDifficulty('medium')" style="width: 250px;">
+                                <span style="color: var(--neon-blue);">MEDIUM</span> - Standard AI
+                            </button>
+                            <button class="cyber-btn" onclick="setDifficulty('hard')" style="width: 250px;">
+                                <span style="color: var(--neon-pink);">HARD</span> - Advanced Neural Net
+                            </button>
+                            <button class="cyber-btn" onclick="setDifficulty('extreme')" style="width: 250px;">
+                                <span style="color: #ff3333;">EXTREME</span> - Cyber Warrior
+                            </button>
+                        </div>
+                        
+                        <button class="cyber-btn" onclick="closeDifficultyMenu()" style="margin-top: 10px;">CANCEL</button>
                     </div>
                 </div>
             </div>
@@ -628,14 +657,20 @@
                     <li><span>Learning</span> <span class="stat-value">ON</span></li>
                     <li><span>Threat</span> <span class="stat-value" id="aiThreat">HIGH</span></li>
                 </ul>
+                
+                <div id="aiPowerStatus" style="margin-top: 15px; padding: 8px; background: rgba(57,255,20,0.1); border-radius: 5px; border: 1px solid rgba(57,255,20,0.3); display: none;">
+                    <div style="font-size: 0.8rem; color: var(--electric-green); font-weight: 600; text-transform: uppercase;">AI Enhancement</div>
+                    <div id="aiPowerName" style="font-size: 0.9rem; color: white; margin-top: 3px;"></div>
+                    <div id="aiPowerTime" style="font-size: 0.7rem; color: var(--neon-blue); margin-top: 2px;"></div>
+                </div>
             </div>
         </div>
         
         <div class="control-panel">
-            <button class="cyber-btn primary">JACK IN</button>
-            <button class="cyber-btn">PAUSE MATRIX</button>
-            <button class="cyber-btn">NEURAL CONFIG</button>
-            <button class="cyber-btn">DISCONNECT</button>
+            <button class="cyber-btn primary" onclick="startNewGame()">JACK IN</button>
+            <button class="cyber-btn" onclick="togglePause()">PAUSE MATRIX</button>
+            <button class="cyber-btn" onclick="resetGame()">NEW GAME</button>
+            <button class="cyber-btn" onclick="showDifficultyMenu()">AI DIFFICULTY</button>
         </div>
     </div>
     
@@ -664,12 +699,53 @@
             playerLives: 5,
             aiLives: 5,
             gameOver: false,
-            paused: false
+            paused: false,
+            difficulty: 'medium'  // easy, medium, hard, extreme
+        };
+        
+        // Difficulty settings
+        const difficultySettings = {
+            easy: {
+                name: 'Training Mode',
+                baseAccuracy: 0.4,
+                maxAccuracy: 0.6,
+                baseError: 50,
+                minError: 35,
+                speed: 3,
+                description: 'AI makes many mistakes'
+            },
+            medium: {
+                name: 'Standard AI',
+                baseAccuracy: 0.65,
+                maxAccuracy: 0.8,
+                baseError: 35,
+                minError: 20,
+                speed: 4,
+                description: 'Balanced gameplay'
+            },
+            hard: {
+                name: 'Advanced Neural Net',
+                baseAccuracy: 0.8,
+                maxAccuracy: 0.92,
+                baseError: 25,
+                minError: 10,
+                speed: 5,
+                description: 'Challenging opponent'
+            },
+            extreme: {
+                name: 'Cyber Warrior',
+                baseAccuracy: 0.9,
+                maxAccuracy: 0.98,
+                baseError: 15,
+                minError: 5,
+                speed: 6,
+                description: 'Nearly perfect AI'
+            }
         };
         
         // Simple function to update title with lives
         function updateTitle() {
-            document.title = `Pong - Player: ${gameState.playerLives} vs AI: ${gameState.aiLives}`;
+            document.title = `Pong [${difficultySettings[gameState.difficulty].name}] - Player: ${gameState.playerLives} vs AI: ${gameState.aiLives}`;
         }
         
         // Game objects
@@ -679,6 +755,84 @@
         let ballVx = 5;
         let ballVy = 3;
         let aiY = canvas.height / 2;
+        
+        // Power-up system
+        let powerUps = [];
+        let activePowers = { player: null, ai: null };
+        let powerSpawnTimer = 0;
+        const powerSpawnInterval = 300; // frames (5 seconds at 60fps)
+        
+        const powerTypes = {
+            // BENEFICIAL POWER-UPS (good for whoever hits them)
+            speedBoost: {
+                name: 'Speed Boost',
+                color: '#ff6b35',
+                duration: 300, // 5 seconds
+                effect: 'Increases paddle speed by 50%',
+                symbol: '⚡',
+                beneficial: true
+            },
+            bigPaddle: {
+                name: 'Big Paddle',
+                color: '#45b7d1',
+                duration: 450, // 7.5 seconds
+                effect: 'Increases paddle size by 40%',
+                symbol: '█',
+                beneficial: true
+            },
+            shield: {
+                name: 'Shield',
+                color: '#feca57',
+                duration: 1, // One-time use
+                effect: 'Prevents next life loss',
+                symbol: '🛡',
+                beneficial: true
+            },
+            
+            // HARMFUL POWER-UPS (bad for whoever hits them - opponent gets benefit)
+            enemySpeedBoost: {
+                name: 'Enemy Speed',
+                color: '#e74c3c',
+                duration: 300, // 5 seconds
+                effect: 'Gives opponent speed boost',
+                symbol: '⚡',
+                beneficial: false
+            },
+            enemyBigPaddle: {
+                name: 'Enemy Advantage',
+                color: '#9b59b6',
+                duration: 300, // 5 seconds
+                effect: 'Makes opponent paddle bigger',
+                symbol: '█',
+                beneficial: false
+            },
+            confusionAttack: {
+                name: 'Neural Scramble Attack',
+                color: '#ff6b35',
+                duration: 240, // 4 seconds
+                effect: 'Scrambles opponent controls',
+                symbol: '🌀',
+                beneficial: false
+            },
+            enemyShield: {
+                name: 'Enemy Shield',
+                color: '#e74c3c',
+                duration: 1, // One-time use
+                effect: 'Gives opponent shield protection',
+                symbol: '🛡',
+                beneficial: false
+            },
+            
+            // This is the actual confusion effect that gets applied
+            confusion: {
+                name: 'Control Scramble',
+                color: '#ff6b35',
+                duration: 240, // 4 seconds
+                effect: 'Reverses paddle controls',
+                symbol: '🌀',
+                beneficial: false
+            }
+        };
         
         // Paddle dimensions
         const paddleWidth = 15;
@@ -696,12 +850,206 @@
             ctx.shadowBlur = 0;
         }
         
+        // Power-up functions
+        function spawnPowerUp() {
+            const powerTypeKeys = Object.keys(powerTypes);
+            const randomType = powerTypeKeys[Math.floor(Math.random() * powerTypeKeys.length)];
+            const powerType = powerTypes[randomType];
+            
+            const powerUp = {
+                x: Math.random() * (canvas.width - 200) + 100, // Avoid edges
+                y: Math.random() * (canvas.height - 100) + 50,
+                type: randomType,
+                typeData: powerType,
+                size: 25,
+                pulseTime: 0,
+                collected: false
+            };
+            
+            powerUps.push(powerUp);
+            console.log(`🔥 POWER-UP SPAWNED: ${powerType.name} (${powerType.beneficial ? 'BENEFICIAL' : 'HARMFUL'}) at (${Math.round(powerUp.x)}, ${Math.round(powerUp.y)})`);
+            console.log(`Total power-ups on screen: ${powerUps.length}`);
+        }
+        
+        function checkPowerUpCollision(ballX, ballY, ballRadius) {
+            for (let i = powerUps.length - 1; i >= 0; i--) {
+                const powerUp = powerUps[i];
+                if (powerUp.collected) continue;
+                
+                const dx = ballX - powerUp.x;
+                const dy = ballY - powerUp.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < ballRadius + powerUp.size/2) {
+                    // Determine who hit the power-up based on ball direction
+                    // ballVx < 0 = ball moving LEFT (toward player) = AI last hit it
+                    // ballVx > 0 = ball moving RIGHT (toward AI) = Player last hit it
+                    const hitter = ballVx < 0 ? 'ai' : 'player';
+                    
+                    // Strategic assignment based on power-up type
+                    let recipient;
+                    let actualPowerType = powerUp.type;
+                    
+                    if (powerUp.typeData.beneficial) {
+                        // Beneficial power goes to whoever hit it
+                        recipient = hitter;
+                    } else {
+                        // Harmful power gives benefit to opponent
+                        recipient = hitter === 'player' ? 'ai' : 'player';
+                        
+                        // Convert harmful power to beneficial equivalent for opponent
+                        if (powerUp.type === 'enemySpeedBoost') {
+                            actualPowerType = 'speedBoost';
+                        } else if (powerUp.type === 'enemyBigPaddle') {
+                            actualPowerType = 'bigPaddle';
+                        } else if (powerUp.type === 'confusionAttack') {
+                            actualPowerType = 'confusion';
+                        } else if (powerUp.type === 'enemyShield') {
+                            actualPowerType = 'shield';
+                        }
+                    }
+                    
+                    activatePowerUp(actualPowerType, recipient);
+                    powerUp.collected = true;
+                    powerUps.splice(i, 1);
+                    
+                    console.log(`⚡ POWER-UP COLLISION! Ball hit: ${powerUp.typeData.name}`);
+                    console.log(`🎯 Hitter: ${hitter}, Type: ${powerUp.typeData.beneficial ? 'BENEFICIAL' : 'HARMFUL'}`);
+                    console.log(`🎁 Power assigned to: ${recipient} (${actualPowerType})`);
+                    
+                    if (actualPowerType === 'confusion') {
+                        console.log(`🌀 CONFUSION ACTIVATED FOR: ${recipient}!`);
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        function activatePowerUp(powerType, recipient) {
+            const powerData = powerTypes[powerType];
+            
+            // Clear existing power for this recipient
+            if (activePowers[recipient]) {
+                deactivatePowerUp(recipient);
+            }
+            
+            activePowers[recipient] = {
+                type: powerType,
+                data: powerData,
+                timeLeft: powerData.duration,
+                recipient: recipient
+            };
+            
+            console.log(`${recipient} activated: ${powerData.name} for ${powerData.duration} frames`);
+        }
+        
+        function deactivatePowerUp(recipient) {
+            if (activePowers[recipient]) {
+                console.log(`${recipient} power-up expired: ${activePowers[recipient].data.name}`);
+                activePowers[recipient] = null;
+            }
+        }
+        
+        function updatePowerUps() {
+            // Update spawn timer
+            powerSpawnTimer++;
+            if (powerSpawnTimer >= powerSpawnInterval) {
+                spawnPowerUp();
+                powerSpawnTimer = 0;
+            }
+            
+            // Update power-up animations
+            powerUps.forEach(powerUp => {
+                powerUp.pulseTime += 0.1;
+            });
+            
+            // Update active power durations
+            ['player', 'ai'].forEach(recipient => {
+                if (activePowers[recipient]) {
+                    activePowers[recipient].timeLeft--;
+                    if (activePowers[recipient].timeLeft <= 0) {
+                        deactivatePowerUp(recipient);
+                    }
+                }
+            });
+            
+            // Update power status displays
+            updatePowerStatusDisplay();
+        }
+        
+        function updatePowerStatusDisplay() {
+            ['player', 'ai'].forEach(recipient => {
+                const statusDiv = document.getElementById(`${recipient}PowerStatus`);
+                const nameDiv = document.getElementById(`${recipient}PowerName`);
+                const timeDiv = document.getElementById(`${recipient}PowerTime`);
+                
+                if (activePowers[recipient] && statusDiv && nameDiv && timeDiv) {
+                    const power = activePowers[recipient];
+                    const timeLeftSeconds = Math.ceil(power.timeLeft / 60);
+                    
+                    statusDiv.style.display = 'block';
+                    nameDiv.textContent = power.data.name;
+                    timeDiv.textContent = `${timeLeftSeconds}s remaining`;
+                    statusDiv.style.borderColor = power.data.color;
+                    statusDiv.style.backgroundColor = power.data.color + '15';
+                } else if (statusDiv) {
+                    statusDiv.style.display = 'none';
+                }
+            });
+        }
+        
+        function drawPowerUps() {
+            powerUps.forEach(powerUp => {
+                if (powerUp.collected) return;
+                
+                const pulseScale = 1 + Math.sin(powerUp.pulseTime) * 0.2;
+                const size = powerUp.size * pulseScale;
+                
+                // Draw glowing outer ring
+                ctx.save();
+                ctx.shadowColor = powerUp.typeData.color;
+                ctx.shadowBlur = 20;
+                ctx.strokeStyle = powerUp.typeData.color;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(powerUp.x, powerUp.y, size/2 + 5, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                // Draw main power-up circle
+                ctx.fillStyle = powerUp.typeData.color;
+                ctx.shadowBlur = 15;
+                ctx.beginPath();
+                ctx.arc(powerUp.x, powerUp.y, size/2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw symbol
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#000';
+                ctx.font = 'bold 14px Orbitron';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(powerUp.typeData.symbol, powerUp.x, powerUp.y);
+                
+                ctx.restore();
+            });
+        }
+        
         canvas.addEventListener('mousemove', (e) => {
             if (gameState.gameOver || gameState.paused) return;
             
             const rect = canvas.getBoundingClientRect();
-            mouseY = ((e.clientY - rect.top) / rect.height) * canvas.height;
-            mouseY = Math.max(paddleHeight/2, Math.min(canvas.height - paddleHeight/2, mouseY));
+            let newMouseY = ((e.clientY - rect.top) / rect.height) * canvas.height;
+            
+            // Apply confusion/neural scramble effect
+            if (activePowers.player && activePowers.player.type === 'confusion') {
+                // Reverse controls - mouse up moves paddle down and vice versa
+                const center = canvas.height / 2;
+                const offset = newMouseY - center;
+                newMouseY = center - offset; // Flip the offset
+            }
+            
+            mouseY = Math.max(paddleHeight/2, Math.min(canvas.height - paddleHeight/2, newMouseY));
         });
         
         function updateLivesDisplay() {
@@ -712,8 +1060,6 @@
             const elementsToUpdate = [
                 { selector: '#playerLivesHUD', value: gameState.playerLives },
                 { selector: '#aiLivesHUD', value: gameState.aiLives },
-                { selector: '#playerLivesBackup', value: gameState.playerLives },
-                { selector: '#aiLivesBackup', value: gameState.aiLives },
                 { selector: '.left-panel .score-display', value: gameState.playerLives },
                 { selector: '.right-panel .score-display', value: gameState.aiLives }
             ];
@@ -809,23 +1155,102 @@
         }
         
         function resetGame() {
+            const currentDifficulty = gameState.difficulty || 'medium'; // Preserve current difficulty
+            
             gameState = {
                 playerLives: 5,
                 aiLives: 5,
                 gameOver: false,
-                paused: false
+                paused: false,
+                difficulty: currentDifficulty
             };
             
             resetBall();
             updateLivesDisplay();
             
+            // Clear all power-ups and active powers
+            powerUps = [];
+            activePowers = { player: null, ai: null };
+            powerSpawnTimer = 0;
+            
             const overlay = document.getElementById('gameOverOverlay');
             overlay.classList.remove('show');
+            
+            console.log('Game reset - new game started with difficulty:', currentDifficulty);
         }
         
-        function checkPaddleCollision(paddleX, paddleY) {
-            const paddleTop = paddleY - paddleHeight/2;
-            const paddleBottom = paddleY + paddleHeight/2;
+        function startNewGame() {
+            resetGame(); // Same as reset for now
+        }
+        
+        function togglePause() {
+            if (!gameState.gameOver) {
+                gameState.paused = !gameState.paused;
+                console.log('Game', gameState.paused ? 'paused' : 'unpaused');
+            }
+        }
+        
+        function showDifficultyMenu() {
+            const overlay = document.getElementById('difficultyOverlay');
+            overlay.style.display = 'flex';
+            overlay.classList.add('show');
+            gameState.paused = true; // Pause game while selecting difficulty
+            console.log('Difficulty menu opened');
+        }
+        
+        function closeDifficultyMenu() {
+            const overlay = document.getElementById('difficultyOverlay');
+            overlay.style.display = 'none';
+            overlay.classList.remove('show');
+            gameState.paused = false; // Unpause game
+            console.log('Difficulty menu closed');
+        }
+        
+        function setDifficulty(level) {
+            console.log('setDifficulty called with level:', level);
+            
+            gameState.difficulty = level;
+            const difficulty = difficultySettings[level];
+            
+            console.log(`Difficulty set to: ${difficulty.name}`);
+            console.log(`AI Accuracy: ${difficulty.baseAccuracy*100}% - ${difficulty.maxAccuracy*100}%`);
+            console.log(`AI Speed: ${difficulty.speed} px/frame`);
+            
+            // Update AI threat display
+            const aiThreat = document.getElementById('aiThreat');
+            if (aiThreat) {
+                switch(level) {
+                    case 'easy':
+                        aiThreat.textContent = 'LOW';
+                        aiThreat.style.color = 'var(--electric-green)';
+                        break;
+                    case 'medium':
+                        aiThreat.textContent = 'MODERATE';
+                        aiThreat.style.color = 'var(--neon-blue)';
+                        break;
+                    case 'hard':
+                        aiThreat.textContent = 'HIGH';
+                        aiThreat.style.color = 'var(--neon-pink)';
+                        break;
+                    case 'extreme':
+                        aiThreat.textContent = 'EXTREME';
+                        aiThreat.style.color = '#ff3333';
+                        break;
+                }
+            }
+            
+            updateTitle(); // Update browser title with new difficulty
+            closeDifficultyMenu();
+            
+            console.log('About to reset game...');
+            // Start a new game with the selected difficulty
+            resetGame();
+            console.log('Game reset completed');
+        }
+        
+        function checkPaddleCollision(paddleX, paddleY, currentPaddleHeight = paddleHeight) {
+            const paddleTop = paddleY - currentPaddleHeight/2;
+            const paddleBottom = paddleY + currentPaddleHeight/2;
             const paddleLeft = paddleX;
             const paddleRight = paddleX + paddleWidth;
             
@@ -868,31 +1293,33 @@
         }
         
         function draw() {
-            if (gameState.gameOver) return;
-            
             // Clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#0a0a0a';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // AI movement logic with better difficulty scaling
-            if (!gameState.paused) {
-                const aiSpeed = 4;
+            // AI movement logic with difficulty scaling
+            if (!gameState.paused && !gameState.gameOver) {
+                const difficulty = difficultySettings[gameState.difficulty];
+                const aiSpeed = difficulty.speed;
+                
                 if (ballVx > 0) { // Ball moving toward AI
                     // Predict where ball will be when it reaches AI paddle
                     const timeToReach = (aiX - ballX) / ballVx;
                     const predictedY = ballY + (ballVy * timeToReach);
                     
-                    // AI difficulty based on remaining lives
-                    let aiAccuracy = 0.65; // Base 65% accuracy (balanced)
-                    let maxError = 35;
+                    // AI accuracy based on difficulty and remaining lives
+                    let aiAccuracy = difficulty.baseAccuracy;
+                    let maxError = difficulty.baseError;
                     
+                    // AI gets better when losing lives (desperation)
                     if (gameState.aiLives <= 2) {
-                        aiAccuracy = 0.75; // Better when desperate
-                        maxError = 25;
+                        const improvement = (difficulty.maxAccuracy - difficulty.baseAccuracy) * 0.6;
+                        aiAccuracy += improvement;
+                        maxError = difficulty.baseError - ((difficulty.baseError - difficulty.minError) * 0.6);
                     } else if (gameState.aiLives <= 1) {
-                        aiAccuracy = 0.85; // Much better when critical
-                        maxError = 15;
+                        aiAccuracy = difficulty.maxAccuracy; // Maximum accuracy when critical
+                        maxError = difficulty.minError;
                     }
                     
                     // AI makes mistakes based on accuracy
@@ -943,20 +1370,40 @@
             ctx.stroke();
             ctx.restore();
             
-            // Draw player paddle (left side)
+            // Draw player paddle (left side) with power-up effects
+            let playerPaddleHeight = paddleHeight;
+            if (activePowers.player) {
+                if (activePowers.player.type === 'bigPaddle') {
+                    playerPaddleHeight = paddleHeight * 1.4;
+                } else if (activePowers.player.type === 'smallPaddle') {
+                    playerPaddleHeight = paddleHeight * 0.7;
+                }
+            }
+            const playerColor = activePowers.player ? activePowers.player.data.color : '#ff0080';
+            
             ctx.save();
-            ctx.fillStyle = '#ff0080';
-            ctx.shadowColor = '#ff0080';
-            ctx.shadowBlur = 15;
-            ctx.fillRect(playerX, mouseY - paddleHeight/2, paddleWidth, paddleHeight);
+            ctx.fillStyle = playerColor;
+            ctx.shadowColor = playerColor;
+            ctx.shadowBlur = activePowers.player ? 25 : 15;
+            ctx.fillRect(playerX, mouseY - playerPaddleHeight/2, paddleWidth, playerPaddleHeight);
             ctx.restore();
             
-            // Draw AI paddle (right side)
+            // Draw AI paddle (right side) with power-up effects
+            let aiPaddleHeight = paddleHeight;
+            if (activePowers.ai) {
+                if (activePowers.ai.type === 'bigPaddle') {
+                    aiPaddleHeight = paddleHeight * 1.4;
+                } else if (activePowers.ai.type === 'smallPaddle') {
+                    aiPaddleHeight = paddleHeight * 0.7;
+                }
+            }
+            const aiColor = activePowers.ai ? activePowers.ai.data.color : '#39ff14';
+            
             ctx.save();
-            ctx.fillStyle = '#39ff14';
-            ctx.shadowColor = '#39ff14';
-            ctx.shadowBlur = 15;
-            ctx.fillRect(aiX, aiY - paddleHeight/2, paddleWidth, paddleHeight);
+            ctx.fillStyle = aiColor;
+            ctx.shadowColor = aiColor;
+            ctx.shadowBlur = activePowers.ai ? 25 : 15;
+            ctx.fillRect(aiX, aiY - aiPaddleHeight/2, paddleWidth, aiPaddleHeight);
             ctx.restore();
             
             // Draw ball
@@ -969,20 +1416,32 @@
             ctx.fill();
             ctx.restore();
             
-            // Draw lives directly on canvas (should always be visible)
-            ctx.save();
-            ctx.fillStyle = 'white';
-            ctx.font = '24px Arial';
-            ctx.shadowColor = 'black';
-            ctx.shadowBlur = 3;
-            ctx.fillText(`Player Lives: ${gameState.playerLives}`, 10, 30);
-            ctx.fillText(`AI Lives: ${gameState.aiLives}`, 10, 60);
-            ctx.restore();
+            // Draw power-ups
+            drawPowerUps();
             
-            if (!gameState.paused) {
+            
+            if (!gameState.paused && !gameState.gameOver) {
+                // Update power-ups
+                updatePowerUps();
+                
+                // Apply power-up effects to ball speed
+                let currentBallVx = ballVx;
+                let currentBallVy = ballVy;
+                
+                if (activePowers.player && activePowers.player.type === 'slowMotion') {
+                    currentBallVx *= 0.5;
+                    currentBallVy *= 0.5;
+                } else if (activePowers.ai && activePowers.ai.type === 'slowMotion') {
+                    currentBallVx *= 0.5;
+                    currentBallVy *= 0.5;
+                }
+                
                 // Ball physics
-                ballX += ballVx;
-                ballY += ballVy;
+                ballX += currentBallVx;
+                ballY += currentBallVy;
+                
+                // Check power-up collisions
+                checkPowerUpCollision(ballX, ballY, ballRadius);
                 
                 // Ball collision with top/bottom walls
                 if (ballY - ballRadius <= 0 || ballY + ballRadius >= canvas.height) {
@@ -990,28 +1449,66 @@
                     ballY = ballY - ballRadius <= 0 ? ballRadius : canvas.height - ballRadius;
                 }
                 
-                // Check paddle collisions
-                checkPaddleCollision(playerX, mouseY);
-                checkPaddleCollision(aiX, aiY);
+                // Check paddle collisions with power-up effects
+                let playerPaddleHeight = paddleHeight;
+                let aiPaddleHeight = paddleHeight;
                 
-                // Life loss detection
+                if (activePowers.player) {
+                    if (activePowers.player.type === 'bigPaddle') {
+                        playerPaddleHeight = paddleHeight * 1.4;
+                    } else if (activePowers.player.type === 'smallPaddle') {
+                        playerPaddleHeight = paddleHeight * 0.7;
+                    }
+                }
+                
+                if (activePowers.ai) {
+                    if (activePowers.ai.type === 'bigPaddle') {
+                        aiPaddleHeight = paddleHeight * 1.4;
+                    } else if (activePowers.ai.type === 'smallPaddle') {
+                        aiPaddleHeight = paddleHeight * 0.7;
+                    }
+                }
+                
+                checkPaddleCollision(playerX, mouseY, playerPaddleHeight);
+                checkPaddleCollision(aiX, aiY, aiPaddleHeight);
+                
+                // Life loss detection with shield protection
                 if (ballX < -ballRadius) {
-                    console.log('Player loses a life!');
-                    gameState.playerLives--;
-                    updateLivesDisplay();
-                    if (!checkGameOver()) {
-                        resetBall();
+                    console.log('Player would lose a life...');
+                    
+                    // Check if player has shield protection
+                    if (activePowers.player && activePowers.player.type === 'shield') {
+                        console.log('Player shield activated! Life saved!');
+                        deactivatePowerUp('player'); // Shield is consumed
+                        resetBall(); // Just reset ball, no life lost
+                    } else {
+                        console.log('Player loses a life!');
+                        gameState.playerLives--;
+                        updateLivesDisplay();
+                        if (!checkGameOver()) {
+                            resetBall();
+                        }
                     }
                 } else if (ballX > canvas.width + ballRadius) {
-                    console.log('AI loses a life!');
-                    gameState.aiLives--;
-                    updateLivesDisplay();
-                    if (!checkGameOver()) {
-                        resetBall();
+                    console.log('AI would lose a life...');
+                    
+                    // Check if AI has shield protection
+                    if (activePowers.ai && activePowers.ai.type === 'shield') {
+                        console.log('AI shield activated! Life saved!');
+                        deactivatePowerUp('ai'); // Shield is consumed
+                        resetBall(); // Just reset ball, no life lost
+                    } else {
+                        console.log('AI loses a life!');
+                        gameState.aiLives--;
+                        updateLivesDisplay();
+                        if (!checkGameOver()) {
+                            resetBall();
+                        }
                     }
                 }
             }
             
+            // Always continue the animation loop
             requestAnimationFrame(draw);
         }
         
