@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong - Cyberpunk Neon</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --neon-blue: #00d4ff;
+            --neon-pink: #ff0080;
+            --neon-purple: #8b00ff;
+            --electric-green: #39ff14;
+            --cyber-dark: #0a0a0a;
+            --cyber-grey: #1a1a1a;
+            --cyber-light: #2a2a2a;
+        }
+        
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--cyber-dark);
+            color: var(--neon-blue);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            z-index: -1;
+        }
+        
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--neon-pink);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0px);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px);
+                opacity: 0;
+            }
+        }
+        
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .cyber-header {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--cyber-grey) 0%, var(--cyber-light) 100%);
+            border-bottom: 2px solid var(--neon-blue);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cyber-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.2), transparent);
+            animation: scanLine 3s infinite;
+        }
+        
+        @keyframes scanLine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .game-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 3rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            text-shadow: 
+                0 0 5px var(--neon-blue),
+                0 0 10px var(--neon-blue),
+                0 0 20px var(--neon-blue),
+                0 0 40px var(--neon-blue);
+            animation: textGlow 2s infinite alternate;
+        }
+        
+        @keyframes textGlow {
+            0% { 
+                text-shadow: 
+                    0 0 5px var(--neon-blue),
+                    0 0 10px var(--neon-blue),
+                    0 0 20px var(--neon-blue);
+            }
+            100% { 
+                text-shadow: 
+                    0 0 10px var(--neon-blue),
+                    0 0 20px var(--neon-blue),
+                    0 0 30px var(--neon-blue),
+                    0 0 40px var(--neon-blue);
+            }
+        }
+        
+        .system-status {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        
+        .status-line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--electric-green);
+            box-shadow: 0 0 10px var(--electric-green);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+        
+        .game-arena {
+            flex: 1;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        .left-panel, .right-panel {
+            width: 200px;
+            background: rgba(26, 26, 26, 0.8);
+            border: 1px solid var(--neon-blue);
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .panel-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--neon-pink);
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 0 10px var(--neon-pink);
+        }
+        
+        .score-display {
+            font-size: 4rem;
+            font-weight: 900;
+            text-align: center;
+            color: var(--electric-green);
+            text-shadow: 0 0 20px var(--electric-green);
+            font-family: 'Orbitron', monospace;
+        }
+        
+        .score-label {
+            font-size: 1rem;
+            text-align: center;
+            color: var(--neon-blue);
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .stats-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+        
+        .stats-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            font-size: 0.9rem;
+        }
+        
+        .stat-value {
+            color: var(--neon-pink);
+            font-weight: 600;
+        }
+        
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .canvas-container {
+            position: relative;
+            border: 3px solid var(--neon-blue);
+            border-radius: 15px;
+            background: var(--cyber-dark);
+            box-shadow: 
+                0 0 20px var(--neon-blue),
+                inset 0 0 20px rgba(0, 212, 255, 0.1);
+            overflow: hidden;
+        }
+        
+        .canvas-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, var(--neon-blue), transparent);
+            animation: rotate 4s linear infinite;
+            z-index: -1;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .game-canvas {
+            background: var(--cyber-dark);
+            display: block;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hud-overlay {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            background: rgba(26, 26, 26, 0.9);
+            padding: 15px 30px;
+            border-radius: 25px;
+            border: 1px solid var(--neon-pink);
+            backdrop-filter: blur(10px);
+        }
+        
+        .hud-score {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--electric-green);
+            text-shadow: 0 0 10px var(--electric-green);
+        }
+        
+        .hud-separator {
+            font-size: 1.5rem;
+            color: var(--neon-pink);
+        }
+        
+        .control-panel {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--cyber-grey) 0%, var(--cyber-light) 100%);
+            border-top: 2px solid var(--neon-pink);
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .cyber-btn {
+            background: transparent;
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 15px 30px;
+            cursor: pointer;
+            border-radius: 25px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .cyber-btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.4), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .cyber-btn:hover {
+            color: var(--cyber-dark);
+            background: var(--neon-blue);
+            box-shadow: 0 0 30px var(--neon-blue);
+            text-shadow: none;
+        }
+        
+        .cyber-btn:hover:before {
+            left: 100%;
+        }
+        
+        .cyber-btn.primary {
+            border-color: var(--neon-pink);
+            color: var(--neon-pink);
+        }
+        
+        .cyber-btn.primary:hover {
+            background: var(--neon-pink);
+            box-shadow: 0 0 30px var(--neon-pink);
+        }
+        
+        .glitch {
+            position: relative;
+        }
+        
+        .glitch:before,
+        .glitch:after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .glitch:before {
+            animation: glitch-1 0.5s infinite;
+            color: var(--neon-pink);
+            z-index: -1;
+        }
+        
+        .glitch:after {
+            animation: glitch-2 0.5s infinite;
+            color: var(--electric-green);
+            z-index: -2;
+        }
+        
+        @keyframes glitch-1 {
+            0%, 14%, 15%, 49%, 50%, 99%, 100% { transform: translate(0); }
+            15%, 49% { transform: translate(-2px, 2px); }
+        }
+        
+        @keyframes glitch-2 {
+            0%, 20%, 21%, 62%, 63%, 99%, 100% { transform: translate(0); }
+            21%, 62% { transform: translate(2px, -2px); }
+        }
+        
+        @media (max-width: 768px) {
+            .game-arena {
+                flex-direction: column;
+                padding: 10px;
+            }
+            
+            .left-panel, .right-panel {
+                width: 100%;
+                order: 1;
+                display: flex;
+                justify-content: space-around;
+            }
+            
+            .canvas-area {
+                order: 0;
+                margin-bottom: 20px;
+            }
+            
+            .game-title {
+                font-size: 2rem;
+                letter-spacing: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating particles -->
+    <div class="particles"></div>
+    
+    <div class="game-container">
+        <div class="cyber-header">
+            <div class="header-content">
+                <h1 class="game-title glitch" data-text="PONG">PONG</h1>
+                <div class="system-status">
+                    <div class="status-line">
+                        <div class="status-indicator"></div>
+                        <span>NEURAL LINK ACTIVE</span>
+                    </div>
+                    <div class="status-line">
+                        <div class="status-indicator"></div>
+                        <span>QUANTUM SYNC: 100%</span>
+                    </div>
+                    <div class="status-line">
+                        <div class="status-indicator"></div>
+                        <span>AI OPPONENT: ONLINE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-arena">
+            <div class="left-panel">
+                <div class="panel-title">Player</div>
+                <div class="score-display">00</div>
+                <div class="score-label">Neural Score</div>
+                
+                <ul class="stats-list">
+                    <li><span>Reflexes</span> <span class="stat-value">98%</span></li>
+                    <li><span>Accuracy</span> <span class="stat-value">76%</span></li>
+                    <li><span>Streak</span> <span class="stat-value">5</span></li>
+                    <li><span>Level</span> <span class="stat-value">Cyber</span></li>
+                </ul>
+            </div>
+            
+            <div class="canvas-area">
+                <div class="canvas-container">
+                    <canvas class="game-canvas" width="800" height="400"></canvas>
+                    
+                    <div class="hud-overlay">
+                        <div class="hud-score">00</div>
+                        <div class="hud-separator">:</div>
+                        <div class="hud-score">00</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="right-panel">
+                <div class="panel-title">AI Core</div>
+                <div class="score-display">00</div>
+                <div class="score-label">Quantum Score</div>
+                
+                <ul class="stats-list">
+                    <li><span>CPU Load</span> <span class="stat-value">67%</span></li>
+                    <li><span>Response</span> <span class="stat-value">0.2ms</span></li>
+                    <li><span>Learning</span> <span class="stat-value">ON</span></li>
+                    <li><span>Threat</span> <span class="stat-value">HIGH</span></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="control-panel">
+            <button class="cyber-btn primary">JACK IN</button>
+            <button class="cyber-btn">PAUSE MATRIX</button>
+            <button class="cyber-btn">NEURAL CONFIG</button>
+            <button class="cyber-btn">DISCONNECT</button>
+        </div>
+    </div>
+    
+    <script>
+        // Generate floating particles
+        function createParticles() {
+            const particlesContainer = document.querySelector('.particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        createParticles();
+        
+        // Cyberpunk Pong Demo
+        const canvas = document.querySelector('.game-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let mouseY = canvas.height / 2;
+        let ballX = canvas.width / 2;
+        let ballY = canvas.height / 2;
+        let ballVx = 5;
+        let ballVy = 3;
+        let aiY = canvas.height / 2;
+        
+        // Neon glow effect
+        function drawNeonShape(drawFn, color, glowSize = 20) {
+            ctx.shadowColor = color;
+            ctx.shadowBlur = glowSize;
+            ctx.fillStyle = color;
+            drawFn();
+            ctx.shadowBlur = 0;
+        }
+        
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouseY = ((e.clientY - rect.top) / rect.height) * canvas.height;
+        });
+        
+        function draw() {
+            // Clear canvas with slight trail effect
+            ctx.fillStyle = 'rgba(10, 10, 10, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw cyberpunk grid
+            ctx.strokeStyle = 'rgba(0, 212, 255, 0.1)';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < canvas.width; x += 40) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += 40) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            // Center line with electric effect
+            drawNeonShape(() => {
+                ctx.beginPath();
+                ctx.setLineDash([15, 10]);
+                ctx.moveTo(canvas.width / 2, 0);
+                ctx.lineTo(canvas.width / 2, canvas.height);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }, '#00d4ff', 10);
+            
+            // Player paddle with neon glow
+            drawNeonShape(() => {
+                ctx.beginPath();
+                ctx.roundRect(20, mouseY - 50, 15, 100, 5);
+                ctx.fill();
+            }, '#ff0080', 25);
+            
+            // AI paddle
+            aiY += (ballY - aiY) * 0.1;
+            drawNeonShape(() => {
+                ctx.beginPath();
+                ctx.roundRect(canvas.width - 35, aiY - 50, 15, 100, 5);
+                ctx.fill();
+            }, '#39ff14', 25);
+            
+            // Neon ball with trail
+            drawNeonShape(() => {
+                ctx.beginPath();
+                ctx.arc(ballX, ballY, 12, 0, Math.PI * 2);
+                ctx.fill();
+            }, '#8b00ff', 30);
+            
+            // Ball physics
+            ballX += ballVx;
+            ballY += ballVy;
+            
+            // Wall bounces
+            if (ballY <= 12 || ballY >= canvas.height - 12) {
+                ballVy = -ballVy;
+            }
+            
+            // Paddle collision
+            if ((ballX <= 35 && ballY >= mouseY - 50 && ballY <= mouseY + 50) ||
+                (ballX >= canvas.width - 35 && ballY >= aiY - 50 && ballY <= aiY + 50)) {
+                ballVx = -ballVx;
+            }
+            
+            // Reset ball
+            if (ballX < 0 || ballX > canvas.width) {
+                ballX = canvas.width / 2;
+                ballY = canvas.height / 2;
+                ballVx = -ballVx;
+            }
+            
+            requestAnimationFrame(draw);
+        }
+        
+        // Add roundRect support
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.lineTo(x + width - radius, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.lineTo(x + width, y + height - radius);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.lineTo(x + radius, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.lineTo(x, y + radius);
+                this.quadraticCurveTo(x, y, x + radius, y);
+                this.closePath();
+            };
+        }
+        
+        draw();
+        
+        // Button effects
+        document.querySelectorAll('.cyber-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    btn.style.transform = '';
+                }, 200);
+            });
+        });
+    </script>
+</body>
+</html>
