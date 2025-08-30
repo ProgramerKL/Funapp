@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong - Cyberpunk Neon</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --neon-blue: #00d4ff;
+            --neon-pink: #ff0080;
+            --neon-purple: #8b00ff;
+            --electric-green: #39ff14;
+            --cyber-dark: #0a0a0a;
+            --cyber-grey: #1a1a1a;
+            --cyber-light: #2a2a2a;
+        }
+        
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--cyber-dark);
+            color: var(--neon-blue);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Static background grid for performance */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.05) 1px, transparent 1px);
+            background-size: 100px 100px;
+            z-index: -1;
+        }
+        
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--neon-pink);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0px);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px);
+                opacity: 0;
+            }
+        }
+        
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .cyber-header {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--cyber-grey) 0%, var(--cyber-light) 100%);
+            border-bottom: 2px solid var(--neon-blue);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cyber-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.2), transparent);
+            animation: scanLine 3s infinite;
+        }
+        
+        @keyframes scanLine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .game-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 3rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            text-shadow: 
+                0 0 5px var(--neon-blue),
+                0 0 10px var(--neon-blue),
+                0 0 20px var(--neon-blue),
+                0 0 40px var(--neon-blue);
+            animation: textGlow 2s infinite alternate;
+        }
+        
+        @keyframes textGlow {
+            0% { 
+                text-shadow: 
+                    0 0 5px var(--neon-blue),
+                    0 0 10px var(--neon-blue),
+                    0 0 20px var(--neon-blue);
+            }
+            100% { 
+                text-shadow: 
+                    0 0 10px var(--neon-blue),
+                    0 0 20px var(--neon-blue),
+                    0 0 30px var(--neon-blue),
+                    0 0 40px var(--neon-blue);
+            }
+        }
+        
+        .system-status {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        
+        .status-line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--electric-green);
+            box-shadow: 0 0 10px var(--electric-green);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+        
+        .game-arena {
+            flex: 1;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        .left-panel, .right-panel {
+            width: 200px;
+            background: rgba(26, 26, 26, 0.8);
+            border: 1px solid var(--neon-blue);
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .panel-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--neon-pink);
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 0 10px var(--neon-pink);
+        }
+        
+        .score-display {
+            font-size: 4rem;
+            font-weight: 900;
+            text-align: center;
+            color: var(--electric-green);
+            text-shadow: 0 0 20px var(--electric-green);
+            font-family: 'Orbitron', monospace;
+        }
+        
+        .score-label {
+            font-size: 1rem;
+            text-align: center;
+            color: var(--neon-blue);
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .stats-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+        
+        .lives-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+        
+        .cyber-life {
+            width: 25px;
+            height: 25px;
+            background: var(--electric-green);
+            border: 2px solid var(--electric-green);
+            border-radius: 4px;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px var(--electric-green);
+            animation: lifeGlow 2s infinite alternate;
+        }
+        
+        .cyber-life.ai {
+            background: var(--neon-blue);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+        
+        .cyber-life.active::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background: currentColor;
+            border-radius: 50%;
+        }
+        
+        .cyber-life:not(.active) {
+            background: var(--cyber-grey);
+            border-color: var(--cyber-light);
+            box-shadow: none;
+            opacity: 0.3;
+            animation: none;
+        }
+        
+        @keyframes lifeGlow {
+            0% { box-shadow: 0 0 10px currentColor; }
+            100% { box-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
+        }
+        
+        .stats-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            font-size: 0.9rem;
+        }
+        
+        .stat-value {
+            color: var(--neon-pink);
+            font-weight: 600;
+        }
+        
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .canvas-container {
+            position: relative;
+            border: 3px solid var(--neon-blue);
+            border-radius: 15px;
+            background: var(--cyber-dark);
+            box-shadow: 
+                0 0 20px var(--neon-blue),
+                inset 0 0 20px rgba(0, 212, 255, 0.1);
+            overflow: hidden;
+        }
+        
+        .canvas-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, transparent, var(--neon-blue), transparent);
+            z-index: -1;
+        }
+        
+        .game-canvas {
+            background: var(--cyber-dark);
+            display: block;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hud-overlay {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            background: rgba(26, 26, 26, 0.9);
+            padding: 15px 30px;
+            border-radius: 25px;
+            border: 1px solid var(--neon-pink);
+            backdrop-filter: blur(10px);
+        }
+        
+        .hud-score {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--electric-green);
+            text-shadow: 0 0 10px var(--electric-green);
+        }
+        
+        .hud-separator {
+            font-size: 1.5rem;
+            color: var(--neon-pink);
+        }
+        
+        .game-over-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 10, 10, 0.95);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            border: 3px solid var(--neon-pink);
+            border-radius: 15px;
+        }
+        
+        .game-over-overlay.show {
+            display: flex;
+            animation: gameOverShow 0.5s ease-out;
+        }
+        
+        @keyframes gameOverShow {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        .game-over-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 4rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            text-shadow: 
+                0 0 10px currentColor,
+                0 0 20px currentColor,
+                0 0 40px currentColor;
+            animation: textGlow 1s infinite alternate;
+        }
+        
+        .game-over-title.victory {
+            color: var(--electric-green);
+        }
+        
+        .game-over-title.defeat {
+            color: var(--neon-pink);
+        }
+        
+        .game-over-text {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            color: var(--neon-blue);
+            text-align: center;
+            opacity: 0.9;
+        }
+        
+        .control-panel {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--cyber-grey) 0%, var(--cyber-light) 100%);
+            border-top: 2px solid var(--neon-pink);
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .cyber-btn {
+            background: transparent;
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 15px 30px;
+            cursor: pointer;
+            border-radius: 25px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .cyber-btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.4), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .cyber-btn:hover {
+            color: var(--cyber-dark);
+            background: var(--neon-blue);
+            box-shadow: 0 0 30px var(--neon-blue);
+            text-shadow: none;
+        }
+        
+        .cyber-btn:hover:before {
+            left: 100%;
+        }
+        
+        .cyber-btn.primary {
+            border-color: var(--neon-pink);
+            color: var(--neon-pink);
+        }
+        
+        .cyber-btn.primary:hover {
+            background: var(--neon-pink);
+            box-shadow: 0 0 30px var(--neon-pink);
+        }
+        
+        .glitch {
+            position: relative;
+        }
+        
+        .glitch:before,
+        .glitch:after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .glitch:before {
+            animation: glitch-1 0.5s infinite;
+            color: var(--neon-pink);
+            z-index: -1;
+        }
+        
+        .glitch:after {
+            animation: glitch-2 0.5s infinite;
+            color: var(--electric-green);
+            z-index: -2;
+        }
+        
+        @keyframes glitch-1 {
+            0%, 14%, 15%, 49%, 50%, 99%, 100% { transform: translate(0); }
+            15%, 49% { transform: translate(-2px, 2px); }
+        }
+        
+        @keyframes glitch-2 {
+            0%, 20%, 21%, 62%, 63%, 99%, 100% { transform: translate(0); }
+            21%, 62% { transform: translate(2px, -2px); }
+        }
+        
+        @media (max-width: 768px) {
+            .game-arena {
+                flex-direction: column;
+                padding: 10px;
+            }
+            
+            .left-panel, .right-panel {
+                width: 100%;
+                order: 1;
+                display: flex;
+                justify-content: space-around;
+            }
+            
+            .canvas-area {
+                order: 0;
+                margin-bottom: 20px;
+            }
+            
+            .game-title {
+                font-size: 2rem;
+                letter-spacing: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating particles -->
+    <div class="particles"></div>
+    
+    <div class="game-container">
+        <div class="cyber-header">
+            <div class="header-content">
+                <h1 class="game-title glitch" data-text="PONG">PONG</h1>
+                <div class="system-status">
+                    <div class="status-line">
+                        <div class="status-indicator"></div>
+                        <span>NEURAL LINK ACTIVE</span>
+                    </div>
+                    <div class="status-line">
+                        <div class="status-indicator"></div>
+                        <span>QUANTUM SYNC: 100%</span>
+                    </div>
+                    <div class="status-line">
+                        <div class="status-indicator"></div>
+                        <span>AI OPPONENT: ONLINE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-arena">
+            <div class="left-panel">
+                <div class="panel-title">Player</div>
+                <div class="score-display">5</div>
+                <div class="score-label">Neural Lives</div>
+                
+                <div class="lives-grid" id="playerLives">
+                    <div class="cyber-life active"></div>
+                    <div class="cyber-life active"></div>
+                    <div class="cyber-life active"></div>
+                    <div class="cyber-life active"></div>
+                    <div class="cyber-life active"></div>
+                </div>
+                
+                <ul class="stats-list">
+                    <li><span>Reflexes</span> <span class="stat-value">98%</span></li>
+                    <li><span>Accuracy</span> <span class="stat-value">76%</span></li>
+                    <li><span>Threat</span> <span class="stat-value" id="playerThreat">MODERATE</span></li>
+                </ul>
+            </div>
+            
+            <div class="canvas-area">
+                <div class="canvas-container">
+                    <canvas class="game-canvas" width="800" height="400"></canvas>
+                    
+                    <div class="hud-overlay">
+                        <div style="color: #ff0080; font-weight: bold;">PLAYER: <span id="playerLivesHUD">5</span></div>
+                        <div class="hud-separator">VS</div>
+                        <div style="color: #39ff14; font-weight: bold;">AI: <span id="aiLivesHUD">5</span></div>
+                    </div>
+                    
+                    <!-- Backup simple display -->
+                    <div style="position: absolute; top: 5px; left: 5px; color: white; font-size: 20px; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px;">
+                        Player Lives: <span id="playerLivesBackup" style="color: #ff0080;">5</span><br>
+                        AI Lives: <span id="aiLivesBackup" style="color: #39ff14;">5</span>
+                    </div>
+                    
+                    <div class="game-over-overlay" id="gameOverOverlay">
+                        <div class="game-over-title" id="gameOverTitle">NEURAL LINK SEVERED</div>
+                        <div class="game-over-text" id="gameOverText">Your consciousness has been disconnected from the matrix</div>
+                        <button class="cyber-btn primary" onclick="resetGame()">RECONNECT</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="right-panel">
+                <div class="panel-title">AI Core</div>
+                <div class="score-display">5</div>
+                <div class="score-label">Quantum Lives</div>
+                
+                <div class="lives-grid" id="aiLives">
+                    <div class="cyber-life active ai"></div>
+                    <div class="cyber-life active ai"></div>
+                    <div class="cyber-life active ai"></div>
+                    <div class="cyber-life active ai"></div>
+                    <div class="cyber-life active ai"></div>
+                </div>
+                
+                <ul class="stats-list">
+                    <li><span>CPU Load</span> <span class="stat-value" id="aiLoad">67%</span></li>
+                    <li><span>Response</span> <span class="stat-value">0.2ms</span></li>
+                    <li><span>Learning</span> <span class="stat-value">ON</span></li>
+                    <li><span>Threat</span> <span class="stat-value" id="aiThreat">HIGH</span></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="control-panel">
+            <button class="cyber-btn primary">JACK IN</button>
+            <button class="cyber-btn">PAUSE MATRIX</button>
+            <button class="cyber-btn">NEURAL CONFIG</button>
+            <button class="cyber-btn">DISCONNECT</button>
+        </div>
+    </div>
+    
+    <script>
+        // Generate fewer particles for better performance
+        function createParticles() {
+            const particlesContainer = document.querySelector('.particles');
+            for (let i = 0; i < 15; i++) { // Reduced from 50 to 15
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (20 + Math.random() * 10) + 's'; // Slower for less CPU
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        createParticles();
+        
+        // Cyberpunk Pong with lives system
+        const canvas = document.querySelector('.game-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Game state
+        let gameState = {
+            playerLives: 5,
+            aiLives: 5,
+            gameOver: false,
+            paused: false
+        };
+        
+        // Simple function to update title with lives
+        function updateTitle() {
+            document.title = `Pong - Player: ${gameState.playerLives} vs AI: ${gameState.aiLives}`;
+        }
+        
+        // Game objects
+        let mouseY = canvas.height / 2;
+        let ballX = canvas.width / 2;
+        let ballY = canvas.height / 2;
+        let ballVx = 5;
+        let ballVy = 3;
+        let aiY = canvas.height / 2;
+        
+        // Paddle dimensions
+        const paddleWidth = 15;
+        const paddleHeight = 100;
+        const ballRadius = 12;
+        const playerX = 20;
+        const aiX = canvas.width - 35;
+        
+        // Neon glow effect
+        function drawNeonShape(drawFn, color, glowSize = 20) {
+            ctx.shadowColor = color;
+            ctx.shadowBlur = glowSize;
+            ctx.fillStyle = color;
+            drawFn();
+            ctx.shadowBlur = 0;
+        }
+        
+        canvas.addEventListener('mousemove', (e) => {
+            if (gameState.gameOver || gameState.paused) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            mouseY = ((e.clientY - rect.top) / rect.height) * canvas.height;
+            mouseY = Math.max(paddleHeight/2, Math.min(canvas.height - paddleHeight/2, mouseY));
+        });
+        
+        function updateLivesDisplay() {
+            console.log('Updating lives:', gameState.playerLives, 'vs', gameState.aiLives);
+            updateTitle(); // Update browser title with lives
+            
+            // Try to update ALL possible elements
+            const elementsToUpdate = [
+                { selector: '#playerLivesHUD', value: gameState.playerLives },
+                { selector: '#aiLivesHUD', value: gameState.aiLives },
+                { selector: '#playerLivesBackup', value: gameState.playerLives },
+                { selector: '#aiLivesBackup', value: gameState.aiLives },
+                { selector: '.left-panel .score-display', value: gameState.playerLives },
+                { selector: '.right-panel .score-display', value: gameState.aiLives }
+            ];
+            
+            elementsToUpdate.forEach(item => {
+                const element = document.querySelector(item.selector);
+                if (element) {
+                    element.textContent = item.value;
+                    console.log('Updated', item.selector, 'to', item.value);
+                } else {
+                    console.log('Could not find element:', item.selector);
+                }
+            });
+            
+            // Update player lives grid
+            const playerLives = document.querySelectorAll('#playerLives .cyber-life');
+            console.log('Found', playerLives.length, 'player life elements');
+            playerLives.forEach((life, index) => {
+                if (index < gameState.playerLives) {
+                    life.classList.add('active');
+                } else {
+                    life.classList.remove('active');
+                }
+            });
+            
+            // Update AI lives grid
+            const aiLives = document.querySelectorAll('#aiLives .cyber-life');
+            console.log('Found', aiLives.length, 'AI life elements');
+            aiLives.forEach((life, index) => {
+                if (index < gameState.aiLives) {
+                    life.classList.add('active');
+                } else {
+                    life.classList.remove('active');
+                }
+            });
+            
+            // Update threat levels based on remaining lives
+            const playerThreat = document.getElementById('playerThreat');
+            const aiThreat = document.getElementById('aiThreat');
+            const aiLoad = document.getElementById('aiLoad');
+            
+            if (gameState.playerLives <= 1) {
+                playerThreat.textContent = 'CRITICAL';
+                playerThreat.style.color = 'var(--neon-pink)';
+            } else if (gameState.playerLives <= 2) {
+                playerThreat.textContent = 'HIGH';
+                playerThreat.style.color = '#ff6b6b';
+            } else {
+                playerThreat.textContent = 'MODERATE';
+                playerThreat.style.color = 'var(--neon-pink)';
+            }
+            
+            if (gameState.aiLives <= 1) {
+                aiThreat.textContent = 'DESPERATE';
+                aiLoad.textContent = '99%';
+            } else if (gameState.aiLives <= 2) {
+                aiThreat.textContent = 'CRITICAL';
+                aiLoad.textContent = '85%';
+            } else {
+                aiThreat.textContent = 'HIGH';
+                aiLoad.textContent = '67%';
+            }
+        }
+        
+        function checkGameOver() {
+            if (gameState.playerLives <= 0 || gameState.aiLives <= 0) {
+                gameState.gameOver = true;
+                const overlay = document.getElementById('gameOverOverlay');
+                const title = document.getElementById('gameOverTitle');
+                const text = document.getElementById('gameOverText');
+                
+                if (gameState.playerLives <= 0) {
+                    title.textContent = 'NEURAL LINK SEVERED';
+                    title.className = 'game-over-title defeat';
+                    text.textContent = 'Your consciousness has been overwritten by the AI. Connection terminated.';
+                } else {
+                    title.textContent = 'VICTORY ACHIEVED';
+                    title.className = 'game-over-title victory';
+                    text.textContent = 'AI Core successfully infiltrated. You are the ultimate cyber warrior!';
+                }
+                
+                overlay.classList.add('show');
+                return true;
+            }
+            return false;
+        }
+        
+        function resetBall() {
+            ballX = canvas.width / 2;
+            ballY = canvas.height / 2;
+            ballVx = (Math.random() > 0.5) ? 5 : -5;
+            ballVy = (Math.random() - 0.5) * 6;
+        }
+        
+        function resetGame() {
+            gameState = {
+                playerLives: 5,
+                aiLives: 5,
+                gameOver: false,
+                paused: false
+            };
+            
+            resetBall();
+            updateLivesDisplay();
+            
+            const overlay = document.getElementById('gameOverOverlay');
+            overlay.classList.remove('show');
+        }
+        
+        function checkPaddleCollision(paddleX, paddleY) {
+            const paddleTop = paddleY - paddleHeight/2;
+            const paddleBottom = paddleY + paddleHeight/2;
+            const paddleLeft = paddleX;
+            const paddleRight = paddleX + paddleWidth;
+            
+            // Check if ball is within paddle bounds
+            if (ballX - ballRadius <= paddleRight && ballX + ballRadius >= paddleLeft &&
+                ballY - ballRadius <= paddleBottom && ballY + ballRadius >= paddleTop) {
+                
+                // Calculate hit position relative to paddle center (-1 to 1)
+                const hitPos = (ballY - paddleY) / (paddleHeight/2);
+                
+                // Reverse horizontal direction with cyberpunk flair
+                ballVx = -ballVx;
+                
+                // Add dramatic angle based on where ball hit the paddle
+                ballVy = hitPos * 7; // Max angle of 7px/frame for intense gameplay
+                
+                // Ensure minimum horizontal speed with acceleration
+                const minSpeed = 4;
+                const acceleration = 0.2;
+                if (ballVx > 0) {
+                    ballVx = Math.max(ballVx + acceleration, minSpeed);
+                } else {
+                    ballVx = Math.min(ballVx - acceleration, -minSpeed);
+                }
+                
+                // Limit max speed to prevent chaos
+                ballVx = Math.max(-12, Math.min(12, ballVx));
+                ballVy = Math.max(-8, Math.min(8, ballVy));
+                
+                // Move ball away from paddle to prevent sticking
+                if (paddleX < canvas.width / 2) {
+                    ballX = paddleRight + ballRadius + 3;
+                } else {
+                    ballX = paddleLeft - ballRadius - 3;
+                }
+                
+                return true;
+            }
+            return false;
+        }
+        
+        function draw() {
+            if (gameState.gameOver) return;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // AI movement logic with better difficulty scaling
+            if (!gameState.paused) {
+                const aiSpeed = 4;
+                if (ballVx > 0) { // Ball moving toward AI
+                    // Predict where ball will be when it reaches AI paddle
+                    const timeToReach = (aiX - ballX) / ballVx;
+                    const predictedY = ballY + (ballVy * timeToReach);
+                    
+                    // AI difficulty based on remaining lives
+                    let aiAccuracy = 0.65; // Base 65% accuracy (balanced)
+                    let maxError = 35;
+                    
+                    if (gameState.aiLives <= 2) {
+                        aiAccuracy = 0.75; // Better when desperate
+                        maxError = 25;
+                    } else if (gameState.aiLives <= 1) {
+                        aiAccuracy = 0.85; // Much better when critical
+                        maxError = 15;
+                    }
+                    
+                    // AI makes mistakes based on accuracy
+                    const aiMistake = Math.random();
+                    if (aiMistake > aiAccuracy) {
+                        // AI makes an error
+                        if (Math.random() < 0.4) {
+                            // Move wrong direction sometimes
+                            const wrongDir = aiY > canvas.height / 2 ? 1 : -1;
+                            aiY += wrongDir * aiSpeed * 0.6;
+                        }
+                        // Otherwise hesitate (don't move)
+                    } else {
+                        // AI moves toward predicted position with some error
+                        const error = (Math.random() - 0.5) * maxError;
+                        const targetY = predictedY + error;
+                        
+                        if (aiY < targetY - 15) {
+                            aiY += aiSpeed;
+                        } else if (aiY > targetY + 15) {
+                            aiY -= aiSpeed;
+                        }
+                    }
+                } else {
+                    // Return to center when ball moving away
+                    const centerY = canvas.height / 2;
+                    if (aiY < centerY - 5) {
+                        aiY += aiSpeed * 0.3;
+                    } else if (aiY > centerY + 5) {
+                        aiY -= aiSpeed * 0.3;
+                    }
+                }
+            }
+            
+            // Keep AI paddle in bounds
+            aiY = Math.max(paddleHeight/2, Math.min(canvas.height - paddleHeight/2, aiY));
+            
+            // Draw center line
+            ctx.save();
+            ctx.strokeStyle = '#00d4ff';
+            ctx.lineWidth = 2;
+            ctx.shadowColor = '#00d4ff';
+            ctx.shadowBlur = 10;
+            ctx.setLineDash([15, 10]);
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.stroke();
+            ctx.restore();
+            
+            // Draw player paddle (left side)
+            ctx.save();
+            ctx.fillStyle = '#ff0080';
+            ctx.shadowColor = '#ff0080';
+            ctx.shadowBlur = 15;
+            ctx.fillRect(playerX, mouseY - paddleHeight/2, paddleWidth, paddleHeight);
+            ctx.restore();
+            
+            // Draw AI paddle (right side)
+            ctx.save();
+            ctx.fillStyle = '#39ff14';
+            ctx.shadowColor = '#39ff14';
+            ctx.shadowBlur = 15;
+            ctx.fillRect(aiX, aiY - paddleHeight/2, paddleWidth, paddleHeight);
+            ctx.restore();
+            
+            // Draw ball
+            ctx.save();
+            ctx.fillStyle = '#8b00ff';
+            ctx.shadowColor = '#8b00ff';
+            ctx.shadowBlur = 20;
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+            
+            // Draw lives directly on canvas (should always be visible)
+            ctx.save();
+            ctx.fillStyle = 'white';
+            ctx.font = '24px Arial';
+            ctx.shadowColor = 'black';
+            ctx.shadowBlur = 3;
+            ctx.fillText(`Player Lives: ${gameState.playerLives}`, 10, 30);
+            ctx.fillText(`AI Lives: ${gameState.aiLives}`, 10, 60);
+            ctx.restore();
+            
+            if (!gameState.paused) {
+                // Ball physics
+                ballX += ballVx;
+                ballY += ballVy;
+                
+                // Ball collision with top/bottom walls
+                if (ballY - ballRadius <= 0 || ballY + ballRadius >= canvas.height) {
+                    ballVy = -ballVy;
+                    ballY = ballY - ballRadius <= 0 ? ballRadius : canvas.height - ballRadius;
+                }
+                
+                // Check paddle collisions
+                checkPaddleCollision(playerX, mouseY);
+                checkPaddleCollision(aiX, aiY);
+                
+                // Life loss detection
+                if (ballX < -ballRadius) {
+                    console.log('Player loses a life!');
+                    gameState.playerLives--;
+                    updateLivesDisplay();
+                    if (!checkGameOver()) {
+                        resetBall();
+                    }
+                } else if (ballX > canvas.width + ballRadius) {
+                    console.log('AI loses a life!');
+                    gameState.aiLives--;
+                    updateLivesDisplay();
+                    if (!checkGameOver()) {
+                        resetBall();
+                    }
+                }
+            }
+            
+            requestAnimationFrame(draw);
+        }
+        
+        // Add roundRect support
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.lineTo(x + width - radius, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.lineTo(x + width, y + height - radius);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.lineTo(x + radius, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.lineTo(x, y + radius);
+                this.quadraticCurveTo(x, y, x + radius, y);
+                this.closePath();
+            };
+        }
+        
+        // Initialize game
+        updateLivesDisplay();
+        draw();
+        
+        // Button effects
+        document.querySelectorAll('.cyber-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    btn.style.transform = '';
+                }, 200);
+            });
+        });
+        
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (!gameState.gameOver) {
+                    gameState.paused = !gameState.paused;
+                }
+            } else if (e.code === 'KeyR') {
+                resetGame();
+            }
+        });
+    </script>
+</body>
+</html>
