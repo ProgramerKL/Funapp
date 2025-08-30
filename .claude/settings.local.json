@@ -3,7 +3,8 @@
     "allow": [
       "Bash(sed:*)",
       "Bash(start:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Read(C:\\Users\\kylel\\OneDrive\\Pictures\\Screenshots/**)"
     ],
     "deny": [],
     "ask": []

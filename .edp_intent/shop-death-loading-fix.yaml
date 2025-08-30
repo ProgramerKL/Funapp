@@ -1,0 +1,47 @@
+version: "1.0.0"
+generatedBy: "edp-6-mcp"
+timestamp: "2025-08-29T00:00:00Z"
+originalIntent: "make sure that the shop loads cuz it dosent right now - fix automatic shop loading when player dies"
+scope:
+  allowedPaths:
+    - "C:/Repo/Ai_coding/Funapp/.superdesign/design_iterations/ide_retro_enhanced_graphics_1.html"
+  forbiddenPaths:
+    - "All other files in project"
+  newFiles: []
+apiContracts:
+  - name: "gameOver"
+    type: "function"
+    params: []
+    returns: "void"
+    required: true
+  - name: "showShop"
+    type: "function" 
+    params: []
+    returns: "void"
+    required: true
+acceptanceCriteria:
+  - id: "AC-001"
+    description: "Shop appears automatically when player dies from obstacle collision"
+    given: "Player is playing the game"
+    when: "Player collides with spike or deadly obstacle"
+    then: "Shop screen appears immediately with coin information"
+  - id: "AC-002"
+    description: "Shop appears when player falls off screen"
+    given: "Player is playing the game"
+    when: "Player falls below bottom of screen"
+    then: "Shop screen appears immediately"
+  - id: "AC-003"
+    description: "Debug messages removed after fix"
+    given: "Shop loading is working properly"
+    when: "Player dies"
+    then: "No debug console messages appear"
+nonGoals:
+  - "Shop UI improvements"
+  - "Performance optimizations"
+  - "New shop features"
+  - "Visual effects changes"
+complexityBudget:
+  maxNewFunctions: 0
+  maxNewFiles: 0
+  maxLinesOfCode: 10
+  maxDependencies: 0
