@@ -5,7 +5,9 @@
       "Bash(start:*)",
       "Bash(git add:*)",
       "Read(C:\\Users\\kylel\\OneDrive\\Pictures\\Screenshots/**)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []
