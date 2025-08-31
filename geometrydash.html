@@ -1339,7 +1339,7 @@
                 player.jumpCount++;
                 player.glowIntensity = 1;
                 playJumpSound();
-                createAdvancedParticles(player.x + player.size/2, player.y + player.size, '#00ff88', 3);
+                createAdvancedParticles(player.x + player.size/2, player.y + player.size, '#00ff88', 1);
             }
         }
         
@@ -1508,7 +1508,7 @@
                 // Horizontal movement during jump
                 if (player.vX > 0) {
                     player.x += player.vX;
-                    player.vX *= 0.90; // Increased air resistance for shorter jumps
+                    player.vX *= 0.85; // Faster decay to prevent sustained speed boost feeling
                 }
                 
                 if (player.y >= canvas.height - 85) {
@@ -1520,7 +1520,7 @@
                     player.jumpCount = 0; // Reset jumps only when touching ground
                     
                     // Landing particles
-                    createAdvancedParticles(player.x + player.size/2, player.y + player.size, '#00ff44', 2);
+                    createAdvancedParticles(player.x + player.size/2, player.y + player.size, '#00ff44', 1);
                 }
             }
             
@@ -1631,7 +1631,7 @@
                         glowColor: '#ff4080',
                         glowIntensity: Math.random() * 0.5 + 0.5
                     });
-                } else if (obstacleType < 0.55) {
+                } else if (obstacleType < 0.7) {
                     // Glowing launch balls (cyan) - special power-up
                     obstacles.push({
                         x: canvas.width,
@@ -1643,10 +1643,10 @@
                         glowColor: '#80ffff',
                         glowIntensity: Math.sin(frameCounter * 0.1) * 0.3 + 0.7,
                         launchPower: 15,
-                        horizontalBoost: 8,
+                        horizontalBoost: 0,
                         used: false
                     });
-                } else if (obstacleType < 0.6) {
+                } else if (obstacleType < 0.75) {
                     // Jump-able platforms (green)
                     obstacles.push({
                         x: canvas.width,
@@ -1658,7 +1658,7 @@
                         glowColor: '#40ff40',
                         glowIntensity: Math.random() * 0.3 + 0.2
                     });
-                } else if (obstacleType < 0.8) {
+                } else if (obstacleType < 0.9) {
                     // Check for nearby spikes before creating orange block
                     const minBlockSpikeDistance = 200; // Minimum distance from spikes
                     const nearbySpike = obstacles.find(obs => 
@@ -1695,7 +1695,7 @@
                         direction: 1,
                         centerY: canvas.height - 140,
                         oscillateRange: 60,
-                        glowIntensity: 0.8
+                        glowIntensity: 0.4
                     });
                 }
                 obstacleTimer = 0;
@@ -1761,7 +1761,7 @@
                             player.grounded = false; // Don't stick to platform
                             player.onPlatform = false;
                             // Landing particles
-                            createAdvancedParticles(player.x + player.size/2, player.y + player.size, '#00ff44', 3);
+                            createAdvancedParticles(player.x + player.size/2, player.y + player.size, '#00ff44', 1);
                         }
                     } else if (obstacles[i].type === 'launchBall') {
                         // Glowing launch balls - power-up interaction
@@ -1769,15 +1769,40 @@
                             console.log('Player activated launch ball!');
                             obstacles[i].used = true;
                             
+                            // Calculate landing zone based on launch physics
+                            const launchVY = obstacles[i].launchPower;
+                            const launchVX = obstacles[i].horizontalBoost;
+                            const gravity = 0.8;
+                            
+                            // Estimate time to land and horizontal distance
+                            const timeToLand = (2 * launchVY) / gravity;
+                            const landingDistance = launchVX * timeToLand;
+                            const landingX = player.x + landingDistance;
+                            
+                            // Clear dangerous obstacles in landing zone (±300px buffer for much larger safe zone)
+                            const landingBuffer = 300;
+                            for (let j = obstacles.length - 1; j >= 0; j--) {
+                                if (j !== i && // Don't remove the launch ball itself
+                                    obstacles[j].x > landingX - landingBuffer &&
+                                    obstacles[j].x < landingX + landingBuffer &&
+                                    (obstacles[j].type === 'spike' || obstacles[j].type === 'block' || obstacles[j].type === 'oscillator')) {
+                                    
+                                    // Create safe landing particles where obstacle was removed
+                                    createAdvancedParticles(obstacles[j].x + obstacles[j].width/2, obstacles[j].y + obstacles[j].height/2, '#00ff00', 3);
+                                    obstacles.splice(j, 1);
+                                    console.log('Cleared dangerous obstacle for safe landing');
+                                }
+                            }
+                            
                             // Launch player with massive boost
-                            player.vY = -obstacles[i].launchPower;
-                            player.vX = obstacles[i].horizontalBoost;
+                            player.vY = -launchVY;
+                            player.vX = launchVX;
                             player.jumpCount = 0; // Reset all jumps
                             player.grounded = false;
                             player.glowIntensity = 1;
                             
                             // Create spectacular launch particles
-                            createAdvancedParticles(obstacles[i].x + obstacles[i].width/2, obstacles[i].y + obstacles[i].height/2, obstacles[i].color, 15);
+                            createAdvancedParticles(obstacles[i].x + obstacles[i].width/2, obstacles[i].y + obstacles[i].height/2, obstacles[i].color, 5);
                             createExplosion(obstacles[i].x + obstacles[i].width/2, obstacles[i].y + obstacles[i].height/2, obstacles[i].glowColor);
                             
                             // Change ball appearance after use
@@ -1785,8 +1810,7 @@
                             obstacles[i].glowColor = '#666666';
                             obstacles[i].glowIntensity = 0.1;
                             
-                            // Add score bonus
-                            gameState.score += 200;
+                            // Score bonus removed to prevent speed issues
                         }
                     } else if (obstacles[i].type === 'oscillator') {
                         // Purple oscillators: bounce on top, deadly on sides
@@ -1797,7 +1821,7 @@
                             player.grounded = false; // Don't stick to platform
                             player.onPlatform = false;
                             // Landing particles
-                            createAdvancedParticles(player.x + player.size/2, player.y + player.size, '#ff00ff', 3);
+                            createAdvancedParticles(player.x + player.size/2, player.y + player.size, '#ff00ff', 1);
                         } else {
                             // Deadly side collision
                             console.log('Player hit oscillator side - triggering explosion');
@@ -1838,7 +1862,7 @@
                     gameState.score += 200;
                     gameState.coins++;
                     playCoinSound();
-                    createAdvancedParticles(coins[i].x, coins[i].y, '#ffff00', 2);
+                    createAdvancedParticles(coins[i].x, coins[i].y, '#ffff00', 1);
                     coins.splice(i, 1);
                     continue;
                 }
@@ -1881,7 +1905,7 @@
                 p.rotation += p.rotationSpeed;
                 
                 // Add sparkle effect for special particles
-                if (p.sparkle && Math.random() < 0.1) {
+                if (p.sparkle && Math.random() < 0.05) {
                     particles.push({
                         x: p.x + (Math.random() - 0.5) * 4,
                         y: p.y + (Math.random() - 0.5) * 4,
@@ -2049,7 +2073,7 @@
                     
                     // Add glow effect
                     ctx.shadowColor = obstacle.glowColor;
-                    ctx.shadowBlur = 15 * obstacle.glowIntensity;
+                    ctx.shadowBlur = 8 * obstacle.glowIntensity;
                     
                     // Draw the ball as a circle
                     ctx.beginPath();
@@ -2066,7 +2090,7 @@
                     
                     // Bright center
                     ctx.fillStyle = '#ffffff';
-                    ctx.globalAlpha = obstacle.glowIntensity * 0.8;
+                    ctx.globalAlpha = obstacle.glowIntensity * 0.5;
                     ctx.beginPath();
                     ctx.arc(obstacle.x + obstacle.width/2, obstacle.y + obstacle.height/2, obstacle.width/6, 0, Math.PI * 2);
                     ctx.fill();
@@ -2163,7 +2187,7 @@
                 ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
                 
                 // Extra sparkle for special particles
-                if (p.sparkle && Math.random() < 0.3) {
+                if (p.sparkle && Math.random() < 0.15) {
                     ctx.fillStyle = '#ffffff';
                     ctx.fillRect(-1, -1, 2, 2);
                 }
@@ -2178,7 +2202,7 @@
             ctx.fillStyle = '#00ff00';
             ctx.font = '16px monospace';
             ctx.shadowColor = '#00ff00';
-            ctx.shadowBlur = 10;
+            ctx.shadowBlur = 5;
             ctx.fillText(`Distance: ${Math.floor(gameState.distance)}m`, 10, 30);
             ctx.shadowBlur = 0;
             
@@ -2189,7 +2213,7 @@
                 ctx.fillStyle = '#ff0044';
                 ctx.font = 'bold 24px monospace';
                 ctx.shadowColor = '#ff0044';
-                ctx.shadowBlur = 15;
+                ctx.shadowBlur = 8;
                 
                 // Center the notification
                 const textWidth = ctx.measureText(milestoneNotification.message).width;
