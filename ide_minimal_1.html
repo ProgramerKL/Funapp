@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangman - Minimal Design</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #f4a460 0%, #daa520 30%, #cd853f 100%);
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(218, 165, 32, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(160, 82, 45, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(210, 180, 140, 0.2) 0%, transparent 50%);
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 120px;
+            background: repeating-linear-gradient(
+                90deg,
+                #daa520 0px,
+                #cd853f 3px,
+                #daa520 6px
+            );
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        body::after {
+            content: '🌵';
+            position: absolute;
+            font-size: 3rem;
+            bottom: 100px;
+            right: 10%;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        .game-container {
+            background: rgba(255, 248, 220, 0.95);
+            padding: 1.5rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(139, 69, 19, 0.2);
+            text-align: center;
+            width: 90vw;
+            height: 90vh;
+            max-width: none;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(160, 82, 45, 0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+
+        .header {
+            margin-bottom: 1rem;
+            flex-shrink: 0;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: #8b4513;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+            text-shadow: 2px 2px 4px rgba(139, 69, 19, 0.3);
+        }
+
+        .score {
+            font-size: 1.1rem;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .hangman-area {
+            margin: 0.5rem 0;
+            height: 30vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(to bottom, #f4e4bc 0%, #deb887 100%);
+            border-radius: 15px;
+            border: 2px solid rgba(160, 82, 45, 0.4);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .hangman-area::before {
+            content: '';
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 8px;
+            background: linear-gradient(90deg, #8b4513, #a0522d);
+            border-radius: 4px;
+            opacity: 0.7;
+        }
+
+        .hangman-drawing {
+            font-size: clamp(0.8rem, 2vw, 1.4rem);
+            color: #8b4513;
+            font-family: 'Courier New', monospace;
+            white-space: pre-line;
+            line-height: 1.1;
+            text-align: left;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(139, 69, 19, 0.3);
+        }
+
+        .word-display {
+            font-size: clamp(1.5rem, 4vw, 3rem);
+            font-weight: 300;
+            letter-spacing: clamp(0.3rem, 0.8vw, 0.8rem);
+            margin: 0.5rem 0;
+            color: #2d3748;
+            font-family: 'Courier New', monospace;
+            min-height: clamp(2rem, 5vh, 3.5rem);
+            flex-shrink: 0;
+        }
+
+        .keyboard {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: clamp(0.3rem, 0.8vw, 0.6rem);
+            margin: 1rem 0;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            flex-shrink: 0;
+            height: 20vh;
+            max-height: 200px;
+        }
+
+        .key {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 0;
+            border-radius: 8px;
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: auto;
+        }
+
+        .key:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
+        }
+
+        .key:disabled {
+            background: #cbd5e0;
+            color: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .key.correct {
+            background: #48bb78;
+            animation: pulse 0.5s ease;
+        }
+
+        .key.incorrect {
+            background: #f56565;
+            animation: shake 0.5s ease;
+        }
+
+        .controls {
+            margin-top: 1rem;
+            flex-shrink: 0;
+        }
+
+        .reset-btn {
+            background: #805ad5;
+            color: white;
+            border: none;
+            padding: clamp(0.8rem, 2vh, 1.2rem) clamp(1.5rem, 4vw, 2.5rem);
+            border-radius: 25px;
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(128, 90, 213, 0.3);
+        }
+
+        .reset-btn:hover {
+            background: #6b46c1;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(128, 90, 213, 0.4);
+        }
+
+        .status-message {
+            margin: 0.5rem 0;
+            font-size: clamp(1rem, 2.2vw, 1.3rem);
+            font-weight: 600;
+            min-height: clamp(1.5rem, 3vh, 2rem);
+            flex-shrink: 0;
+        }
+
+        .win { color: #38a169; }
+        .lose { color: #e53e3e; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes hintPulse {
+            0% { transform: scale(1); box-shadow: 0 4px 12px rgba(246, 173, 85, 0.3); }
+            50% { transform: scale(1.15); box-shadow: 0 8px 25px rgba(246, 173, 85, 0.6); }
+            100% { transform: scale(1); box-shadow: 0 4px 12px rgba(246, 173, 85, 0.3); }
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 1rem;
+                width: 95vw;
+                height: 95vh;
+            }
+            
+            .title {
+                font-size: clamp(1.8rem, 6vw, 2.5rem);
+            }
+            
+            .score {
+                font-size: clamp(1rem, 3vw, 1.1rem);
+            }
+            
+            .hangman-area {
+                height: 25vh;
+                min-height: 150px;
+            }
+            
+            .hangman-drawing {
+                font-size: clamp(0.7rem, 2.5vw, 1.2rem);
+            }
+            
+            .word-display {
+                font-size: clamp(1.2rem, 6vw, 2.5rem);
+                letter-spacing: clamp(0.2rem, 1vw, 0.6rem);
+            }
+            
+            .keyboard {
+                height: 18vh;
+                max-height: 180px;
+                gap: clamp(0.2rem, 0.5vw, 0.4rem);
+            }
+            
+            .key {
+                font-size: clamp(0.8rem, 2.2vw, 1rem);
+                border-radius: 6px;
+            }
+            
+            .status-message {
+                font-size: clamp(0.9rem, 2.8vw, 1.2rem);
+            }
+            
+            .reset-btn {
+                font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+                padding: clamp(0.6rem, 1.5vh, 1rem) clamp(1.2rem, 3vw, 2rem);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 0.8rem;
+                width: 98vw;
+                height: 98vh;
+            }
+            
+            .hangman-area {
+                height: 22vh;
+            }
+            
+            .keyboard {
+                height: 16vh;
+                grid-template-columns: repeat(6, 1fr);
+            }
+            
+            .key {
+                font-size: clamp(0.7rem, 3vw, 0.9rem);
+            }
+        }
+
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .key {
+                min-height: 44px;
+                touch-action: manipulation;
+            }
+            
+            .reset-btn {
+                min-height: 44px;
+                touch-action: manipulation;
+            }
+            
+            .key:active {
+                transform: scale(0.95);
+                background: #2b6cb0;
+            }
+            
+            .reset-btn:active {
+                transform: scale(0.95);
+                background: #553c9a;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1 class="title">Hangman</h1>
+            <div class="score">Score: <span id="score">0</span> | High: <span id="highScore">150</span></div>
+        </div>
+
+        <div class="hangman-area">
+            <div class="hangman-drawing" id="hangman"></div>
+        </div>
+
+        <div class="word-display" id="wordDisplay">_ _ _ _ _</div>
+
+        <div class="status-message" id="statusMessage"></div>
+
+        <div class="keyboard" id="keyboard">
+            <!-- Letters A-Z will be generated here -->
+        </div>
+
+        <div class="controls">
+            <button class="reset-btn" onclick="resetGame()">New Game</button>
+        </div>
+    </div>
+
+    <script>
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const keyboard = document.getElementById('keyboard');
+        const wordDisplay = document.getElementById('wordDisplay');
+        const hangmanDisplay = document.getElementById('hangman');
+        const statusMessage = document.getElementById('statusMessage');
+        const scoreDisplay = document.getElementById('score');
+
+        let currentWord = '';
+        let guessedLetters = new Set();
+        let wrongGuesses = 0;
+        let score = 0;
+
+        const hangmanStages = [
+            '  ┌───────┐\n  │       ┃\n  │        \n  │        \n  │        \n  │        \n  │        \n──┴────────',  // 0 - Just gallows
+            '  ┌───────┐\n  │       ┃\n  │      😟\n  │        \n  │        \n  │        \n  │        \n──┴────────',  // 1 - Head with worried face
+            '  ┌───────┐\n  │       ┃\n  │      😟\n  │       ┃\n  │       ┃\n  │        \n  │        \n──┴────────',  // 2 - Body
+            '  ┌───────┐\n  │       ┃\n  │      😟\n  │     ╱ ┃\n  │       ┃\n  │        \n  │        \n──┴────────',  // 3 - Left arm
+            '  ┌───────┐\n  │       ┃\n  │      😟\n  │     ╱ ┃ ╲\n  │       ┃\n  │        \n  │        \n──┴────────',  // 4 - Right arm
+            '  ┌───────┐\n  │       ┃\n  │      😟\n  │     ╱ ┃ ╲\n  │       ┃\n  │      ╱ \n  │        \n──┴────────',  // 5 - Left leg
+            '  ┌───────┐\n  │       ┃\n  │      💀\n  │     ╱ ┃ ╲\n  │       ┃\n  │      ╱ ╲\n  │        \n──┴────────'   // 6 - Right leg (dead with skull)
+        ];
+
+        // Create keyboard in 4 rows (QWERTY-style layout)
+        const keyboardLayout = [
+            ['Q', 'W', 'E', 'R', 'T', 'Y', 'U'],
+            ['I', 'O', 'P', 'A', 'S', 'D', 'F'],
+            ['G', 'H', 'J', 'K', 'L', 'Z', 'X'],
+            ['C', 'V', 'B', 'N', 'M', '', '']
+        ];
+        
+        keyboardLayout.forEach(row => {
+            row.forEach(letter => {
+                if (letter) {
+                    const key = document.createElement('button');
+                    key.className = 'key';
+                    key.textContent = letter;
+                    key.onclick = () => guessLetter(letter, key);
+                    keyboard.appendChild(key);
+                } else {
+                    // Empty cell for layout spacing
+                    const spacer = document.createElement('div');
+                    keyboard.appendChild(spacer);
+                }
+            });
+        });
+
+        function guessLetter(letter, keyElement) {
+            if (guessedLetters.has(letter)) return;
+            
+            guessedLetters.add(letter);
+            keyElement.disabled = true;
+
+            if (currentWord.includes(letter)) {
+                keyElement.classList.add('correct');
+                score += 10;
+                updateWordDisplay();
+                
+                if (isWordComplete()) {
+                    score += 50;
+                    statusMessage.textContent = 'You Win! 🎉';
+                    statusMessage.className = 'status-message win';
+                    disableAllKeys();
+                    
+                    // Send win message to parent window
+                    window.parent.postMessage({
+                        type: 'gameWin',
+                        game: 'hangman'
+                    }, '*');
+                }
+            } else {
+                keyElement.classList.add('incorrect');
+                wrongGuesses++;
+                score = Math.max(0, score - 5);
+                hangmanDisplay.textContent = hangmanStages[wrongGuesses];
+                
+                if (wrongGuesses >= 6) {
+                    statusMessage.textContent = `You Lose! The stickman was executed! The word was ${currentWord}`;
+                    statusMessage.className = 'status-message lose';
+                    disableAllKeys();
+                }
+            }
+            
+            scoreDisplay.textContent = score;
+        }
+
+        function updateWordDisplay() {
+            const display = currentWord.split('').map(letter => 
+                guessedLetters.has(letter) ? letter : '_'
+            ).join(' ');
+            wordDisplay.textContent = display;
+        }
+
+        function isWordComplete() {
+            return currentWord.split('').every(letter => guessedLetters.has(letter));
+        }
+
+        function disableAllKeys() {
+            document.querySelectorAll('.key').forEach(key => key.disabled = true);
+        }
+
+        function resetGame() {
+            // Reset hints used counter for new game
+            hintsUsedThisGame = 0;
+            
+            // Expanded word list with various difficulty levels
+            const words = [
+                // Easy (4-5 letters) - Concrete objects and animals
+                'APPLE', 'BEACH', 'CHAIR', 'EAGLE', 'FIELD', 'HORSE', 'JUICE', 'KNIFE',
+                'LIGHT', 'MUSIC', 'NIGHT', 'ORANGE', 'PAPER', 'QUEEN', 'RIVER', 'STONE', 'TIGER',
+                'WATER', 'ZEBRA', 'BREAD', 'CLOUD', 'EARTH', 'FLAME', 'GRAPE',
+                'GLOVE', 'HOUSE', 'JELLY', 'KITE', 'NURSE', 'OCEAN', 'PHONE', 'RADIO', 'TRAIN', 'UNCLE',
+                'WHALE', 'WORLD', 'DOVE', 'FLAME', 'JOINT', 'MEDAL', 'NOVEL', 'PRIZE', 'WHEAT', 'CORAL', 'ELBOW',
+                
+                // Medium (6-7 letters) - Concrete objects and places
+                'BRIDGE', 'CASTLE', 'DRAGON', 'FOREST', 'JUNGLE', 'KNIGHT', 'LAPTOP', 'MAGNET',
+                'PALACE', 'ROCKET', 'SPIDER', 'TEMPLE', 'WINTER', 'YELLOW', 'ZOMBIE',
+                'ANIMAL', 'BOTTLE', 'CAMERA', 'DIAMOND', 'FABRIC', 'GARDEN', 'HELMET', 'ISLAND', 'JEWELS',
+                'MARBLE', 'NEPHEW', 'PLANET', 'QUARTZ', 'SILVER', 'TOMATO',
+                'VESSEL', 'WIZARD', 'YOGURT', 'FALCON', 'GUITAR', 'HAMMER', 'ICEBERG',
+                'CARPET', 'DOCTOR', 'ENGINE', 'FLOWER', 'JUNGLE', 'LEMON', 'NEPHEW', 'OFFICE', 'PERSON', 'QUINOA', 'RUBBER', 'TURKEY',
+                'VIKING', 'YOGURT', 'ZIGZAG', 'BEACON', 'ELEVEN', 'FROZEN', 'HUNTER', 'JUNGLE', 'KERNEL', 'MUSEUM', 'PENCIL',
+                'RUNWAY', 'SYSTEM', 'TWELVE', 'UNICORN', 'VIOLET', 'WOODEN', 'YELLOW', 'ZODIAC', 'BUCKET',
+                
+                // Hard (8+ letters) - Concrete objects, places, and professions
+                'BUTTERFLY', 'CHOCOLATE', 'GENERATOR', 'JELLYFISH', 'LANDSCAPE', 'MOUNTAINS', 'ORCHESTRA', 'PROFESSOR',
+                'RAINBOW', 'SCIENTIST', 'TELEPHONE', 'UMBRELLA', 'VOLCANO', 'WATERFALL', 'XYLOPHONE',
+                'BACKPACK', 'CAMPFIRE', 'DINOSAUR', 'ELEPHANT', 'FIREWORK', 'GOLDFISH',
+                'HAMBURGER', 'ICECREAM', 'KANGAROO', 'LIGHTNING', 'MUSHROOM', 'NOTEBOOK', 'PARACHUTE', 'QUICKSAND',
+                'SANDWICH', 'VACATION', 'YEARBOOK', 'ZEPPELIN',
+                'CATHEDRAL', 'DETECTIVE', 'GYMNASIUM', 'HELICOPTER',
+                'JOURNALIST', 'KALEIDOSCOPE', 'LABYRINTH', 'PHOTOGRAPH', 'QUARTERBACK', 'RESTAURANT', 'TOURNAMENT', 'UNDERGROUND', 'VETERINARIAN',
+                'WHEELCHAIR', 'YACHTSMAN', 'ZOOKEEPER', 'BASKETBALL', 'CONSTELLATION',
+                'FIREFIGHTER', 'GRANDFATHER', 'HANDWRITING', 'KINDERGARTEN', 'LOCOMOTIVE', 'QUARTERBACK', 'REFRIGERATOR', 'THERMOMETER',
+                'YELLOWHAMMER',
+                
+                // Animals
+                'DOLPHIN', 'PENGUIN', 'GIRAFFE', 'CHEETAH', 'OCTOPUS', 'HAMSTER', 'PANTHER', 'RACCOON', 'FLAMINGO',
+                'LEOPARD', 'BUFFALO', 'OSTRICH', 'WALRUS', 'HEDGEHOG', 'MONGOOSE', 'PLATYPUS', 'ANTELOPE', 'WOMBAT',
+                'RHINOCEROS', 'HIPPOPOTAMUS', 'CROCODILE', 'BUTTERFLY', 'DRAGONFLY', 'GRASSHOPPER', 'LADYBUG',
+                'TARANTULA', 'SCORPION', 'CENTIPEDE', 'MILLIPEDE', 'SALAMANDER', 'CHAMELEON', 'IGUANA', 'TURTLE',
+                'ARMADILLO', 'PORCUPINE', 'SQUIRREL', 'CHIPMUNK', 'MUSKRAT', 'BEAVER', 'OTTER', 'SEAL', 'MANATEE',
+                'NARWHAL', 'BARRACUDA', 'SWORDFISH', 'ANGELFISH', 'CLOWNFISH', 'SEAHORSE', 'STARFISH', 'JELLYFISH',
+                
+                // Technology
+                'COMPUTER', 'INTERNET', 'KEYBOARD', 'MONITOR', 'HARDWARE', 'DATABASE',
+                'WEBSITE', 'PASSWORD', 'DOWNLOAD', 'BLUETOOTH', 'WIRELESS', 'SMARTPHONE', 'TABLET',
+                'ROBOTICS', 'COMPUTING', 'MACHINE', 'NETWORK', 'MICROPROCESSOR', 'SEMICONDUCTOR', 'SATELLITE',
+                
+                // Space & Science
+                'ASTEROID', 'SATELLITE', 'TELESCOPE', 'SPACECRAFT', 'ASTRONAUT', 'LABORATORY',
+                'CONSTELLATION', 'GALAXY', 'METEORITE', 'ORGANISM', 'ELEMENT', 'COMPOUND', 'SOLUTION', 'EXPERIMENT',
+                
+                // Geography
+                'CONTINENT', 'PENINSULA', 'GLACIER', 'PLATEAU', 'CANYON', 'PRAIRIE', 'DESERT', 'RAINFOREST',
+                'MOUNTAIN', 'VALLEY', 'RIVER', 'LAKE', 'OCEAN', 'BEACH', 'ISLAND', 'DELTA',
+                'MARSH', 'SWAMP', 'OASIS', 'CLIFF', 'WATERFALL', 'GEYSER', 'VOLCANO', 'CRATER',
+                
+                // Food & Cooking
+                'SPAGHETTI', 'CHOCOLATE', 'STRAWBERRY', 'PINEAPPLE', 'AVOCADO', 'BROCCOLI', 'BLUEBERRY', 'WATERMELON',
+                'SANDWICH', 'HAMBURGER', 'CROISSANT', 'PRETZEL', 'PANCAKE', 'WAFFLE', 'SMOOTHIE', 'MILKSHAKE',
+                'CAPPUCCINO', 'ESPRESSO', 'BAGUETTE', 'QUINOA', 'COUSCOUS', 'RISOTTO', 'GNOCCHI', 'LINGUINE', 'RAVIOLI', 'TIRAMISU',
+                'GELATO', 'ECLAIR', 'MACAROON', 'STRUDEL', 'CHOWDER', 'CASSEROLE',
+                
+                // Entertainment
+                'CARNIVAL', 'FESTIVAL', 'CONCERT', 'THEATER', 'CINEMA', 'CELEBRITY',
+                'ORCHESTRA', 'BALLET', 'OPERA', 'MUSICAL', 'DIRECTOR', 'PRODUCER', 'SOUNDTRACK',
+                'TELEVISION', 'RADIO', 'MAGAZINE',
+                
+                // Sports & Recreation
+                'BASKETBALL', 'FOOTBALL', 'BASEBALL', 'SOCCER', 'TENNIS', 'VOLLEYBALL', 'BADMINTON', 'GOLF',
+                'SWIMMING', 'CYCLING', 'MARATHON', 'GYMNASTICS', 'WRESTLING', 'BOXING', 'SKIING',
+                'SNOWBOARDING', 'SURFING', 'SKATEBOARDING', 'CLIMBING', 'HIKING', 'CAMPING', 'FISHING',
+                'ARCHERY', 'BOWLING', 'BILLIARDS', 'CHESS', 'CHECKERS', 'SCRABBLE', 'MONOPOLY', 'JIGSAW', 'PUZZLE',
+                
+                // Professions & Careers  
+                'ARCHITECT', 'ENGINEER', 'TEACHER', 'LAWYER', 'DOCTOR', 'NURSE', 'PILOT', 'MECHANIC',
+                'ELECTRICIAN', 'PLUMBER', 'CARPENTER', 'PAINTER', 'PHOTOGRAPHER', 'JOURNALIST', 'WRITER', 'EDITOR',
+                'LIBRARIAN', 'ACCOUNTANT', 'BANKER', 'SCIENTIST', 'PROFESSOR', 'STUDENT',
+                'MANAGER', 'DESIGNER', 'ARTIST', 'MUSICIAN',
+                
+                // Weather & Natural Events
+                'THUNDERSTORM', 'LIGHTNING', 'HURRICANE', 'TORNADO', 'BLIZZARD', 'RAINBOW',
+                'EARTHQUAKE', 'TSUNAMI', 'AVALANCHE', 'LANDSLIDE', 'FLOOD', 'WILDFIRE', 'ECLIPSE',
+                'METEOR', 'COMET',
+                
+                // Colors & Art
+                'CRIMSON', 'SCARLET', 'MAROON', 'CORAL', 'SALMON', 'ORANGE', 'AMBER', 'GOLDEN',
+                'YELLOW', 'EMERALD', 'TURQUOISE', 'VIOLET', 'PURPLE', 'MAGENTA', 'PINK', 'BROWN',
+                'PAINTING', 'SCULPTURE', 'DRAWING', 'WATERCOLOR', 'PORTRAIT', 'LANDSCAPE'
+            ];
+            
+            currentWord = words[Math.floor(Math.random() * words.length)];
+            guessedLetters.clear();
+            wrongGuesses = 0;
+            
+            hangmanDisplay.textContent = hangmanStages[0];
+            statusMessage.textContent = '';
+            statusMessage.className = 'status-message';
+            
+            document.querySelectorAll('.key').forEach(key => {
+                key.disabled = false;
+                key.classList.remove('correct', 'incorrect');
+                // Reset hint styling
+                key.style.background = '';
+                key.style.animation = '';
+            });
+            
+            updateWordDisplay();
+        }
+
+        // Hint functionality
+        function revealRandomLetter() {
+            // Find letters in the word that haven't been guessed yet
+            const unguessedLetters = currentWord.split('').filter(letter => 
+                !guessedLetters.has(letter)
+            );
+            
+            if (unguessedLetters.length === 0) {
+                return; // All letters already revealed
+            }
+            
+            // Pick a random unguessed letter
+            const randomLetter = unguessedLetters[Math.floor(Math.random() * unguessedLetters.length)];
+            
+            // Find the corresponding key button
+            const keyElement = [...document.querySelectorAll('.key')].find(key => 
+                key.textContent === randomLetter && !key.disabled
+            );
+            
+            if (keyElement) {
+                // Simulate clicking the key
+                guessLetter(randomLetter, keyElement);
+                
+                // Add a visual hint effect
+                keyElement.style.background = '#f6ad55';
+                keyElement.style.animation = 'hintPulse 0.8s ease';
+            }
+        }
+
+        // Track hints used in current game
+        let hintsUsedThisGame = 0;
+
+        // Listen for hint messages from parent window
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'hint' && event.data.action === 'revealLetter') {
+                // Check if there are still letters to reveal
+                const unguessedLetters = currentWord.split('').filter(letter => 
+                    !guessedLetters.has(letter)
+                );
+                
+                if (unguessedLetters.length > 0) {
+                    revealRandomLetter();
+                    hintsUsedThisGame++;
+                    
+                    // Send win message to parent if game is won
+                    setTimeout(() => {
+                        if (isWordComplete()) {
+                            window.parent.postMessage({
+                                type: 'gameWin',
+                                game: 'hangman'
+                            }, '*');
+                        }
+                    }, 100);
+                }
+            }
+        });
+
+        // Initialize game
+        resetGame();
+    </script>
+</body>
+</html>
