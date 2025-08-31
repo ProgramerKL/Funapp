@@ -1631,6 +1631,21 @@
                         glowColor: '#ff4080',
                         glowIntensity: Math.random() * 0.5 + 0.5
                     });
+                } else if (obstacleType < 0.55) {
+                    // Glowing launch balls (cyan) - special power-up
+                    obstacles.push({
+                        x: canvas.width,
+                        y: canvas.height - 160 - Math.random() * 80,
+                        width: 24,
+                        height: 24,
+                        type: 'launchBall',
+                        color: '#00ffff',
+                        glowColor: '#80ffff',
+                        glowIntensity: Math.sin(frameCounter * 0.1) * 0.3 + 0.7,
+                        launchPower: 15,
+                        horizontalBoost: 8,
+                        used: false
+                    });
                 } else if (obstacleType < 0.6) {
                     // Jump-able platforms (green)
                     obstacles.push({
@@ -1747,6 +1762,31 @@
                             player.onPlatform = false;
                             // Landing particles
                             createAdvancedParticles(player.x + player.size/2, player.y + player.size, '#00ff44', 3);
+                        }
+                    } else if (obstacles[i].type === 'launchBall') {
+                        // Glowing launch balls - power-up interaction
+                        if (!obstacles[i].used) {
+                            console.log('Player activated launch ball!');
+                            obstacles[i].used = true;
+                            
+                            // Launch player with massive boost
+                            player.vY = -obstacles[i].launchPower;
+                            player.vX = obstacles[i].horizontalBoost;
+                            player.jumpCount = 0; // Reset all jumps
+                            player.grounded = false;
+                            player.glowIntensity = 1;
+                            
+                            // Create spectacular launch particles
+                            createAdvancedParticles(obstacles[i].x + obstacles[i].width/2, obstacles[i].y + obstacles[i].height/2, obstacles[i].color, 15);
+                            createExplosion(obstacles[i].x + obstacles[i].width/2, obstacles[i].y + obstacles[i].height/2, obstacles[i].glowColor);
+                            
+                            // Change ball appearance after use
+                            obstacles[i].color = '#444444';
+                            obstacles[i].glowColor = '#666666';
+                            obstacles[i].glowIntensity = 0.1;
+                            
+                            // Add score bonus
+                            gameState.score += 200;
                         }
                     } else if (obstacles[i].type === 'oscillator') {
                         // Purple oscillators: bounce on top, deadly on sides
@@ -2003,6 +2043,36 @@
                     ctx.closePath();
                     ctx.fill();
                     ctx.globalAlpha = 1;
+                } else if (obstacle.type === 'launchBall') {
+                    // Glowing launch balls with special effects
+                    ctx.save();
+                    
+                    // Add glow effect
+                    ctx.shadowColor = obstacle.glowColor;
+                    ctx.shadowBlur = 15 * obstacle.glowIntensity;
+                    
+                    // Draw the ball as a circle
+                    ctx.beginPath();
+                    ctx.arc(obstacle.x + obstacle.width/2, obstacle.y + obstacle.height/2, obstacle.width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Inner glow
+                    ctx.fillStyle = obstacle.glowColor;
+                    ctx.globalAlpha = obstacle.glowIntensity * 0.6;
+                    ctx.beginPath();
+                    ctx.arc(obstacle.x + obstacle.width/2, obstacle.y + obstacle.height/2, obstacle.width/3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                    
+                    // Bright center
+                    ctx.fillStyle = '#ffffff';
+                    ctx.globalAlpha = obstacle.glowIntensity * 0.8;
+                    ctx.beginPath();
+                    ctx.arc(obstacle.x + obstacle.width/2, obstacle.y + obstacle.height/2, obstacle.width/6, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                    
+                    ctx.restore();
                 } else {
                     ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
                     
