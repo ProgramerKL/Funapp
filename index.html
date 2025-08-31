@@ -3,11 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 Fun Games Hub 🎮</title>
+    <title>Kyle Liu - Portfolio & Games Hub</title>
     <style>
-        @import url("https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&display=swap");
-        @import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
-
         * {
             margin: 0;
             padding: 0;
@@ -15,317 +12,855 @@
         }
 
         body {
-            font-family: "Fredoka One", cursive;
-            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             padding: 20px;
-            position: relative;
-            overflow-x: hidden;
+            color: #333;
         }
 
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* Homepage Styles */
-        .main-menu {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(15px);
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 30px;
-            padding: 50px;
-            text-align: center;
+        .main-container {
             max-width: 1200px;
-            width: 100%;
-            position: relative;
-            z-index: 2;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-        }
-
-        .hub-title {
-            font-size: 4rem;
-            color: white;
-            margin-bottom: 2rem;
-            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
-            animation: bounce 2s ease-in-out infinite;
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
-        }
-
-        .game-selection {
+            margin: 0 auto;
             display: flex;
+            flex-direction: column;
             gap: 3rem;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
         }
 
-        .game-option {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 25px;
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             padding: 3rem;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: #4a5568;
+            margin-bottom: 2rem;
+            letter-spacing: -0.5px;
+        }
+
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: #718096;
+            margin-bottom: 2rem;
+            font-weight: 400;
+        }
+
+        /* Portfolio Section */
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 3rem;
+            text-align: left;
+            margin-top: 2rem;
+        }
+
+        .profile-card {
+            background: #f7fafc;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+            padding: 2rem;
+            height: fit-content;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 1.5rem auto;
+        }
+
+        .profile-name {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-role {
+            font-size: 1.1rem;
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .profile-bio {
+            color: #4a5568;
+            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .vibe-status {
+            background: #edf2f7;
+            border-radius: 10px;
+            padding: 0.75rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #4a5568;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .social-link {
+            background: #4299e1;
             color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+        }
+
+        .social-link:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+        }
+
+        .accomplishments-area {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .accomplishment-item {
+            background: #f7fafc;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .accomplishment-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .accomplishment-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 1rem;
+        }
+
+        .accomplishment-desc {
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .accomplishment-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            background: #4299e1;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Games Section */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .game-card {
+            background: #f7fafc;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+            padding: 2rem;
             cursor: pointer;
-            transition: all 0.4s ease;
-            width: 320px;
-            height: 320px;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
-            border: none;
-            position: relative;
-            overflow: hidden;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-height: 200px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            user-select: none;
         }
 
-        .game-option::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            transform: rotate(45deg);
-            transition: all 0.6s;
-            opacity: 0;
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            border-color: #4299e1;
         }
 
-        .game-option:hover::before {
-            animation: shine 1.5s ease-in-out;
-        }
-
-        @keyframes shine {
-            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateX(100%) translateY(100%) rotate(45deg); opacity: 0; }
-        }
-
-        .game-option:hover {
-            transform: translateY(-15px) scale(1.05);
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
-            background: linear-gradient(135deg, #764ba2, #667eea);
-        }
-
-        .option-icon {
-            font-size: 6rem;
+        .game-icon {
+            font-size: 3rem;
             margin-bottom: 1rem;
-            display: block;
             animation: float 3s ease-in-out infinite;
-            pointer-events: none;
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(5deg); }
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
         }
 
-        .game-option h2 {
-            font-size: 1.5rem;
-            margin: 0;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-            text-align: center;
+        .game-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
         }
 
-        .game-option p {
-            display: none;
+        .game-desc {
+            color: #718096;
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
 
-        /* Back button for games */
-        .back-button {
-            position: absolute;
-            top: 30px;
-            left: 30px;
-            background: linear-gradient(45deg, #ff6b6b, #feca57);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            z-index: 1000;
-            border: none;
-            font-family: "Fredoka One", cursive;
-            font-size: 1rem;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .back-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Game container base */
+        /* Game Container */
         .game-container {
             display: none;
-            width: 100%;
-            height: 100vh;
             position: fixed;
             top: 0;
             left: 0;
-            z-index: 10;
+            width: 100%;
+            height: 100vh;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.9);
         }
 
         .game-container.active {
             display: block;
         }
 
-        /* Mobile responsive */
-        @media (max-width: 768px) {
-            .hub-title {
-                font-size: 2.5rem;
-                margin-bottom: 1.5rem;
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #805ad5;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            z-index: 1001;
+            box-shadow: 0 4px 15px rgba(128, 90, 213, 0.3);
+        }
+
+        .back-button:hover {
+            background: #6b46c1;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(128, 90, 213, 0.4);
+        }
+
+        .game-content {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Hint System */
+        .hint-counter {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+        }
+
+        .hint-icon {
+            font-size: 1.2rem;
+        }
+
+        .win-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            border: 2px solid #48bb78;
+            display: none;
+        }
+
+        .win-notification.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
             }
-            
-            .game-selection {
-                flex-direction: column;
-                gap: 2rem;
-                align-items: center;
-            }
-            
-            .game-option {
-                width: 250px;
-                height: 250px;
-                padding: 2rem;
-            }
-            
-            .option-icon {
-                font-size: 4rem;
-            }
-            
-            .back-button {
-                top: 20px;
-                left: 20px;
-                padding: 12px 20px;
-                font-size: 0.9rem;
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
             }
         }
 
-        /* Hidden class for show/hide functionality */
-        .hidden {
-            display: none !important;
+        .win-title {
+            font-size: 1.5rem;
+            color: #38a169;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .win-message {
+            color: #4a5568;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .hint-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .hint-btn {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .hint-btn:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+        }
+
+        .hint-btn.save {
+            background: #805ad5;
+        }
+
+        .hint-btn.save:hover {
+            background: #6b46c1;
+        }
+
+        .use-hint-btn {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background: #f6ad55;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 2001;
+            font-size: 1rem;
+            display: none;
+            box-shadow: 0 6px 20px rgba(246, 173, 85, 0.4);
+        }
+
+        .use-hint-btn:hover {
+            background: #ed8936;
+            transform: translateY(-2px);
+        }
+
+        .use-hint-btn:disabled {
+            background: #cbd5e0;
+            color: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .section {
+                padding: 2rem 1.5rem;
+            }
+
+            .portfolio-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .section {
+                padding: 1.5rem 1rem;
+            }
+
+            .section-title {
+                font-size: 1.75rem;
+            }
+
+            .main-container {
+                gap: 2rem;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Main Menu -->
-    <div class="main-menu" id="mainMenu">
-        <h1 class="hub-title">🎮 Fun Games Hub 🎮</h1>
-        <div class="game-selection">
-            <div class="game-option" onclick="showWhackAMole()">
-                <span class="option-icon">🎯</span>
-                <h2>Whack-a-Mole</h2>
+    <div class="main-container">
+        <!-- Portfolio Section -->
+        <div class="section">
+            <h1 class="section-title">Kyle Liu</h1>
+            <p class="section-subtitle">Creative Developer & Game Designer</p>
+            
+            <div class="portfolio-grid">
+                <!-- Profile Card -->
+                <div class="profile-card">
+                    <div class="avatar">👨‍🎨</div>
+                    <h2 class="profile-name">Kyle Liu</h2>
+                    <p class="profile-role">Creative Developer</p>
+                    <p class="profile-bio">
+                        Passionate about crafting beautiful digital experiences through thoughtful design and clean code.
+                    </p>
+                    <div class="vibe-status">
+                        <span id="vibeEmoji">🎯</span>
+                        <span id="vibeText">In the zone</span>
+                    </div>
+                    <div class="social-links">
+                        <a href="#" class="social-link">📧</a>
+                        <a href="#" class="social-link">💼</a>
+                        <a href="#" class="social-link">🐙</a>
+                        <a href="#" class="social-link">🐦</a>
+                    </div>
+                </div>
+
+                <!-- Accomplishments Area -->
+                <div class="accomplishments-area" id="accomplishmentsArea">
+                    <!-- Accomplishments will be generated by JavaScript -->
+                </div>
             </div>
-            <div class="game-option" onclick="showGeometryDash()">
-                <span class="option-icon">🕹️</span>
-                <h2>Geometry Dash</h2>
-            </div>
-            <div class="game-option" onclick="showCyberpunkPong()">
-                <span class="option-icon">🏓</span>
-                <h2>Cyberpunk Pong</h2>
+        </div>
+
+        <!-- Games Section -->
+        <div class="section">
+            <h2 class="section-title">🎮 Interactive Games</h2>
+            <p class="section-subtitle">Play the games I've developed - click any game to start!</p>
+            
+            <div class="games-grid">
+                <div class="game-card" onclick="showWhackAMole()">
+                    <div class="game-icon">🎯</div>
+                    <h3 class="game-title">Whack-a-Mole</h3>
+                    <p class="game-desc">Fast-paced reaction game with animated moles and score tracking</p>
+                </div>
+                <div class="game-card" onclick="showGeometryDash()">
+                    <div class="game-icon">🕹️</div>
+                    <h3 class="game-title">Geometry Dash</h3>
+                    <p class="game-desc">Side-scrolling platformer with geometric obstacles and smooth gameplay</p>
+                </div>
+                <div class="game-card" onclick="showCyberpunkPong()">
+                    <div class="game-icon">🏓</div>
+                    <h3 class="game-title">Cyberpunk Pong</h3>
+                    <p class="game-desc">Modern twist on the classic Pong game with neon cyberpunk aesthetics</p>
+                </div>
+                <div class="game-card" onclick="showHangmanGame()">
+                    <div class="game-icon">🎪</div>
+                    <h3 class="game-title">Hangman</h3>
+                    <p class="game-desc">Classic word guessing game with clean minimal design and smooth animations</p>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Whack-a-Mole Game Container -->
+    <!-- Hint Counter -->
+    <div class="hint-counter" id="hintCounter">
+        <span class="hint-icon">💡</span>
+        <span id="hintCount">0</span> Hints
+    </div>
+
+    <!-- Win Notification -->
+    <div class="win-notification" id="winNotification">
+        <h3 class="win-title">🎉 Congratulations!</h3>
+        <p class="win-message">You won! You've earned a hint that you can use in any game.</p>
+        <div class="hint-buttons">
+            <button class="hint-btn" onclick="useHintNow()">💡 Use Hint Now</button>
+            <button class="hint-btn save" onclick="saveHint()">💾 Save for Later</button>
+        </div>
+    </div>
+
+    <!-- Game Containers -->
     <div class="game-container" id="whackGameContainer">
-        <button class="back-button" onclick="showMainMenu()">🏠 Back to Games</button>
-        <div id="whackGameContent" style="width: 100%; height: 100vh; background: linear-gradient(45deg, #87ceeb, #98fb98, #ffb6c1, #f0e68c); display: flex; justify-content: center; align-items: center;">
+        <button class="back-button" onclick="closeGame()">🏠 Back to Portfolio</button>
+        <div class="game-content" id="whackGameContent">
             <!-- Whack-a-mole game will be loaded here -->
         </div>
     </div>
 
-    <!-- Geometry Dash Game Container -->
     <div class="game-container" id="geometryGameContainer">
-        <button class="back-button" onclick="showMainMenu()">🏠 Back to Games</button>
-        <div id="geometryGameContent" style="width: 100%; height: 100vh; background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e); display: flex; justify-content: center; align-items: center;">
+        <button class="back-button" onclick="closeGame()">🏠 Back to Portfolio</button>
+        <div class="game-content" id="geometryGameContent">
             <!-- Geometry dash game will be loaded here -->
         </div>
     </div>
 
-    <!-- Cyberpunk Pong Game Container -->
     <div class="game-container" id="pongGameContainer">
-        <button class="back-button" onclick="showMainMenu()">🏠 Back to Games</button>
-        <div id="pongGameContent" style="width: 100%; height: 100vh; background: linear-gradient(135deg, #0a0a0a, #1a1a1a, #2a2a2a); display: flex; justify-content: center; align-items: center;">
-            <!-- Cyberpunk Pong game will be loaded here -->
+        <button class="back-button" onclick="closeGame()">🏠 Back to Portfolio</button>
+        <div class="game-content" id="pongGameContent">
+            <!-- Cyberpunk pong game will be loaded here -->
+        </div>
+    </div>
+
+
+    <div class="game-container" id="hangmanGameContainer">
+        <button class="back-button" onclick="closeGame()">🏠 Back to Portfolio</button>
+        <button class="use-hint-btn" id="hangmanHintBtn" onclick="useHintInGame('hangman')">💡 Use Hint</button>
+        <div class="game-content" id="hangmanGameContent">
+            <!-- Hangman game will be loaded here -->
         </div>
     </div>
 
     <script>
-        // Navigation functions
-        function showMainMenu() {
-            document.getElementById('mainMenu').classList.remove('hidden');
-            document.getElementById('whackGameContainer').classList.remove('active');
-            document.getElementById('geometryGameContainer').classList.remove('active');
-            document.getElementById('pongGameContainer').classList.remove('active');
+        // Global Hint System
+        let hintCount = parseInt(localStorage.getItem('gameHints') || '0');
+        let currentGame = null;
+        let pendingHint = false;
+
+        // Update hint counter display
+        function updateHintCounter() {
+            document.getElementById('hintCount').textContent = hintCount;
+            localStorage.setItem('gameHints', hintCount.toString());
         }
 
-        function showWhackAMole() {
-            console.log('showWhackAMole called');
-            document.getElementById('mainMenu').classList.add('hidden');
-            document.getElementById('whackGameContainer').classList.add('active');
-            document.getElementById('geometryGameContainer').classList.remove('active');
-            document.getElementById('pongGameContainer').classList.remove('active');
+        // Show win notification when player wins a game
+        function showWinNotification() {
+            document.getElementById('winNotification').classList.add('show');
+        }
+
+        // Hide win notification
+        function hideWinNotification() {
+            document.getElementById('winNotification').classList.remove('show');
+        }
+
+        // Player chooses to use hint immediately
+        function useHintNow() {
+            hintCount++;
+            updateHintCounter();
+            hideWinNotification();
             
-            // Load whack-a-mole game
+            // Show hint button only if current game is Hangman
+            if (currentGame === 'hangman') {
+                showHintButton(currentGame);
+            }
+        }
+
+        // Player chooses to save hint for later
+        function saveHint() {
+            hintCount++;
+            updateHintCounter();
+            hideWinNotification();
+        }
+
+        // Show hint button for specific game (only Hangman)
+        function showHintButton(game) {
+            console.log('showHintButton called for:', game, 'hintCount:', hintCount);
+            if (game === 'hangman' && hintCount > 0) {
+                const hintBtn = document.getElementById(game + 'HintBtn');
+                console.log('Hint button element:', hintBtn);
+                if (hintBtn) {
+                    hintBtn.style.display = 'block';
+                    console.log('Hint button should now be visible');
+                } else {
+                    console.log('Hint button element not found!');
+                }
+            }
+        }
+
+        // Hide all hint buttons
+        function hideAllHintButtons() {
+            const hintButtons = document.querySelectorAll('.use-hint-btn');
+            hintButtons.forEach(btn => btn.style.display = 'none');
+        }
+
+        // Use hint in specific game
+        function useHintInGame(game) {
+            if (hintCount <= 0) {
+                console.log('No hints available');
+                return;
+            }
+            
+            hintCount--;
+            updateHintCounter();
+            
+            console.log(`Using hint in ${game}. Remaining hints:`, hintCount);
+            
+            // Apply hint based on game type
+            applyGameHint(game);
+            
+            // Hide hint button if no hints left
+            if (hintCount <= 0) {
+                document.getElementById(game + 'HintBtn').style.display = 'none';
+            }
+        }
+
+        // Apply game-specific hints (only for Hangman)
+        function applyGameHint(game) {
+            if (game !== 'hangman') return;
+            
+            const gameContent = document.getElementById(game + 'GameContent');
+            const iframe = gameContent.querySelector('iframe');
+            
+            if (iframe && iframe.contentWindow) {
+                try {
+                    // Hangman-specific hint: Reveal a random letter
+                    iframe.contentWindow.postMessage({type: 'hint', action: 'revealLetter'}, '*');
+                } catch (e) {
+                    console.log('Could not communicate with game iframe');
+                }
+            }
+            
+            // Show hint feedback
+            showHintUsedFeedback(game);
+        }
+
+        // Show feedback when hint is used
+        function showHintUsedFeedback(game) {
+            const feedback = document.createElement('div');
+            feedback.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(246, 173, 85, 0.95);
+                color: white;
+                padding: 1rem 2rem;
+                border-radius: 12px;
+                font-weight: 600;
+                z-index: 2001;
+                animation: fadeInOut 2s ease;
+            `;
+            feedback.innerHTML = '💡 Hint Activated!';
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeInOut {
+                    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                    20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                    80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                }
+            `;
+            document.head.appendChild(style);
+            document.body.appendChild(feedback);
+            
+            setTimeout(() => {
+                document.body.removeChild(feedback);
+                document.head.removeChild(style);
+            }, 2000);
+        }
+
+        // Listen for win messages from games
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'gameWin') {
+                currentGame = event.data.game;
+                showWinNotification();
+            }
+        });
+
+        // Portfolio data
+        const portfolioProjects = [
+            {
+                title: "🎮 Interactive Games Hub",
+                description: "A collection of browser-based games including Whack-a-Mole, Geometry Dash, Cyberpunk Pong, and Hangman with modern UI/UX design and smooth gameplay mechanics.",
+                tags: ["JavaScript", "HTML5 Canvas", "CSS3", "Game Development"]
+            },
+            {
+                title: "🤖 AI Code Assistant",
+                description: "Integration with Claude AI for intelligent code suggestions and automated development workflows, enhancing productivity.",
+                tags: ["AI/ML", "API Integration", "Automation", "Developer Tools"]
+            }
+        ];
+
+        // Game functions
+        function showWhackAMole() {
+            currentGame = 'whack';
+            document.getElementById('whackGameContainer').classList.add('active');
             loadWhackAMoleGame();
+            hideAllHintButtons();
         }
 
         function showGeometryDash() {
-            document.getElementById('mainMenu').classList.add('hidden');
-            document.getElementById('whackGameContainer').classList.remove('active');
+            currentGame = 'geometry';
             document.getElementById('geometryGameContainer').classList.add('active');
-            document.getElementById('pongGameContainer').classList.remove('active');
-            
-            // Load geometry dash game
             loadGeometryDashGame();
+            hideAllHintButtons();
         }
 
         function showCyberpunkPong() {
-            document.getElementById('mainMenu').classList.add('hidden');
-            document.getElementById('whackGameContainer').classList.remove('active');
-            document.getElementById('geometryGameContainer').classList.remove('active');
+            currentGame = 'pong';
             document.getElementById('pongGameContainer').classList.add('active');
-            
-            // Load cyberpunk pong game
             loadCyberpunkPongGame();
+            hideAllHintButtons();
+        }
+
+        function showHangmanGame() {
+            currentGame = 'hangman';
+            document.getElementById('hangmanGameContainer').classList.add('active');
+            loadHangmanGame();
+            hideAllHintButtons();
+            
+            // Show hint button if hints are available
+            if (hintCount > 0) {
+                console.log('Showing Hangman game. Hint count:', hintCount);
+                showHintButton('hangman');
+            }
+        }
+
+        function closeGame() {
+            document.querySelectorAll('.game-container').forEach(container => {
+                container.classList.remove('active');
+            });
+            hideAllHintButtons();
+            currentGame = null;
         }
 
         function loadWhackAMoleGame() {
-            // Load the original whack-a-mole game into an iframe to preserve all functionality
             const container = document.getElementById('whackGameContent');
             container.innerHTML = '<iframe src="whackamole.html" style="width: 100%; height: 100vh; border: none; background: transparent;"></iframe>';
         }
 
         function loadGeometryDashGame() {
-            // Load the original geometry dash game into an iframe to preserve all functionality
             const container = document.getElementById('geometryGameContent');
             container.innerHTML = '<iframe src="geometrydash.html" style="width: 100%; height: 100vh; border: none; background: transparent;"></iframe>';
         }
 
         function loadCyberpunkPongGame() {
-            // Load the cyberpunk pong game into an iframe to preserve all functionality
             const container = document.getElementById('pongGameContent');
             container.innerHTML = '<iframe src="cyberpunk-pong.html" style="width: 100%; height: 100vh; border: none; background: transparent;"></iframe>';
         }
 
 
+        function loadHangmanGame() {
+            const container = document.getElementById('hangmanGameContent');
+            container.innerHTML = '<iframe src="ide_minimal_1.html" style="width: 100%; height: 100vh; border: none; background: transparent;"></iframe>';
+            
+            // Add slight delay to ensure iframe is loaded, then show hint button if hints available
+            setTimeout(() => {
+                if (hintCount > 0) {
+                    showHintButton('hangman');
+                }
+            }, 500);
+        }
+
+        // Generate accomplishments
+        function generateAccomplishments() {
+            const container = document.getElementById('accomplishmentsArea');
+            container.innerHTML = '';
+            
+            portfolioProjects.forEach(project => {
+                const item = document.createElement('div');
+                item.className = 'accomplishment-item';
+                item.innerHTML = `
+                    <h3 class="accomplishment-title">${project.title}</h3>
+                    <p class="accomplishment-desc">${project.description}</p>
+                    <div class="accomplishment-tags">
+                        ${project.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Vibe status rotation
+        const vibes = [
+            { emoji: '🎯', text: 'In the zone' },
+            { emoji: '🚀', text: 'Building the future' },
+            { emoji: '💡', text: 'Having ideas' },
+            { emoji: '🎨', text: 'Creating magic' },
+            { emoji: '🔥', text: 'On fire today' },
+            { emoji: '⚡', text: 'High energy' },
+            { emoji: '🌟', text: 'Feeling inspired' },
+            { emoji: '🎮', text: 'Game dev mode' }
+        ];
+
+        function updateVibe() {
+            const vibe = vibes[Math.floor(Math.random() * vibes.length)];
+            document.getElementById('vibeEmoji').textContent = vibe.emoji;
+            document.getElementById('vibeText').textContent = vibe.text;
+        }
+
+        // Debug: Add some hints for testing
+        function addTestHints() {
+            hintCount += 3;
+            updateHintCounter();
+            console.log('Added 3 test hints. Total:', hintCount);
+        }
 
         // Initialize
-        showMainMenu();
+        document.addEventListener('DOMContentLoaded', function() {
+            generateAccomplishments();
+            updateHintCounter();
+            
+            // Debug: Add test hints automatically
+            if (hintCount === 0) {
+                addTestHints();
+            }
+            
+            // Update vibe every 30 seconds
+            setInterval(updateVibe, 30000);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeGame();
+            }
+        });
     </script>
 </body>
 </html>

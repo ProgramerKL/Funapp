@@ -515,9 +515,37 @@
         }
         
         @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+            
+            .game-container {
+                padding: 10px;
+                gap: 15px;
+            }
+            
+            .cyber-header {
+                padding: 15px;
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .game-title {
+                font-size: clamp(1.8rem, 6vw, 2.5rem);
+                letter-spacing: 2px;
+            }
+            
+            .system-status {
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 10px;
+                justify-content: center;
+            }
+            
             .game-arena {
                 flex-direction: column;
                 padding: 10px;
+                gap: 15px;
             }
             
             .left-panel, .right-panel {
@@ -525,16 +553,121 @@
                 order: 1;
                 display: flex;
                 justify-content: space-around;
+                flex-wrap: wrap;
+                gap: 15px;
             }
             
             .canvas-area {
                 order: 0;
-                margin-bottom: 20px;
+                margin-bottom: 0;
+                width: 100%;
+            }
+            
+            .canvas-container {
+                max-width: 100%;
+                aspect-ratio: 2/1;
+            }
+            
+            .game-canvas {
+                width: 100% !important;
+                height: auto !important;
+                max-height: 50vh;
+            }
+            
+            .control-panel {
+                padding: 15px;
+                min-height: auto;
+            }
+            
+            .control-title {
+                font-size: 1.2rem;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                font-size: 0.9rem;
+                min-height: 44px;
+                touch-action: manipulation;
+            }
+            
+            .btn:active {
+                transform: scale(0.95);
+            }
+            
+            .difficulty-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .power-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .power-item {
+                padding: 10px;
+            }
+            
+            .power-name {
+                font-size: 0.9rem;
+            }
+            
+            .power-description {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 5px;
+                gap: 10px;
+            }
+            
+            .cyber-header {
+                padding: 10px;
             }
             
             .game-title {
-                font-size: 2rem;
-                letter-spacing: 4px;
+                font-size: clamp(1.5rem, 8vw, 2rem);
+            }
+            
+            .system-status {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .status-line {
+                font-size: 0.8rem;
+            }
+            
+            .left-panel, .right-panel {
+                gap: 10px;
+            }
+            
+            .control-panel {
+                padding: 10px;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .game-canvas {
+                touch-action: none;
+                user-select: none;
+            }
+            
+            .btn:active {
+                background: var(--neon-blue);
+                color: var(--cyber-dark);
+            }
+            
+            .difficulty-btn:active {
+                background: var(--neon-pink);
             }
         }
     </style>
@@ -752,8 +885,8 @@
         let mouseY = canvas.height / 2;
         let ballX = canvas.width / 2;
         let ballY = canvas.height / 2;
-        let ballVx = 5;
-        let ballVy = 3;
+        let ballVx = 5.5;
+        let ballVy = 3.3;
         let aiY = canvas.height / 2;
         
         // Power-up system
@@ -1051,6 +1184,49 @@
             
             mouseY = Math.max(paddleHeight/2, Math.min(canvas.height - paddleHeight/2, newMouseY));
         });
+
+        // Touch controls for mobile
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (gameState.gameOver || gameState.paused) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            let newMouseY = ((touch.clientY - rect.top) / rect.height) * canvas.height;
+            
+            // Apply confusion/neural scramble effect for touch as well
+            if (activePowers.player && activePowers.player.type === 'confusion') {
+                const center = canvas.height / 2;
+                const offset = newMouseY - center;
+                newMouseY = center - offset;
+            }
+            
+            mouseY = Math.max(paddleHeight/2, Math.min(canvas.height - paddleHeight/2, newMouseY));
+        });
+
+        // Touch start
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (gameState.gameOver || gameState.paused) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            let touchY = ((touch.clientY - rect.top) / rect.height) * canvas.height;
+            
+            // Apply confusion effect
+            if (activePowers.player && activePowers.player.type === 'confusion') {
+                const center = canvas.height / 2;
+                const offset = touchY - center;
+                touchY = center - offset;
+            }
+            
+            mouseY = Math.max(paddleHeight/2, Math.min(canvas.height - paddleHeight/2, touchY));
+        });
+
+        // Prevent scrolling on touch
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+        });
         
         function updateLivesDisplay() {
             console.log('Updating lives:', gameState.playerLives, 'vs', gameState.aiLives);
@@ -1150,8 +1326,8 @@
         function resetBall() {
             ballX = canvas.width / 2;
             ballY = canvas.height / 2;
-            ballVx = (Math.random() > 0.5) ? 5 : -5;
-            ballVy = (Math.random() - 0.5) * 6;
+            ballVx = (Math.random() > 0.5) ? 5.5 : -5.5;
+            ballVy = (Math.random() - 0.5) * 6.6;
         }
         
         function resetGame() {
@@ -1335,7 +1511,16 @@
                     } else {
                         // AI moves toward predicted position with some error
                         const error = (Math.random() - 0.5) * maxError;
-                        const targetY = predictedY + error;
+                        let targetY = predictedY + error;
+                        
+                        // Apply neural scramble/confusion effect to AI
+                        if (activePowers.ai && activePowers.ai.type === 'confusion') {
+                            // Reverse AI's targeting - make it move away from the ball
+                            const centerY = canvas.height / 2;
+                            const offset = targetY - centerY;
+                            targetY = centerY - offset; // Flip the target position
+                            console.log(`🌀 AI CONFUSED! Target flipped from ${Math.round(predictedY + error)} to ${Math.round(targetY)}`);
+                        }
                         
                         if (aiY < targetY - 15) {
                             aiY += aiSpeed;
@@ -1346,10 +1531,21 @@
                 } else {
                     // Return to center when ball moving away
                     const centerY = canvas.height / 2;
-                    if (aiY < centerY - 5) {
-                        aiY += aiSpeed * 0.3;
-                    } else if (aiY > centerY + 5) {
-                        aiY -= aiSpeed * 0.3;
+                    
+                    // Apply neural scramble/confusion effect to AI center return
+                    if (activePowers.ai && activePowers.ai.type === 'confusion') {
+                        // When confused, AI moves randomly instead of returning to center
+                        const randomMove = Math.random();
+                        if (randomMove < 0.4) {
+                            aiY += (Math.random() - 0.5) * aiSpeed * 0.6; // Random movement
+                        }
+                        // Otherwise don't move (confusion causes hesitation)
+                    } else {
+                        if (aiY < centerY - 5) {
+                            aiY += aiSpeed * 0.3;
+                        } else if (aiY > centerY + 5) {
+                            aiY -= aiSpeed * 0.3;
+                        }
                     }
                 }
             }
@@ -1552,6 +1748,14 @@
                 }
             } else if (e.code === 'KeyR') {
                 resetGame();
+            } else if (e.code === 'KeyC') {
+                // Debug key: Test confusion effect on AI
+                activatePowerUp('confusion', 'ai');
+                console.log('🌀 DEBUG: Confusion activated for AI! AI should now move erratically.');
+            } else if (e.code === 'KeyV') {
+                // Debug key: Test confusion effect on Player
+                activatePowerUp('confusion', 'player');
+                console.log('🌀 DEBUG: Confusion activated for Player! Controls should now be reversed.');
             }
         });
     </script>

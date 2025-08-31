@@ -613,35 +613,127 @@
         }
         
         @media (max-width: 768px) {
+            body {
+                font-size: 10px;
+                padding: 0;
+            }
+            
             .arcade-cabinet {
                 width: 100vw;
                 height: 100vh;
                 border-radius: 0;
                 border: none;
+                margin: 0;
             }
             
             .screen-bezel {
-                top: 40px;
-                left: 20px;
-                right: 20px;
-                bottom: 120px;
+                top: 30px;
+                left: 10px;
+                right: 10px;
+                bottom: 100px;
             }
             
             .control-panel {
-                height: 120px;
-                padding: 0 20px;
+                height: 100px;
+                padding: 0 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
             }
             
             .arcade-button {
-                width: 65px;
-                height: 65px;
-                font-size: 8px;
+                width: clamp(55px, 12vw, 75px);
+                height: clamp(55px, 12vw, 75px);
+                font-size: clamp(6px, 2vw, 10px);
+                min-height: 44px;
+                touch-action: manipulation;
             }
             
             .arcade-header {
-                font-size: 10px;
-                padding: 8px 20px;
+                font-size: clamp(8px, 2.5vw, 12px);
+                padding: 6px 15px;
+                height: 30px;
             }
+            
+            .stats {
+                flex-wrap: wrap;
+                gap: 8px;
+                justify-content: center;
+            }
+            
+            .stat {
+                font-size: clamp(6px, 2vw, 10px);
+                padding: 4px 8px;
+                min-width: 60px;
+            }
+            
+            .game-canvas {
+                touch-action: none;
+                user-select: none;
+                cursor: pointer;
+            }
+            
+            .game-canvas:active {
+                filter: brightness(1.1);
+            }
+            
+        }
+
+        @media (max-width: 480px) {
+            .screen-bezel {
+                top: 25px;
+                left: 5px;
+                right: 5px;
+                bottom: 85px;
+            }
+            
+            .control-panel {
+                height: 85px;
+                padding: 0 10px;
+                gap: 8px;
+            }
+            
+            .arcade-button {
+                width: clamp(50px, 15vw, 65px);
+                height: clamp(50px, 15vw, 65px);
+                font-size: clamp(5px, 2.5vw, 8px);
+            }
+            
+            .arcade-header {
+                font-size: clamp(7px, 3vw, 10px);
+                padding: 4px 10px;
+                height: 25px;
+            }
+            
+            .stat {
+                font-size: clamp(5px, 2.5vw, 8px);
+                padding: 3px 6px;
+                min-width: 50px;
+            }
+            
+            .stats {
+                gap: 5px;
+            }
+        }
+
+        /* Touch-friendly enhancements */
+        @media (hover: none) and (pointer: coarse) {
+            .arcade-button:active {
+                transform: scale(0.9);
+                box-shadow: 
+                    inset 0 5px 10px rgba(0, 0, 0, 0.5),
+                    0 0 10px var(--button-glow);
+            }
+            
+            .game-canvas {
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
         }
     </style>
 </head>
@@ -1210,10 +1302,30 @@
             }
         });
         
-        // Touch controls
+        // Enhanced touch controls
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             jump();
+        });
+        
+        // Click controls for mouse/cursor
+        canvas.addEventListener('click', (e) => {
+            e.preventDefault();
+            jump();
+        });
+        
+        // Prevent scrolling and zooming on touch devices
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        });
+        
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+        });
+        
+        // Handle multiple touches
+        canvas.addEventListener('touchcancel', (e) => {
+            e.preventDefault();
         });
         
         function jump() {

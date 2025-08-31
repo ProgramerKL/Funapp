@@ -4,7 +4,11 @@
       "Bash(sed:*)",
       "Bash(start:*)",
       "Bash(git add:*)",
-      "Read(C:\\Users\\kylel\\OneDrive\\Pictures\\Screenshots/**)"
+      "Read(C:\\Users\\kylel\\OneDrive\\Pictures\\Screenshots/**)",
+      "Bash(git rm:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
