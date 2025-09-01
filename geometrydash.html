@@ -756,6 +756,9 @@
                     <div>HIGH: <span id="highScore">000000</span></div>
                     <div>LIVES: <span id="lives">001</span></div>
                 </div>
+                <div class="score-section">
+                    <div>UNIQUE: <span id="visitorCount">0001</span></div>
+                </div>
             </div>
             
             <div class="level-indicator">
@@ -1066,7 +1069,8 @@
             glowIntensity: 0,
             jumpCount: 0,
             maxJumps: 3,
-            alive: true // Track if player is alive
+            alive: true, // Track if player is alive
+            launchCooldown: 0 // Prevent multiple launch activations
         };
         
         const obstacles = [];
@@ -1552,6 +1556,11 @@
                 player.glowIntensity -= 0.05;
             }
             
+            // Countdown launch cooldown
+            if (player.launchCooldown > 0) {
+                player.launchCooldown--;
+            }
+            
             // Enhanced sprite animation
             player.spriteFrame += 0.3;
             
@@ -1642,7 +1651,7 @@
                         color: '#00ffff',
                         glowColor: '#80ffff',
                         glowIntensity: Math.sin(frameCounter * 0.1) * 0.3 + 0.7,
-                        launchPower: 15,
+                        launchPower: 12,
                         horizontalBoost: 0,
                         used: false
                     });
@@ -1765,52 +1774,28 @@
                         }
                     } else if (obstacles[i].type === 'launchBall') {
                         // Glowing launch balls - power-up interaction
-                        if (!obstacles[i].used) {
+                        if (!obstacles[i].used && player.launchCooldown <= 0) {
                             console.log('Player activated launch ball!');
+                            console.log('Game speed BEFORE launch ball:', gameState.speed);
                             obstacles[i].used = true;
                             
-                            // Calculate landing zone based on launch physics
-                            const launchVY = obstacles[i].launchPower;
-                            const launchVX = obstacles[i].horizontalBoost;
-                            const gravity = 0.8;
-                            
-                            // Estimate time to land and horizontal distance
-                            const timeToLand = (2 * launchVY) / gravity;
-                            const landingDistance = launchVX * timeToLand;
-                            const landingX = player.x + landingDistance;
-                            
-                            // Clear dangerous obstacles in landing zone (±300px buffer for much larger safe zone)
-                            const landingBuffer = 300;
-                            for (let j = obstacles.length - 1; j >= 0; j--) {
-                                if (j !== i && // Don't remove the launch ball itself
-                                    obstacles[j].x > landingX - landingBuffer &&
-                                    obstacles[j].x < landingX + landingBuffer &&
-                                    (obstacles[j].type === 'spike' || obstacles[j].type === 'block' || obstacles[j].type === 'oscillator')) {
-                                    
-                                    // Create safe landing particles where obstacle was removed
-                                    createAdvancedParticles(obstacles[j].x + obstacles[j].width/2, obstacles[j].y + obstacles[j].height/2, '#00ff00', 3);
-                                    obstacles.splice(j, 1);
-                                    console.log('Cleared dangerous obstacle for safe landing');
-                                }
-                            }
-                            
-                            // Launch player with massive boost
-                            player.vY = -launchVY;
-                            player.vX = launchVX;
+                            // Simple launch - just vertical boost, no complex physics
+                            player.vY = -obstacles[i].launchPower;
+                            player.vX = 0; // No horizontal movement at all
                             player.jumpCount = 0; // Reset all jumps
                             player.grounded = false;
                             player.glowIntensity = 1;
-                            
-                            // Create spectacular launch particles
-                            createAdvancedParticles(obstacles[i].x + obstacles[i].width/2, obstacles[i].y + obstacles[i].height/2, obstacles[i].color, 5);
-                            createExplosion(obstacles[i].x + obstacles[i].width/2, obstacles[i].y + obstacles[i].height/2, obstacles[i].glowColor);
+                            player.launchCooldown = 60; // 1 second cooldown at 60fps
                             
                             // Change ball appearance after use
                             obstacles[i].color = '#444444';
                             obstacles[i].glowColor = '#666666';
                             obstacles[i].glowIntensity = 0.1;
                             
-                            // Score bonus removed to prevent speed issues
+                            
+                            console.log('Game speed AFTER launch ball:', gameState.speed);
+                            console.log('Player vX after launch:', player.vX);
+                            console.log('Player vY after launch:', player.vY);
                         }
                     } else if (obstacles[i].type === 'oscillator') {
                         // Purple oscillators: bounce on top, deadly on sides
@@ -2569,8 +2554,36 @@
             }
         }
         
+        // Unique Visitor Counter System
+        function initializeVisitorCounter() {
+            // Check if this device has visited before
+            const hasVisited = localStorage.getItem('geometryDashHasVisited');
+            
+            // Get current unique visitor count
+            let visitorCount = parseInt(localStorage.getItem('geometryDashUniqueVisitorCount') || '0');
+            
+            // Only increment if this is a first-time visitor on this device
+            if (!hasVisited) {
+                visitorCount++;
+                
+                // Mark this device as having visited
+                localStorage.setItem('geometryDashHasVisited', 'true');
+                
+                // Store the new count
+                localStorage.setItem('geometryDashUniqueVisitorCount', visitorCount.toString());
+                
+                console.log('New unique visitor! Count now:', visitorCount);
+            } else {
+                console.log('Returning visitor. Count remains:', visitorCount);
+            }
+            
+            // Update the display
+            document.getElementById('visitorCount').textContent = visitorCount.toString().padStart(4, '0');
+        }
+
         // Initialize
         loadGameData();
+        initializeVisitorCounter();
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
         
