@@ -457,7 +457,7 @@
     <div class="main-container">
         <!-- Portfolio Section -->
         <div class="section">
-            <h1 class="section-title">Kyle Liu</h1>
+            <h1 class="section-title">Kyle Liu <span id="visitorCounter" style="font-size: 1.2rem; color: #718096; font-weight: normal;">(Visitors: <span id="uniqueVisitorCount">0001</span>)</span></h1>
             <p class="section-subtitle">Creative Developer & Game Designer</p>
             
             <div class="portfolio-grid">
@@ -861,6 +861,36 @@
                 closeGame();
             }
         });
+
+        // Unique Visitor Counter System for Homepage
+        function initializeHomepageVisitorCounter() {
+            // Check if this device has visited the homepage before
+            const hasVisitedHomepage = localStorage.getItem('homepageHasVisited');
+            
+            // Get current unique visitor count for homepage
+            let visitorCount = parseInt(localStorage.getItem('homepageUniqueVisitorCount') || '0');
+            
+            // Only increment if this is a first-time visitor on this device
+            if (!hasVisitedHomepage) {
+                visitorCount++;
+                
+                // Mark this device as having visited the homepage
+                localStorage.setItem('homepageHasVisited', 'true');
+                
+                // Store the new count
+                localStorage.setItem('homepageUniqueVisitorCount', visitorCount.toString());
+                
+                console.log('New unique homepage visitor! Count now:', visitorCount);
+            } else {
+                console.log('Returning homepage visitor. Count remains:', visitorCount);
+            }
+            
+            // Update the display
+            document.getElementById('uniqueVisitorCount').textContent = visitorCount.toString().padStart(4, '0');
+        }
+
+        // Initialize visitor counter immediately
+        initializeHomepageVisitorCounter();
     </script>
 </body>
 </html>
