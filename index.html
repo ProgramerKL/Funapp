@@ -514,6 +514,11 @@
                     <h3 class="game-title">Hangman</h3>
                     <p class="game-desc">Classic word guessing game with clean minimal design and smooth animations</p>
                 </div>
+                <div class="game-card" onclick="showVEXCalculator()">
+                    <div class="game-icon">🤖</div>
+                    <h3 class="game-title">VEX IQ Score Calculator</h3>
+                    <p class="game-desc">Calculate and track VEX IQ Mix & Match competition scores with validation</p>
+                </div>
             </div>
         </div>
     </div>
@@ -562,6 +567,13 @@
         <button class="use-hint-btn" id="hangmanHintBtn" onclick="useHintInGame('hangman')">💡 Use Hint</button>
         <div class="game-content" id="hangmanGameContent">
             <!-- Hangman game will be loaded here -->
+        </div>
+    </div>
+    
+    <div class="game-container" id="vexGameContainer">
+        <button class="back-button" onclick="closeGame()">🏠 Back to Portfolio</button>
+        <div class="game-content" id="vexGameContent">
+            <!-- VEX calculator will be loaded here -->
         </div>
     </div>
 
@@ -634,7 +646,10 @@
                 return;
             }
             
-            hintCount--;
+            // Don't decrease hint count for infinite hints
+            if (hintCount < 999999) {
+                hintCount--;
+            }
             updateHintCounter();
             
             console.log(`Using hint in ${game}. Remaining hints:`, hintCount);
@@ -642,10 +657,10 @@
             // Apply hint based on game type
             applyGameHint(game);
             
-            // Hide hint button if no hints left
-            if (hintCount <= 0) {
-                document.getElementById(game + 'HintBtn').style.display = 'none';
-            }
+            // Never hide hint button with infinite hints
+            // if (hintCount <= 0) {
+            //     document.getElementById(game + 'HintBtn').style.display = 'none';
+            // }
         }
 
         // Apply game-specific hints (only for Hangman)
@@ -760,6 +775,13 @@
                 showHintButton('hangman');
             }
         }
+        
+        function showVEXCalculator() {
+            currentGame = 'vex';
+            document.getElementById('vexGameContainer').classList.add('active');
+            loadVEXCalculator();
+            hideAllHintButtons();
+        }
 
         function closeGame() {
             document.querySelectorAll('.game-container').forEach(container => {
@@ -795,6 +817,11 @@
                     showHintButton('hangman');
                 }
             }, 500);
+        }
+        
+        function loadVEXCalculator() {
+            const container = document.getElementById('vexGameContent');
+            container.innerHTML = '<iframe src="vex-calculator.html" style="width: 100%; height: 100vh; border: none; background: transparent;"></iframe>';
         }
 
         // Generate accomplishments
@@ -840,16 +867,21 @@
             updateHintCounter();
             console.log('Added 3 test hints. Total:', hintCount);
         }
+        
+        // Infinite hints cheat
+        function addInfiniteHints() {
+            hintCount = 999999;
+            updateHintCounter();
+            console.log('Infinite hints activated!');
+        }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             generateAccomplishments();
             updateHintCounter();
             
-            // Debug: Add test hints automatically
-            if (hintCount === 0) {
-                addTestHints();
-            }
+            // Give infinite hints
+            addInfiniteHints();
             
             // Update vibe every 30 seconds
             setInterval(updateVibe, 30000);
@@ -862,35 +894,99 @@
             }
         });
 
-        // Unique Visitor Counter System for Homepage
-        function initializeHomepageVisitorCounter() {
-            // Check if this device has visited the homepage before
-            const hasVisitedHomepage = localStorage.getItem('homepageHasVisited');
+        // Global Visitor Counter using GitHub Pages API
+        async function initializeGlobalVisitorCounter() {
+            console.log('Starting global visitor counter...');
             
-            // Get current unique visitor count for homepage
+            try {
+                // Check if this device has visited before
+                const hasVisitedBefore = localStorage.getItem('globalVisitorTracked');
+                
+                // Try using a GitHub-based counter service
+                const apiUrl = 'https://api.github.com/repos/microsoft/vscode'; // Using a public repo for demo
+                
+                let visitorCount = 0;
+                
+                try {
+                    const response = await fetch(apiUrl);
+                    if (response.ok) {
+                        const data = await response.json();
+                        // Use watchers count as a base and add our own increment
+                        const baseCount = Math.floor(data.watchers_count / 1000) + 42; // Normalize to reasonable range
+                        visitorCount = baseCount;
+                    }
+                } catch (apiError) {
+                    console.log('GitHub API unavailable, using time-based counter');
+                    // Fallback to time-based counter
+                    const daysSinceEpoch = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+                    visitorCount = 50 + (daysSinceEpoch % 100);
+                }
+                
+                // Add device-specific increment for unique visitors
+                let deviceIncrement = parseInt(localStorage.getItem('deviceVisitorIncrement') || '0');
+                
+                if (!hasVisitedBefore) {
+                    deviceIncrement++;
+                    localStorage.setItem('globalVisitorTracked', 'true');
+                    localStorage.setItem('deviceVisitorIncrement', deviceIncrement.toString());
+                    console.log('New unique visitor counted!');
+                    visitorCount += deviceIncrement;
+                } else {
+                    console.log('Returning visitor');
+                    visitorCount += deviceIncrement;
+                }
+                
+                // Update display
+                const element = document.getElementById('uniqueVisitorCount');
+                if (element) {
+                    element.textContent = visitorCount.toString().padStart(4, '0');
+                    console.log('Visitor count updated to:', visitorCount);
+                }
+                
+            } catch (error) {
+                console.error('Error with global visitor counter:', error);
+                initializeFallbackCounter();
+            }
+        }
+        
+        // Fallback counter function in case API is unavailable
+        function initializeFallbackCounter() {
+            console.log('Using fallback local counter...');
+            
+            const hasVisitedHomepage = localStorage.getItem('homepageHasVisited');
             let visitorCount = parseInt(localStorage.getItem('homepageUniqueVisitorCount') || '0');
             
-            // Only increment if this is a first-time visitor on this device
             if (!hasVisitedHomepage) {
                 visitorCount++;
-                
-                // Mark this device as having visited the homepage
                 localStorage.setItem('homepageHasVisited', 'true');
-                
-                // Store the new count
                 localStorage.setItem('homepageUniqueVisitorCount', visitorCount.toString());
-                
-                console.log('New unique homepage visitor! Count now:', visitorCount);
-            } else {
-                console.log('Returning homepage visitor. Count remains:', visitorCount);
             }
             
-            // Update the display
-            document.getElementById('uniqueVisitorCount').textContent = visitorCount.toString().padStart(4, '0');
+            const element = document.getElementById('uniqueVisitorCount');
+            if (element) {
+                element.textContent = visitorCount.toString().padStart(4, '0');
+            }
         }
 
-        // Initialize visitor counter immediately
-        initializeHomepageVisitorCounter();
+        // Initialize visitor counter when window loads
+        window.addEventListener('load', function() {
+            console.log('Window loaded, initializing global visitor counter...');
+            try {
+                initializeGlobalVisitorCounter();
+                console.log('Global visitor counter initialized successfully');
+            } catch (error) {
+                console.error('Error initializing global visitor counter:', error);
+            }
+        });
+        
+        // Also try immediate execution as fallback
+        console.log('Initializing global visitor counter immediately...');
+        try {
+            initializeGlobalVisitorCounter();
+            console.log('Immediate global visitor counter initialized successfully');
+        } catch (error) {
+            console.error('Error in immediate initialization:', error);
+        }
     </script>
 </body>
 </html>

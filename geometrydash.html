@@ -908,8 +908,8 @@
             isPlaying: false,
             score: 0,
             distance: 0,
-            speed: 7.392,
-            baseSpeed: 7.392,
+            speed: 6.65,  // 10% slower than original (7.392 * 0.9 = 6.65)
+            baseSpeed: 6.65,  // 10% slower than original (7.392 * 0.9 = 6.65)
             level: 1,
             lives: 1,
             soundEnabled: true,
@@ -917,7 +917,7 @@
             totalCoins: 0, // Persistent coins across rounds
             combo: 0,
             jumpPower: 13, // Faster, higher jump for quick movement
-            horizontalJumpBoost: 1.2, // Minimal horizontal boost
+            horizontalJumpBoost: 1.32, // 10% longer horizontal jump (1.2 * 1.1 = 1.32)
             gravityStrength: 1.092, // 5% faster falling
             selectedAvatar: 'default',
             purchasedAvatars: ['default'] // Avatars bought with coins
@@ -1070,7 +1070,10 @@
             jumpCount: 0,
             maxJumps: 3,
             alive: true, // Track if player is alive
-            launchCooldown: 0 // Prevent multiple launch activations
+            launchCooldown: 0, // Prevent multiple launch activations
+            isFlying: false, // Flying rocket mode
+            flyingTimer: 0, // Duration in flying mode
+            portalCooldown: 0 // Prevent immediate re-entry
         };
         
         const obstacles = [];
@@ -1335,15 +1338,22 @@
         function jump() {
             if (!gameState.isPlaying) return;
             
-            // Can only jump if: 1) Have jumps remaining  
-            if (player.jumpCount < player.maxJumps) {
-                player.vY = -gameState.jumpPower; // Enhanced jump power
-                player.vX = gameState.horizontalJumpBoost; // Add horizontal momentum
-                player.grounded = false;
-                player.jumpCount++;
-                player.glowIntensity = 1;
+            if (player.isFlying) {
+                // Flying mode: jump makes player fly upward
+                player.vY = -4; // Fly upward
                 playJumpSound();
-                createAdvancedParticles(player.x + player.size/2, player.y + player.size, '#00ff88', 1);
+                createAdvancedParticles(player.x + player.size/2, player.y, '#ff00ff', 2);
+            } else {
+                // Normal mode jumping
+                if (player.jumpCount < player.maxJumps) {
+                    player.vY = -gameState.jumpPower; // Enhanced jump power
+                    player.vX = gameState.horizontalJumpBoost; // Add horizontal momentum
+                    player.grounded = false;
+                    player.jumpCount++;
+                    player.glowIntensity = 1;
+                    playJumpSound();
+                    createAdvancedParticles(player.x + player.size/2, player.y + player.size, '#00ff88', 1);
+                }
             }
         }
         
@@ -1504,8 +1514,55 @@
             
             updateUI();
             
-            // Enhanced player physics with horizontal movement
-            if (!player.grounded) {
+            // Portal spawning every 30 meters
+            const portalDistance = 30;
+            const currentPortalCheck = Math.floor(gameState.distance / portalDistance);
+            const shouldSpawnPortal = (gameState.distance >= portalDistance && 
+                                     gameState.distance % portalDistance < 1 && 
+                                     !player.isFlying && 
+                                     player.portalCooldown <= 0);
+            
+            if (shouldSpawnPortal) {
+                obstacles.push({
+                    x: canvas.width,
+                    y: canvas.height - 100,
+                    width: 30,
+                    height: 50,
+                    type: 'portal',
+                    color: '#ff00ff',
+                    glowColor: '#ff00ff',
+                    glowIntensity: 1,
+                    animationOffset: Math.random() * Math.PI * 2
+                });
+            }
+            
+            // Enhanced player physics with flying mode
+            if (player.isFlying) {
+                // Flying rocket mode physics
+                player.flyingTimer++;
+                player.vY += 0.3; // Gentle gravity in flying mode
+                player.y += player.vY;
+                
+                // Keep player within bounds
+                if (player.y < 20) {
+                    player.y = 20;
+                    player.vY = 0;
+                }
+                if (player.y >= canvas.height - 50) {
+                    player.y = canvas.height - 50;
+                    player.vY = 0;
+                }
+                
+                // Exit flying mode after 10 seconds
+                if (player.flyingTimer > 600) { // 10 seconds at 60fps
+                    player.isFlying = false;
+                    player.flyingTimer = 0;
+                    player.portalCooldown = 120; // 2 second cooldown
+                    player.y = canvas.height - 85;
+                    player.grounded = true;
+                    player.vY = 0;
+                }
+            } else if (!player.grounded) {
                 player.vY += gameState.gravityStrength;
                 player.y += player.vY;
                 
@@ -1526,6 +1583,11 @@
                     // Landing particles
                     createAdvancedParticles(player.x + player.size/2, player.y + player.size, '#00ff44', 1);
                 }
+            }
+            
+            // Update cooldowns
+            if (player.portalCooldown > 0) {
+                player.portalCooldown--;
             }
             
             // Keep player in bounds
@@ -1603,6 +1665,20 @@
                     
                     obstacles.push(newObstacle);
                 }
+            }
+            
+            // Flying mode spike obstacles
+            if (player.isFlying && Math.random() < 0.03) {
+                obstacles.push({
+                    x: canvas.width,
+                    y: Math.random() * (canvas.height - 100) + 50,
+                    width: 20,
+                    height: 15,
+                    type: 'flyingSpike',
+                    color: '#ff4080',
+                    glowColor: '#ff4080',
+                    glowIntensity: 0.8
+                });
             }
             
             // Enhanced obstacle generation with variety
@@ -1761,7 +1837,19 @@
                     player.y + player.size > obstacles[i].y) {
                     console.log('Collision detected with obstacle type:', obstacles[i].type);
                     
-                    if (obstacles[i].type === 'platform') {
+                    if (obstacles[i].type === 'portal') {
+                        // Portal collision - enter flying mode
+                        if (!player.isFlying) {
+                            player.isFlying = true;
+                            player.flyingTimer = 0;
+                            player.grounded = false;
+                            player.vY = -2; // Initial upward momentum
+                            createAdvancedParticles(player.x + player.size/2, player.y + player.size/2, '#ff00ff', 5);
+                            obstacles.splice(i, 1); // Remove portal after use
+                            i--;
+                            continue;
+                        }
+                    } else if (obstacles[i].type === 'platform') {
                         // Platform collision - only bounce, don't stick to platform
                         if (player.vY >= 0 && player.y + player.size/2 < obstacles[i].y + obstacles[i].height/2) {
                             // Bounce off platform
@@ -1811,6 +1899,14 @@
                             // Deadly side collision
                             console.log('Player hit oscillator side - triggering explosion');
                             createExplosion(player.x + player.size/2, player.y + player.size/2, player.color);
+                            gameOver();
+                            return;
+                        }
+                    } else if (obstacles[i].type === 'flyingSpike') {
+                        // Flying spike collision - death in flying mode
+                        if (player.isFlying) {
+                            console.log('Player hit flying spike - triggering explosion');
+                            createExplosion(player.x + player.size/2, player.y + player.size/2, '#ff00ff');
                             gameOver();
                             return;
                         }
@@ -1961,15 +2057,25 @@
                 console.log('render() called, particles.length:', particles.length, 'isPlaying:', gameState.isPlaying);
             }
             
-            // Enhanced background with animated gradient
+            // Enhanced background with animated gradient - different for flying mode
             const time = frameCounter * 0.01;
             const gradient = ctx.createRadialGradient(
                 canvas.width/2, canvas.height/2, 0,
                 canvas.width/2, canvas.height/2, Math.max(canvas.width, canvas.height)
             );
-            gradient.addColorStop(0, `hsl(${180 + Math.sin(time) * 20}, 100%, 3%)`);
-            gradient.addColorStop(0.5, `hsl(${200 + Math.cos(time * 0.7) * 15}, 100%, 2%)`);
-            gradient.addColorStop(1, '#000000');
+            
+            if (player.isFlying) {
+                // Different dimension - purple/magenta space
+                gradient.addColorStop(0, `hsl(${280 + Math.sin(time * 2) * 30}, 100%, 8%)`);
+                gradient.addColorStop(0.5, `hsl(${300 + Math.cos(time * 1.5) * 25}, 100%, 5%)`);
+                gradient.addColorStop(1, '#1a0a1a');
+            } else {
+                // Normal dimension
+                gradient.addColorStop(0, `hsl(${180 + Math.sin(time) * 20}, 100%, 3%)`);
+                gradient.addColorStop(0.5, `hsl(${200 + Math.cos(time * 0.7) * 15}, 100%, 2%)`);
+                gradient.addColorStop(1, '#000000');
+            }
+            
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
@@ -2016,18 +2122,46 @@
             
             // Removed trail effect for maximum performance
             
-            // Ultra-simple player rendering - only render if alive
+            // Player rendering - different for flying mode
             if (player.alive) {
-                ctx.fillStyle = avatars[gameState.selectedAvatar].color;
-                ctx.fillRect(player.x, player.y, player.size, player.size);
-                
-                // Player details with animation
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = '#ffffff';
-                const eyeOffset = Math.sin(player.spriteFrame) * 2;
-                ctx.fillRect(player.x + 3 + eyeOffset, player.y + 3, 4, 4);
-                ctx.fillRect(player.x + 11 + eyeOffset, player.y + 3, 4, 4);
-                ctx.fillRect(player.x + 5, player.y + 12, 8, 3);
+                if (player.isFlying) {
+                    // Flying rocket mode rendering
+                    ctx.save();
+                    ctx.shadowColor = '#ff00ff';
+                    ctx.shadowBlur = 10;
+                    
+                    // Rocket body
+                    ctx.fillStyle = '#ff00ff';
+                    ctx.fillRect(player.x, player.y + 5, player.size, player.size - 10);
+                    
+                    // Rocket nose cone
+                    ctx.beginPath();
+                    ctx.moveTo(player.x + player.size/2, player.y);
+                    ctx.lineTo(player.x, player.y + 5);
+                    ctx.lineTo(player.x + player.size, player.y + 5);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // Rocket flames
+                    ctx.fillStyle = '#ff4400';
+                    const flameLength = Math.sin(frameCounter * 0.5) * 8 + 12;
+                    ctx.fillRect(player.x + 2, player.y + player.size - 5, 4, flameLength);
+                    ctx.fillRect(player.x + player.size - 6, player.y + player.size - 5, 4, flameLength);
+                    
+                    ctx.restore();
+                } else {
+                    // Normal cube rendering
+                    ctx.fillStyle = avatars[gameState.selectedAvatar].color;
+                    ctx.fillRect(player.x, player.y, player.size, player.size);
+                    
+                    // Player details with animation
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = '#ffffff';
+                    const eyeOffset = Math.sin(player.spriteFrame) * 2;
+                    ctx.fillRect(player.x + 3 + eyeOffset, player.y + 3, 4, 4);
+                    ctx.fillRect(player.x + 11 + eyeOffset, player.y + 3, 4, 4);
+                    ctx.fillRect(player.x + 5, player.y + 12, 8, 3);
+                }
             }
             
             // Ultra-simple obstacle rendering - no shadows
@@ -2080,6 +2214,48 @@
                     ctx.arc(obstacle.x + obstacle.width/2, obstacle.y + obstacle.height/2, obstacle.width/6, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.globalAlpha = 1;
+                    
+                    ctx.restore();
+                } else if (obstacle.type === 'portal') {
+                    // Portal rendering - swirling magic portal
+                    ctx.save();
+                    const time = frameCounter * 0.1 + obstacle.animationOffset;
+                    
+                    // Portal glow
+                    ctx.shadowColor = obstacle.glowColor;
+                    ctx.shadowBlur = 15;
+                    
+                    // Portal outer ring
+                    ctx.strokeStyle = obstacle.glowColor;
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(obstacle.x + obstacle.width/2, obstacle.y + obstacle.height/2, 
+                           obstacle.width/2, time, time + Math.PI * 1.5);
+                    ctx.stroke();
+                    
+                    // Portal inner swirl
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(obstacle.x + obstacle.width/2, obstacle.y + obstacle.height/2, 
+                           obstacle.width/3, -time, -time + Math.PI);
+                    ctx.stroke();
+                    
+                    ctx.restore();
+                } else if (obstacle.type === 'flyingSpike') {
+                    // Flying spike - diamond shape
+                    ctx.save();
+                    ctx.shadowColor = obstacle.glowColor;
+                    ctx.shadowBlur = 8;
+                    
+                    ctx.fillStyle = obstacle.color;
+                    ctx.beginPath();
+                    ctx.moveTo(obstacle.x + obstacle.width/2, obstacle.y); // top
+                    ctx.lineTo(obstacle.x + obstacle.width, obstacle.y + obstacle.height/2); // right
+                    ctx.lineTo(obstacle.x + obstacle.width/2, obstacle.y + obstacle.height); // bottom
+                    ctx.lineTo(obstacle.x, obstacle.y + obstacle.height/2); // left
+                    ctx.closePath();
+                    ctx.fill();
                     
                     ctx.restore();
                 } else {

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VEX IQ Mix & Match Score Calculator</title>
+    <link rel="stylesheet" href="vex-styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>VEX IQ Mix & Match Score Calculator</h1>
+            <p class="version">Version 1.0 | 2024-2025 Season</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <h2>Scoring Elements</h2>
+                
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label for="connectedPins">
+                            Connected Pins
+                            <span class="points-label">(1 pt each)</span>
+                        </label>
+                        <input type="number" id="connectedPins" min="0" max="35" value="0">
+                        <span class="input-hint">Max: 35</span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="connectedBeams">
+                            Connected Beams
+                            <span class="points-label">(10 pts each)</span>
+                        </label>
+                        <input type="number" id="connectedBeams" min="0" max="7" value="0">
+                        <span class="input-hint">Max: 7</span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="twoColorStacks">
+                            2-Color Stacks
+                            <span class="points-label">(5 pts bonus each)</span>
+                        </label>
+                        <input type="number" id="twoColorStacks" min="0" max="6" value="0">
+                        <span class="input-hint">Max: 6</span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="threeColorStacks">
+                            3-Color Stacks
+                            <span class="points-label">(15 pts bonus each)</span>
+                        </label>
+                        <input type="number" id="threeColorStacks" min="0" max="8" value="0">
+                        <span class="input-hint">Max: 8</span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="matchingGoals">
+                            Matching Goal Bonus
+                            <span class="points-label">(10 pts bonus each)</span>
+                        </label>
+                        <input type="number" id="matchingGoals" min="0" max="8" value="0">
+                        <span class="input-hint">Stacks in matching colored goals</span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="stacksOnStandoff">
+                            Stack Placed on Standoff Goal
+                            <span class="points-label">(10 pts bonus each)</span>
+                        </label>
+                        <input type="number" id="stacksOnStandoff" min="0" max="3" value="0">
+                        <span class="input-hint">Max: 3 (only 3 standoff goals)</span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="clearedPins">
+                            Cleared Starting Pins
+                            <span class="points-label">(2 pts each)</span>
+                        </label>
+                        <input type="number" id="clearedPins" min="0" max="35" value="0">
+                        <span class="input-hint">Max: 35</span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="robotsInContact">
+                            Robots in Contact with Scoring Objects
+                            <span class="points-label">(2 pts each)</span>
+                        </label>
+                        <input type="number" id="robotsInContact" min="0" max="2" value="0">
+                        <span class="input-hint">At end of match (Max: 2)</span>
+                    </div>
+                </div>
+
+                <div class="validation-message" id="validationMessage"></div>
+            </section>
+
+            <section class="score-section">
+                <div class="total-score">
+                    <h2>Total Score</h2>
+                    <div class="score-display" id="totalScore">0</div>
+                    <div class="score-label">Points</div>
+                </div>
+
+                <div class="score-breakdown">
+                    <h3>Score Breakdown</h3>
+                    <div id="scoreBreakdown" class="breakdown-list"></div>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="resetBtn" class="btn btn-secondary">Reset All</button>
+                    <button id="addToAverageBtn" class="btn btn-secondary">Add to Average</button>
+                    <button id="shareBtn" class="btn btn-primary">Share Score</button>
+                </div>
+            </section>
+
+            <section class="preset-section">
+                <h3>Quick Presets</h3>
+                <div class="preset-buttons">
+                    <button class="preset-btn" data-preset="average">
+                        Average Score
+                        <span id="averageDisplay" class="average-badge"></span>
+                    </button>
+                    <button class="preset-btn" data-preset="maximum">Theoretical Max</button>
+                    <button id="clearHistoryBtn" class="preset-btn" style="background: #dc3545; color: white; border-color: #dc3545;">Clear History</button>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 VEX IQ Score Calculator | Not affiliated with VEX Robotics</p>
+            <p class="footer-links">
+                <a href="#" id="helpLink">Help</a> | 
+                <a href="#" id="aboutLink">About</a> | 
+                <a href="https://www.vexrobotics.com/iq/competition/viqc-current-game" target="_blank">Official Rules</a>
+            </p>
+        </footer>
+    </div>
+
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Share Your Score</h3>
+            <p>Copy this link to share your scoring scenario:</p>
+            <div class="share-link-container">
+                <input type="text" id="shareLink" readonly>
+                <button id="copyLinkBtn" class="btn btn-small">Copy</button>
+            </div>
+            <div id="copyMessage" class="copy-message"></div>
+        </div>
+    </div>
+
+    <script src="vex-script.js"></script>
+</body>
+</html>
