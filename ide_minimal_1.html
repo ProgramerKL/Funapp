@@ -476,7 +476,33 @@
             hintsUsedThisGame = 0;
             
             // Expanded word list with various difficulty levels
-            const words = [
+            const brainrotWords = [
+                // Core brainrot words (internet slang)
+                'SIGMA', 'RIZZ', 'GYATT', 'SKIBIDI', 'BUSSIN', 'SLAY', 'BASED', 'CRINGE',
+                'SHEESH', 'OHIO', 'DRIP', 'VIBE', 'COPE', 'CHAD', 'SIMP', 'YEET',
+                'BRUH', 'GOAT', 'RATIO', 'SLAPS', 'FACTS', 'BANGER',
+                'MEWING', 'MOGGING', 'DELULU', 'FANUM', 'GRIMACE', 'SUSSY', 'BAKA', 'AMOGUS',
+                'NOOB', 'CLOUT', 'GUCCI', 'FLEEK', 'WOKE', 'STAN', 'TOXIC', 'VIBING',
+                'LOWKEY', 'HIGHKEY', 'PERIODT', 'CHEUGY', 'BUSSING', 'RIZLER', 'GYATTED',
+                
+                // More brainrot additions
+                'ALPHA', 'BETA', 'OMEGA', 'LIGMA', 'SUGMA', 'BOFA', 'DEEZ', 'NUTS',
+                'ZAMN', 'SHEEESH', 'BING', 'CHILLING', 'SOCIAL', 'CREDIT', 'SENPAI', 'KAWAII',
+                'UWUWU', 'OWOWO', 'NOTICE', 'SEMPAI', 'YAMETE', 'NANI', 'OMAE', 'SHINDEIRU',
+                'BONK', 'HORNY', 'JAIL', 'TOUCH', 'GRASS', 'MAIDENLESS', 'ZESTY',
+                'GOOFY', 'AHHHH', 'AUGHHH', 'GRIDDY', 'FORTNITE', 'MINECRAFT', 'ROBLOX', 'VALORANT',
+                'GAMER', 'GAMING', 'SPEEDRUN', 'GLITCH', 'EXPLOIT', 'HACKER', 'CHEATER', 'TRYHARD',
+                'SWEAT', 'SWEATY', 'CLUTCH', 'THREW', 'INTING', 'FEEDING', 'TILTED',
+                'AMOGUS', 'IMPOSTER', 'SUSSY', 'BAKA', 'VENTED',
+                'EMERGENCY', 'MEETING', 'SABOTAGE', 'CREWMATE', 'ELECTRICAL', 'MEDBAY', 'CAFETERIA',
+                'LOOKSMAXXING', 'JAWLINE', 'CANTHAL', 'TILT', 'HUNTER', 'EYES', 'HOLLOW', 'CHEEKS',
+                'EDGING', 'GOONING', 'LOCKED', 'RESPECT', 'DISRESPECT', 'VIOLATED', 'EMOTIONAL', 'DAMAGE',
+                'RAWDOGGING', 'ABSOLUTELY', 'DIABOLICAL', 'GENERATIONAL', 'FUMBLE', 'CRASHOUT', 'TWEAKING',
+                'MOTION', 'MOVEMENT', 'DIFFERENT', 'BREED', 'BUILT', 'MENACE', 'SOCIETY'
+            ];
+            
+            const regularWords = [
+                
                 // Easy (4-5 letters) - Concrete objects and animals
                 'APPLE', 'BEACH', 'CHAIR', 'EAGLE', 'FIELD', 'HORSE', 'JUICE', 'KNIFE',
                 'LIGHT', 'MUSIC', 'NIGHT', 'ORANGE', 'PAPER', 'QUEEN', 'RIVER', 'STONE', 'TIGER',
@@ -562,7 +588,17 @@
                 'PAINTING', 'SCULPTURE', 'DRAWING', 'WATERCOLOR', 'PORTRAIT', 'LANDSCAPE'
             ];
             
-            currentWord = words[Math.floor(Math.random() * words.length)];
+            // 50% chance to pick a brainrot word, 50% chance for regular word
+            let selectedWord;
+            if (Math.random() < 0.5) {
+                // Pick a brainrot word
+                selectedWord = brainrotWords[Math.floor(Math.random() * brainrotWords.length)];
+            } else {
+                // Pick a regular word
+                selectedWord = regularWords[Math.floor(Math.random() * regularWords.length)];
+            }
+            
+            currentWord = selectedWord;
             guessedLetters.clear();
             wrongGuesses = 0;
             
