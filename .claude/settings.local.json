@@ -8,7 +8,12 @@
       "Bash(git rm:*)",
       "Bash(find:*)",
       "Bash(grep:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Read(C:\\Users\\kylel\\OneDrive\\Pictures\\Screenshots/**)",
+      "Bash(open vex-calculator.html)",
+      "WebFetch(domain:www.dropbox.com)",
+      "WebFetch(domain:kb.roboticseducation.org)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []
