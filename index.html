@@ -519,6 +519,11 @@
                     <h3 class="game-title">VEX IQ Score Calculator</h3>
                     <p class="game-desc">Calculate and track VEX IQ Mix & Match competition scores with validation</p>
                 </div>
+                <div class="game-card" onclick="showPopTheLock()">
+                    <div class="game-icon">🔓</div>
+                    <h3 class="game-title">Pop the Lock</h3>
+                    <p class="game-desc">Precision timing game - tap when the marker aligns with the target zone</p>
+                </div>
             </div>
         </div>
     </div>
@@ -574,6 +579,13 @@
         <button class="back-button" onclick="closeGame()">🏠 Back to Portfolio</button>
         <div class="game-content" id="vexGameContent">
             <!-- VEX calculator will be loaded here -->
+        </div>
+    </div>
+
+    <div class="game-container" id="popLockGameContainer">
+        <button class="back-button" onclick="closeGame()">🏠 Back to Portfolio</button>
+        <div class="game-content" id="popLockGameContent">
+            <!-- Pop the Lock game will be loaded here -->
         </div>
     </div>
 
@@ -783,6 +795,13 @@
             hideAllHintButtons();
         }
 
+        function showPopTheLock() {
+            currentGame = 'poplock';
+            document.getElementById('popLockGameContainer').classList.add('active');
+            loadPopTheLockGame();
+            hideAllHintButtons();
+        }
+
         function closeGame() {
             document.querySelectorAll('.game-container').forEach(container => {
                 container.classList.remove('active');
@@ -822,6 +841,11 @@
         function loadVEXCalculator() {
             const container = document.getElementById('vexGameContent');
             container.innerHTML = '<iframe src="vex-calculator.html" style="width: 100%; height: 100vh; border: none; background: transparent;"></iframe>';
+        }
+
+        function loadPopTheLockGame() {
+            const container = document.getElementById('popLockGameContent');
+            container.innerHTML = '<iframe src=".superdesign/design_iterations/ide_gaming_dashboard_spam_resistant_1.html" style="width: 100%; height: 100vh; border: none; background: transparent;"></iframe>';
         }
 
         // Generate accomplishments

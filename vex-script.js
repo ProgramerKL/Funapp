@@ -59,13 +59,13 @@ class VEXScoreCalculator {
             maximum: {
                 connectedPins: 35, // Maximum pins (35 points)
                 connectedBeams: 7, // Maximum beams (70 points)
-                twoColorStacks: 4, // 4 two-color stacks (20 points)
-                threeColorStacks: 8, // 8 three-color stacks (120 points)
-                matchingGoals: 8, // 8 stacks in matching goals (80 points)
-                stacksOnStandoff: 3, // 3 stacks on standoff (30 points)
+                twoColorStacks: 0, // 0 two-color stacks (0 points)
+                threeColorStacks: 9, // 9 three-color stacks (135 points)
+                matchingGoals: 9, // 9 of the 9 stacks in matching goals (90 points)
+                stacksOnStandoff: 3, // 3 of the 9 stacks on standoff (30 points)
                 clearedPins: 35, // Maximum cleared pins (70 points)
                 robotsInContact: 2 // Both robots in contact (4 points)
-                // Total: 35+70+20+120+80+30+70+4 = 429 points
+                // Total: 35+70+0+135+90+30+70+4 = 434 points (theoretical max)
             }
         };
 
@@ -155,9 +155,9 @@ class VEXScoreCalculator {
             warnings.push('Logic: Matching goal bonuses can only apply to existing stacks');
         }
 
-        // Maximum matching goals is 8
-        if (matchingGoals > 8) {
-            warnings.push('Error: Maximum 8 matching goal positions available');
+        // Maximum matching goals is 9
+        if (matchingGoals > 9) {
+            warnings.push('Error: Maximum 9 matching goal positions available');
         }
 
         // Standoff goals limited to 3 positions
@@ -228,9 +228,9 @@ class VEXScoreCalculator {
             this.scoreDisplay.style.animation = 'scoreUpdate 0.3s ease-in-out';
         }, 10);
 
-        // Check for illegal score (above 429)
+        // Check for illegal score (above 434)
         const scoreLabel = document.querySelector('.score-label');
-        if (totalScore > 429) {
+        if (totalScore > 434) {
             scoreLabel.innerHTML = 'Points<br><span style="color: red; font-weight: bold; font-size: 1.2em;">⚠️ ILLEGAL SCORE</span>';
             this.scoreDisplay.style.color = 'red';
         } else {
@@ -276,8 +276,8 @@ class VEXScoreCalculator {
     addToAverage() {
         const currentScore = parseInt(this.scoreDisplay.textContent) || 0;
         
-        // Check if score is illegal (above 429)
-        if (currentScore > 429) {
+        // Check if score is illegal (above 434)
+        if (currentScore > 434) {
             this.addToAverageBtn.textContent = 'Illegal Score!';
             this.addToAverageBtn.style.background = 'var(--danger-color)';
             this.addToAverageBtn.style.color = 'white';
@@ -386,9 +386,9 @@ class VEXScoreCalculator {
             issues.push('Too many stacks (max 9 possible)');
         }
         
-        // Maximum matching goals is 8
-        if (matchingGoals > 8) {
-            issues.push('Too many matching goals (max 8)');
+        // Maximum matching goals is 9
+        if (matchingGoals > 9) {
+            issues.push('Too many matching goals (max 9)');
         }
         
         // Maximum standoff goals is 3
@@ -410,7 +410,7 @@ class VEXScoreCalculator {
             if (this.scoreHistory.length > 0) {
                 const avgScore = Math.round(this.scoreHistory.reduce((a, b) => a + b, 0) / this.scoreHistory.length);
                 // Distribute the average score proportionally across inputs based on their max values
-                const totalMaxPoints = 35 + 70 + 30 + 120 + 80 + 30 + 70 + 4; // 439 max possible
+                const totalMaxPoints = 35 + 70 + 0 + 135 + 90 + 30 + 70 + 4; // 434 max possible
                 
                 Object.keys(this.inputs).forEach(key => {
                     const input = this.inputs[key];
