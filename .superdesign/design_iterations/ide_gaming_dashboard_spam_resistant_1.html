@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pop the Lock - Enhanced Gaming Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-green: #00ff88;
+            --secondary-green: #00dd77;
+            --danger-red: #ff6b6b;
+            --warning-yellow: #ffd93d;
+            --info-blue: #74c0fc;
+            --background-primary: #0f1419;
+            --background-secondary: #1a2332;
+            --background-tertiary: #253344;
+            --surface-dark: #1e2936;
+            --surface-light: #2d3748;
+            --border-color: #4a5568;
+            --text-primary: #00ff88;
+            --text-secondary: #a0aec0;
+            --text-highlight: #f7fafc;
+            --accent-blue: #63b3ed;
+            --accent-purple: #b794f6;
+            --accent-pink: #f093fb;
+            --accent-orange: #fbb660;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            background: linear-gradient(135deg, 
+                var(--background-primary) 0%, 
+                var(--background-secondary) 25%, 
+                var(--background-tertiary) 50%,
+                var(--background-secondary) 75%, 
+                var(--background-primary) 100%);
+            color: var(--text-primary);
+            height: 100vh;
+            display: grid;
+            grid-template-areas: 
+                "header header header header"
+                "sidebar game-area mini-map console"
+                "controls controls controls controls";
+            grid-template-rows: 70px 1fr 100px;
+            grid-template-columns: 250px 1fr 200px 200px;
+            gap: 12px;
+            padding: 12px;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(0, 255, 136, 0.12) 0%, transparent 35%),
+                radial-gradient(circle at 85% 20%, rgba(116, 192, 252, 0.1) 0%, transparent 35%),
+                radial-gradient(circle at 70% 85%, rgba(183, 148, 246, 0.08) 0%, transparent 35%),
+                radial-gradient(circle at 25% 80%, rgba(240, 147, 251, 0.06) 0%, transparent 35%),
+                radial-gradient(circle at 50% 50%, rgba(251, 182, 96, 0.04) 0%, transparent 40%);
+            animation: gentle-background-shift 15s ease-in-out infinite;
+        }
+
+        @keyframes gentle-background-shift {
+            0%, 100% { 
+                background-position: 0% 0%, 100% 0%, 100% 100%, 0% 100%, 50% 50%;
+            }
+            33% { 
+                background-position: 10% 10%, 90% 10%, 90% 90%, 10% 90%, 60% 40%;
+            }
+            66% { 
+                background-position: -10% 5%, 110% 15%, 95% 85%, 5% 95%, 40% 60%;
+            }
+        }
+
+        .header {
+            grid-area: header;
+            background: linear-gradient(135deg, 
+                rgba(30, 41, 54, 0.95), 
+                rgba(45, 55, 72, 0.9), 
+                rgba(30, 41, 54, 0.95));
+            border: 2px solid var(--primary-green);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            box-shadow: 
+                0 8px 32px rgba(0, 255, 136, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                var(--accent-blue), 
+                var(--primary-green), 
+                var(--accent-purple), 
+                transparent);
+            animation: rainbow-scan 6s linear infinite;
+        }
+
+        .game-title {
+            font-size: 24px;
+            font-weight: 700;
+            text-shadow: 0 0 20px var(--primary-green);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .title-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(45deg, 
+                var(--primary-green), 
+                var(--accent-blue), 
+                var(--accent-purple));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--background-primary);
+            font-weight: bold;
+            box-shadow: 
+                0 0 25px rgba(0, 255, 136, 0.4),
+                inset 0 2px 4px rgba(255, 255, 255, 0.2);
+            animation: icon-glow 3s ease-in-out infinite;
+        }
+
+        .system-info {
+            display: flex;
+            gap: 24px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .system-metric {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .metric-label {
+            color: var(--text-secondary);
+            font-size: 10px;
+        }
+
+        .metric-value {
+            color: var(--text-highlight);
+        }
+
+        .sidebar {
+            grid-area: sidebar;
+            background: rgba(30, 41, 54, 0.85);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            overflow-y: auto;
+            position: relative;
+            backdrop-filter: blur(20px);
+            box-shadow: 
+                0 4px 16px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, 
+                var(--primary-green), 
+                var(--accent-blue), 
+                var(--accent-purple));
+            border-radius: 0 4px 4px 0;
+        }
+
+        .game-area {
+            grid-area: game-area;
+            background: rgba(15, 20, 25, 0.92);
+            border: 3px solid var(--primary-green);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: crosshair;
+            overflow: hidden;
+            backdrop-filter: blur(25px);
+            box-shadow: 
+                inset 0 0 60px rgba(0, 255, 136, 0.12),
+                0 0 40px rgba(0, 255, 136, 0.2),
+                0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .mini-map {
+            grid-area: mini-map;
+            background: rgba(30, 41, 54, 0.85);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 15px;
+            overflow-y: auto;
+            backdrop-filter: blur(20px);
+            box-shadow: 
+                0 4px 16px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+
+
+        .console {
+            grid-area: console;
+            background: rgba(30, 41, 54, 0.85);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 15px;
+            overflow-y: auto;
+            font-size: 10px;
+            backdrop-filter: blur(20px);
+            box-shadow: 
+                0 4px 16px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .controls-panel {
+            grid-area: controls;
+            background: linear-gradient(135deg, 
+                rgba(30, 41, 54, 0.9), 
+                rgba(45, 55, 72, 0.85), 
+                rgba(30, 41, 54, 0.9));
+            border: 2px solid var(--primary-green);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: 
+                0 8px 32px rgba(0, 255, 136, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        /* Game Over Modal Styles */
+        .game-over-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(10px);
+        }
+
+        .game-over-content {
+            background: linear-gradient(135deg, 
+                rgba(30, 41, 54, 0.95), 
+                rgba(45, 55, 72, 0.9));
+            border: 3px solid var(--primary-green);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            min-width: 400px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.6),
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .game-over-header h2 {
+            color: var(--error-red);
+            font-size: 48px;
+            font-weight: 900;
+            margin: 0 0 10px 0;
+            text-shadow: 0 0 20px rgba(255, 82, 82, 0.5);
+            letter-spacing: 4px;
+        }
+
+        .game-over-header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 18px;
+            margin: 0 0 30px 0;
+        }
+
+        .game-over-stats {
+            margin: 30px 0;
+        }
+
+        .final-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .final-stat:last-child {
+            border-bottom: none;
+        }
+
+        .final-stat .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+        }
+
+        .final-stat .stat-value {
+            color: var(--primary-green);
+            font-size: 20px;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        .game-over-buttons {
+            margin-top: 40px;
+        }
+
+        .restart-button {
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            border: 2px solid var(--primary-green);
+            border-radius: 12px;
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            padding: 16px 40px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 4px 16px rgba(0, 255, 136, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .restart-button:hover {
+            background: linear-gradient(135deg, var(--secondary-green), var(--primary-green));
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 24px rgba(0, 255, 136, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .restart-button:active {
+            transform: translateY(0);
+            box-shadow: 
+                0 4px 12px rgba(0, 255, 136, 0.4),
+                inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Difficulty Selection Modal Styles */
+        .difficulty-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            backdrop-filter: blur(15px);
+        }
+
+        .difficulty-content {
+            background: linear-gradient(135deg, 
+                rgba(30, 41, 54, 0.98), 
+                rgba(45, 55, 72, 0.95));
+            border: 3px solid var(--primary-green);
+            border-radius: 24px;
+            padding: 50px;
+            text-align: center;
+            min-width: 500px;
+            box-shadow: 
+                0 25px 80px rgba(0, 0, 0, 0.8),
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .difficulty-header h2 {
+            color: var(--primary-green);
+            font-size: 42px;
+            font-weight: 900;
+            margin: 0 0 15px 0;
+            text-shadow: 0 0 25px rgba(0, 255, 136, 0.6);
+            letter-spacing: 3px;
+        }
+
+        .difficulty-header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 18px;
+            margin: 0 0 40px 0;
+        }
+
+        .difficulty-options {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+        }
+
+        .difficulty-btn {
+            background: linear-gradient(135deg, 
+                rgba(45, 55, 72, 0.9), 
+                rgba(30, 41, 54, 0.9));
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            color: white;
+            padding: 30px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 140px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .difficulty-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.1), 
+                transparent);
+            transition: left 0.5s ease;
+        }
+
+        .difficulty-btn:hover::before {
+            left: 100%;
+        }
+
+        .difficulty-btn:hover {
+            border-color: var(--primary-green);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 
+                0 10px 30px rgba(0, 255, 136, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .difficulty-btn[data-difficulty="easy"]:hover {
+            border-color: var(--warning-yellow);
+            box-shadow: 
+                0 10px 30px rgba(255, 193, 7, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .difficulty-btn[data-difficulty="hard"]:hover {
+            border-color: var(--error-red);
+            box-shadow: 
+                0 10px 30px rgba(255, 82, 82, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .difficulty-btn:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        .difficulty-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .difficulty-desc {
+            font-size: 16px;
+            color: var(--primary-green);
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .difficulty-btn[data-difficulty="easy"] .difficulty-desc {
+            color: var(--warning-yellow);
+        }
+
+        .difficulty-btn[data-difficulty="hard"] .difficulty-desc {
+            color: var(--error-red);
+        }
+
+        .difficulty-detail {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+        }
+
+        .section-title {
+            color: var(--warning-yellow);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .stat-item {
+            margin-bottom: 12px;
+            padding: 14px;
+            background: rgba(0, 255, 136, 0.06);
+            border-left: 4px solid var(--primary-green);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .stat-item:hover {
+            background: rgba(0, 255, 136, 0.12);
+            transform: translateX(8px);
+            box-shadow: 0 6px 20px rgba(0, 255, 136, 0.25);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--text-highlight);
+        }
+
+        .stat-trend {
+            font-size: 10px;
+            margin-left: 8px;
+        }
+
+        .trend-up {
+            color: var(--secondary-green);
+        }
+
+        .trend-down {
+            color: var(--danger-red);
+        }
+
+        .lock-interface {
+            position: relative;
+            width: 320px;
+            height: 320px;
+        }
+
+        .lock-circle {
+            width: 100%;
+            height: 100%;
+            border: 4px solid var(--primary-green);
+            border-radius: 50%;
+            position: relative;
+            background: radial-gradient(circle, rgba(0,255,136,0.18), transparent 70%);
+            box-shadow: 
+                inset 0 0 40px rgba(0,255,136,0.3),
+                0 0 60px rgba(0,255,136,0.25);
+            animation: lock-gentle-pulse 4s ease-in-out infinite;
+        }
+
+        .target-zone {
+            position: absolute;
+            width: 60px;
+            height: 12px;
+            background: linear-gradient(45deg, var(--danger-red), var(--accent-pink));
+            border-radius: 6px;
+            top: -6px;
+            left: 50%;
+            transform-origin: 50% 166px;
+            transform: translateX(-50%) rotate(75deg);
+            /* transition: transform 0.5s ease-in-out; */
+            box-shadow: 
+                0 0 25px var(--danger-red),
+                inset 0 2px 4px rgba(255, 255, 255, 0.2);
+            animation: target-gentle-pulse 2s ease-in-out infinite alternate;
+        }
+
+        .marker {
+            position: absolute;
+            width: 6px;
+            height: 30px;
+            background: linear-gradient(180deg, var(--text-highlight), var(--primary-green));
+            border-radius: 3px;
+            top: -15px;
+            left: 50%;
+            transform-origin: 50% 175px;
+            transform: translateX(-50%) rotate(0deg);
+            animation: rotate var(--rotation-speed, 2.8s) linear infinite;
+            box-shadow: 
+                0 0 20px var(--primary-green),
+                inset 0 2px 4px rgba(255, 255, 255, 0.3);
+        }
+
+        .hud-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .hud-item {
+            background: rgba(30, 41, 54, 0.95);
+            border: 1px solid var(--primary-green);
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-size: 12px;
+            backdrop-filter: blur(15px);
+            box-shadow: 
+                0 6px 20px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .hit-zone-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90px;
+            height: 90px;
+            border: 2px solid var(--accent-blue);
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: hit-zone-gentle-pulse 3s ease-in-out infinite;
+        }
+
+        .crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            border: 2px solid var(--primary-green);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: crosshair-gentle-pulse 2.5s ease-in-out infinite;
+        }
+
+        .crosshair::before,
+        .crosshair::after {
+            content: '';
+            position: absolute;
+            background: var(--primary-green);
+        }
+
+        .crosshair::before {
+            top: 50%;
+            left: -12px;
+            right: -12px;
+            height: 1px;
+            transform: translateY(-50%);
+        }
+
+        .crosshair::after {
+            left: 50%;
+            top: -12px;
+            bottom: -12px;
+            width: 1px;
+            transform: translateX(-50%);
+        }
+
+        .radar-circle {
+            position: absolute;
+            border: 1px solid rgba(116, 192, 252, 0.25);
+            border-radius: 50%;
+            animation: gentle-radar 6s linear infinite;
+        }
+
+        .radar-1 { width: 360px; height: 360px; top: -20px; left: -20px; }
+        .radar-2 { width: 400px; height: 400px; top: -40px; left: -40px; animation-delay: 2s; }
+        .radar-3 { width: 440px; height: 440px; top: -60px; left: -60px; animation-delay: 4s; }
+
+        .spam-protection-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 107, 107, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .spam-protection-indicator.active {
+            opacity: 1;
+        }
+
+
+        .game-mode-selector {
+            margin-top: 10px;
+        }
+
+        .game-mode-selector select {
+            width: 100%;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid var(--accent-blue);
+            border-radius: 8px;
+            color: var(--primary-cyan);
+            font-family: "Press Start 2P", monospace;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .game-mode-selector select:hover {
+            border-color: var(--secondary-green);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .game-mode-selector option {
+            background: rgba(0, 0, 0, 0.9);
+            color: var(--primary-cyan);
+            padding: 8px;
+        }
+
+        .mode-description {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--accent-blue);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .desc-title {
+            font-family: "Press Start 2P", monospace;
+            font-size: 10px;
+            color: var(--secondary-green);
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .desc-text {
+            font-family: "Press Start 2P", monospace;
+            font-size: 8px;
+            color: var(--primary-cyan);
+            line-height: 1.4;
+            text-align: left;
+        }
+
+
+        .console-log {
+            margin-bottom: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 2px 0;
+        }
+
+        .log-timestamp {
+            color: var(--text-secondary);
+        }
+
+        .log-info {
+            color: var(--info-blue);
+        }
+
+        .log-success {
+            color: var(--secondary-green);
+        }
+
+        .log-warning {
+            color: var(--warning-yellow);
+        }
+
+        .log-error {
+            color: var(--danger-red);
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .control-button {
+            background: var(--surface-dark);
+            border: 2px solid var(--primary-green);
+            color: var(--primary-green);
+            padding: 12px 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+        }
+
+        .control-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.25), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .control-button:hover {
+            background: var(--primary-green);
+            color: var(--background-primary);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+            transform: translateY(-3px);
+        }
+
+        .control-button:hover::before {
+            left: 100%;
+        }
+
+        .accuracy-meter {
+            width: 120px;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            margin-top: 6px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .accuracy-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--danger-red), var(--warning-yellow), var(--secondary-green));
+            width: 78%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .accuracy-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 2px;
+            height: 100%;
+            background: var(--text-highlight);
+            box-shadow: 0 0 8px var(--text-highlight);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--secondary-green);
+            animation: gentle-status-blink 3s ease-in-out infinite;
+            box-shadow: 0 0 15px var(--secondary-green);
+        }
+
+        .hit-feedback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 36px;
+            font-weight: bold;
+            pointer-events: none;
+            animation: hit-feedback 1.2s ease-out forwards;
+            text-shadow: 0 0 25px currentColor;
+        }
+
+        .hit-feedback.perfect {
+            color: var(--secondary-green);
+        }
+
+        .hit-feedback.good {
+            color: var(--accent-blue);
+        }
+
+        .hit-feedback.miss {
+            color: var(--danger-red);
+        }
+
+        @keyframes rainbow-scan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        @keyframes icon-glow {
+            0%, 100% { box-shadow: 0 0 25px rgba(0, 255, 136, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.2); }
+            50% { box-shadow: 0 0 35px rgba(116, 192, 252, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.3); }
+        }
+
+        @keyframes rotate {
+            from { transform: translateX(-50%) rotate(0deg); }
+            to { transform: translateX(-50%) rotate(360deg); }
+        }
+
+        @keyframes target-gentle-pulse {
+            from { 
+                box-shadow: 0 0 25px var(--danger-red), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+                transform: translateX(-50%) rotate(75deg) scale(1);
+            }
+            to { 
+                box-shadow: 0 0 40px var(--danger-red), 0 0 60px var(--accent-pink), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+                transform: translateX(-50%) rotate(75deg) scale(1.03);
+            }
+        }
+
+        @keyframes lock-gentle-pulse {
+            0%, 100% { box-shadow: inset 0 0 40px rgba(0,255,136,0.3), 0 0 60px rgba(0,255,136,0.25); }
+            50% { box-shadow: inset 0 0 40px rgba(0,255,136,0.4), 0 0 60px rgba(0,255,136,0.35); }
+        }
+
+        @keyframes gentle-radar {
+            from { opacity: 0.6; transform: scale(0.85); }
+            to { opacity: 0; transform: scale(1.25); }
+        }
+
+        @keyframes crosshair-gentle-pulse {
+            0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.08); }
+        }
+
+        @keyframes hit-zone-gentle-pulse {
+            0%, 100% { opacity: 0.25; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.5; transform: translate(-50%, -50%) scale(1.06); }
+        }
+
+        @keyframes gentle-status-blink {
+            0%, 100% { opacity: 1; box-shadow: 0 0 15px var(--secondary-green); }
+            50% { opacity: 0.6; box-shadow: 0 0 20px var(--accent-blue); }
+        }
+
+        @keyframes hit-feedback {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            25% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.3);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1) translateY(-50px);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            body {
+                grid-template-areas: 
+                    "header header"
+                    "sidebar game-area"
+                    "controls controls";
+                grid-template-columns: 250px 1fr;
+                grid-template-rows: 70px 1fr 100px;
+            }
+            
+            .mini-map, .console {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                grid-template-areas: 
+                    "header"
+                    "game-area"
+                    "controls";
+                grid-template-columns: 1fr;
+                grid-template-rows: 70px 1fr 120px;
+            }
+            
+            .sidebar, .mini-map, .console {
+                display: none;
+            }
+            
+            .system-info {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="game-title">
+            <div class="title-icon">🔓</div>
+            POP THE LOCK v3.2.0
+        </div>
+        <div class="system-info">
+            <div class="system-metric">
+                <div class="metric-label">FPS</div>
+                <div class="metric-value" id="fps-counter">60</div>
+            </div>
+            <div class="system-metric">
+                <div class="metric-label">PING</div>
+                <div class="metric-value">12ms</div>
+            </div>
+            <div class="system-metric">
+                <div class="metric-label">STATUS</div>
+                <div class="metric-value">ONLINE</div>
+            </div>
+        </div>
+    </header>
+
+    <aside class="sidebar">
+        <div class="section-title">Player Statistics</div>
+        
+        
+        <div class="stat-item">
+            <div class="stat-label">Total Score</div>
+            <div class="stat-value">45,832 <span class="stat-trend trend-up">↗ +150</span></div>
+        </div>
+        
+        <div class="stat-item">
+            <div class="stat-label">Accuracy Rating</div>
+            <div class="stat-value">78.4% <span class="stat-trend trend-up">↗ +0.1%</span></div>
+            <div class="accuracy-meter">
+                <div class="accuracy-fill"></div>
+            </div>
+        </div>
+        
+        <div class="stat-item">
+            <div class="stat-label">Current Streak</div>
+            <div class="stat-value">12 <span class="stat-trend trend-up">↗ +1</span></div>
+        </div>
+        
+        <div class="stat-item">
+            <div class="stat-label">Best Reaction</div>
+            <div class="stat-value">0.047s</div>
+        </div>
+        
+        <div class="stat-item">
+            <div class="stat-label">Locks Opened</div>
+            <div class="stat-value">1,247 <span class="stat-trend trend-up">↗ +1</span></div>
+        </div>
+
+        <div class="stat-item">
+            <div class="stat-label">Session Time</div>
+            <div class="stat-value">23:45</div>
+        </div>
+
+        <div class="stat-item">
+            <div class="stat-label">Input Rate</div>
+            <div class="stat-value" id="input-rate">0 IPM</div>
+        </div>
+    </aside>
+
+    <main class="game-area" onclick="handleTap()">
+        <div class="hud-overlay">
+            <div class="hud-item">
+                <div>COMBO x<span id="current-combo">2.3</span></div>
+            </div>
+        </div>
+        
+        <div class="hit-zone-indicator"></div>
+        <div class="crosshair"></div>
+        
+        <div class="radar-circle radar-1"></div>
+        <div class="radar-circle radar-2"></div>
+        <div class="radar-circle radar-3"></div>
+        
+        <div class="spam-protection-indicator" id="spam-indicator">
+            Spam Protection Active - Slow Down!
+        </div>
+        
+        <div class="lock-interface">
+            <div class="lock-circle">
+                <div class="target-zone" id="target-zone"></div>
+                <div class="marker" id="marker"></div>
+            </div>
+        </div>
+    </main>
+
+    <aside class="mini-map">
+        <div class="section-title">Target Analysis</div>
+    </aside>
+
+
+
+    <!-- Game Over Modal -->
+    <div id="gameOverModal" class="game-over-modal" style="display: none;">
+        <div class="game-over-content">
+            <div class="game-over-header">
+                <h2>GAME OVER</h2>
+                <p>You missed 5 locks!</p>
+            </div>
+            <div class="game-over-stats">
+                <div class="final-stat">
+                    <span class="stat-label">Final Score:</span>
+                    <span class="stat-value" id="finalScore">0</span>
+                </div>
+                <div class="final-stat">
+                    <span class="stat-label">Locks Opened:</span>
+                    <span class="stat-value" id="finalLocks">0</span>
+                </div>
+                <div class="final-stat">
+                    <span class="stat-label">Best Streak:</span>
+                    <span class="stat-value" id="finalStreak">0</span>
+                </div>
+                <div class="final-stat">
+                    <span class="stat-label">Accuracy:</span>
+                    <span class="stat-value" id="finalAccuracy">0%</span>
+                </div>
+            </div>
+            <div class="game-over-buttons">
+                <button class="restart-button" onclick="restartGame()">RESTART GAME</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="controls-panel">
+        <div class="control-group">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>ENHANCED DETECTION - CLICK/SPACE TO HIT | N/NEXT TARGET BUTTON TO MOVE TARGET</span>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <button class="control-button" onclick="pauseGame()">PAUSE</button>
+            <button class="control-button" onclick="resetGame()">RESET</button>
+            <button class="control-button" onclick="moveToNextTarget()" style="background: var(--accent-blue); border-color: var(--accent-blue);">NEXT TARGET</button>
+            <button class="control-button" onclick="toggleSound()">AUDIO: ON</button>
+            <button class="control-button" onclick="toggleFullscreen()">FULLSCREEN</button>
+        </div>
+    </footer>
+
+    <script>
+        // Accurate Game State - starts from zero
+        let gameStats = {
+            score: 0,
+            accuracy: 0,
+            streak: 0,
+            bestTime: 999.999,
+            totalLocks: 0,
+            sessionTime: { minutes: 0, seconds: 0 },
+            combo: 1.0,
+            hits: 0,
+            misses: 0,
+            totalInputs: 0,
+            lastInputTime: 0,
+            perfectHits: 0,
+            perfectStreak: 0,
+            maxStreak: 0,
+            sessionStartTime: Date.now()
+        };
+
+        // Animation synchronization variables
+        let animationStartTime = null;
+        let currentAnimationDuration = 3.0; // seconds
+
+        // Game starts automatically at normal speed
+        let gameStarted = false;
+
+        // Advanced Spam Protection System
+        let spamProtection = {
+            enabled: true,
+            inputHistory: [],
+            maxInputsPerSecond: 8,
+            blockDuration: 2000, // ms
+            isBlocked: false,
+            blockEndTime: 0,
+            warningThreshold: 6
+        };
+
+        // Precise Game Mechanics
+        let markerAngle = 0;
+        let targetAngle = 75;
+        let rotationSpeed = 3.0; // Will be set based on difficulty
+        let hitTolerance = 15;
+        let perfectTolerance = 5;
+        let isGameRunning = true;
+        let isTargetBlocked = false;
+        let gameStartTime = Date.now();
+
+        // Input tracking for rate calculation
+        let inputTimes = [];
+        
+        // FPS tracking
+        let frameCount = 0;
+        let lastFpsTime = performance.now();
+        
+        // Target movement control
+        let targetMoveTimeout = null;
+        let isMovingTarget = false;
+
+        // High-precision marker angle calculation
+        function calculateMarkerAngle() {
+            const now = Date.now();
+            const elapsed = (now - gameStartTime) / 1000;
+            markerAngle = ((elapsed % rotationSpeed) / rotationSpeed) * 360;
+            return markerAngle;
+        }
+
+        // Accurate angle difference calculation
+        function getAngleDifference(angle1, angle2) {
+            let diff = Math.abs(angle1 - angle2);
+            if (diff > 180) {
+                diff = 360 - diff;
+            }
+            return diff;
+        }
+
+        // Simplified spam protection system
+        function checkSpamProtection() {
+            // Always allow inputs for normal gameplay
+            return true;
+        }
+
+        // Simplified hit detection function
+        function checkHit() {
+            // Basic spam prevention (max 10 clicks per second)
+            const now = Date.now();
+            if (now - lastHitTime < 100) {
+                return 'blocked';
+            }
+            lastHitTime = now;
+            
+            // Get current marker angle - synchronized with CSS animation
+            let currentMarkerAngle = 0;
+            if (animationStartTime !== null) {
+                const elapsed = (now - animationStartTime) / 1000; // Convert to seconds
+                const rotationPeriods = elapsed / currentAnimationDuration;
+                currentMarkerAngle = (rotationPeriods % 1) * 360; // Get fractional part and convert to degrees
+            } else {
+                // Fallback calculation if animation start time not set
+                const elapsed = (now % (currentAnimationDuration * 1000)) / 1000;
+                currentMarkerAngle = (elapsed / currentAnimationDuration) * 360;
+            }
+            
+            // Get the ACTUAL current target angle from the visual element to prevent desync
+            const targetZone = document.getElementById('target-zone');
+            let visualTargetAngle = targetAngle; // fallback
+            
+            if (targetZone && targetZone.style.transform) {
+                const match = targetZone.style.transform.match(/rotate\(([^)]+)deg\)/);
+                if (match) {
+                    visualTargetAngle = parseFloat(match[1]);
+                    console.log('Using VISUAL target angle:', visualTargetAngle, 'vs stored:', targetAngle);
+                }
+            }
+            
+            // Handle multi-target mode - check both targets using VISUAL position
+            let targetAngleToCheck = visualTargetAngle;
+            let angleDiff = getAngleDifference(currentMarkerAngle, targetAngleToCheck);
+            
+            if (false) { // Game mode removed
+                const secondTargetAngle = (visualTargetAngle + 180) % 360;
+                const secondAngleDiff = getAngleDifference(currentMarkerAngle, secondTargetAngle);
+                // Use whichever target is closer
+                if (secondAngleDiff < angleDiff) {
+                    angleDiff = secondAngleDiff;
+                    targetAngleToCheck = secondTargetAngle;
+                }
+                console.log('Multi-target check: Primary =', visualTargetAngle, 'Secondary =', secondTargetAngle, 'Using =', targetAngleToCheck);
+            }
+            
+            // Mode-specific tolerances to prevent glitches
+            let modePerfectTolerance = perfectTolerance;
+            let modeHitTolerance = hitTolerance;
+            
+            switch('normal') { // Default to normal mode
+                case 'shrinkTarget':
+                    // Tighter tolerance for precision mode
+                    modePerfectTolerance = perfectTolerance * 0.8;
+                    modeHitTolerance = hitTolerance * 0.8;
+                    break;
+                case 'lightning':
+                    // Much tighter tolerance for lightning mode
+                    modePerfectTolerance = perfectTolerance * 0.7;
+                    modeHitTolerance = hitTolerance * 0.7;
+                    break;
+                case 'fastSpin':
+                    // Slightly more forgiving for speed mode
+                    modePerfectTolerance = perfectTolerance * 1.1;
+                    modeHitTolerance = hitTolerance * 1.1;
+                    break;
+                case 'invisible':
+                    // More forgiving for invisible mode
+                    modePerfectTolerance = perfectTolerance * 1.2;
+                    modeHitTolerance = hitTolerance * 1.2;
+                    break;
+            }
+            
+            // Log precise hit data with extra debugging
+            console.log('Hit detection - Marker:', currentMarkerAngle.toFixed(1), 'Target:', targetAngleToCheck.toFixed(1), 'Diff:', angleDiff.toFixed(1), 'Mode:', 'normal', 
+                'Sync:', animationStartTime ? 'SYNCED' : 'FALLBACK', 'Duration:', currentAnimationDuration.toFixed(2) + 's');
+            
+            let result;
+            if (angleDiff <= modePerfectTolerance) {
+                result = 'perfect';
+            } else if (angleDiff <= modeHitTolerance) {
+                result = 'good';
+            } else {
+                result = 'miss';
+            }
+            
+            // Release ALL locks after a MUCH longer delay to prevent glitch
+            setTimeout(() => {
+                hitProcessingLock = false;
+                console.log('Hit processing lock released');
+            }, 300);
+            
+            // Release target move block even later
+            setTimeout(() => {
+                targetMoveBlocked = false;
+                console.log('TARGET MOVE BLOCK RELEASED - SAFE TO MOVE TARGET');
+            }, 400);
+            
+            return result;
+        }
+
+        // Enhanced input rate tracking
+        function updateInputRate() {
+            const now = Date.now();
+            inputTimes.push(now);
+            
+            // Keep only inputs from last minute
+            inputTimes = inputTimes.filter(time => now - time < 60000);
+            
+            const inputsPerMinute = inputTimes.length;
+            document.getElementById('input-rate').textContent = `${inputsPerMinute} IPM`;
+        }
+
+        // Prevent rapid target changes and hit-miss glitches
+        let lastTargetChange = 0;
+        let lastHitTime = 0;
+        let pendingTargetMove = false;
+        let hitProcessingLock = false;
+        let targetMoveBlocked = false;
+        let currentTargetAngle = 75; // Track current target separately
+
+        // Randomize target position after successful hits with AGGRESSIVE anti-glitch protection
+        function randomizeTarget() {
+            const now = Date.now();
+            
+            // SUPER AGGRESSIVE anti-glitch: Check ALL blocking conditions
+            if (hitProcessingLock || targetMoveBlocked || pendingTargetMove || (now - lastTargetChange < 500)) {
+                console.log('TARGET MOVE BLOCKED - Hit processing:', hitProcessingLock, 'Move blocked:', targetMoveBlocked, 'Pending:', pendingTargetMove, 'Time since last change:', now - lastTargetChange);
+                return;
+            }
+            
+            console.log('TARGET MOVE STARTING - All checks passed');
+            
+            // Set ALL flags to prevent conflicts
+            pendingTargetMove = true;
+            targetMoveBlocked = true;
+            lastTargetChange = now;
+            // Generate new random position
+            const newAngle = Math.random() * 360;
+            
+            // Ensure minimum distance from current position for better gameplay
+            const minDistance = 60; // degrees
+            const currentAngle = targetAngle;
+            const angleDiff = getAngleDifference(newAngle, currentAngle);
+            
+            if (angleDiff < minDistance) {
+                // If too close, offset by minimum distance
+                targetAngle = (newAngle + minDistance + Math.random() * 120) % 360;
+            } else {
+                targetAngle = newAngle;
+            }
+            
+            // Ensure the angle is properly normalized and synced
+            targetAngle = targetAngle % 360;
+            if (targetAngle < 0) targetAngle += 360;
+            
+            // CRITICAL: Update stored angle to match what will be visually displayed
+            currentTargetAngle = targetAngle;
+            console.log('SYNCHRONIZED: targetAngle =', targetAngle, 'currentTargetAngle =', currentTargetAngle);
+            
+            // Update target zone position with visual feedback for all modes
+            const targetZone = document.getElementById('target-zone');
+            const secondTarget = document.getElementById('second-target');
+            
+            if (targetZone) {
+                console.log('Moving target from', targetZone.style.transform, 'to angle', targetAngle);
+                
+                // Force the visual update with !important and comprehensive sync
+                const newTransform = `translateX(-50%) rotate(${targetAngle}deg)`;
+                targetZone.style.setProperty('transform', newTransform, 'important');
+                
+                // Update second target for multi-target mode
+                if (secondTarget && 'normal' === 'multiTarget') {
+                    const secondTransform = `translateX(-50%) rotate(${(targetAngle + 180) % 360}deg)`;
+                    secondTarget.style.setProperty('transform', secondTransform, 'important');
+                }
+                
+                // Force multiple repaints to ensure the change takes effect across all modes
+                targetZone.offsetHeight; // Force reflow
+                targetZone.getBoundingClientRect(); // Force layout recalculation
+                if (secondTarget) {
+                    secondTarget.offsetHeight;
+                    secondTarget.getBoundingClientRect();
+                }
+                
+                // Enhanced double-check with retry mechanism
+                setTimeout(() => {
+                    const currentTransform = targetZone.style.transform;
+                    const expectedTransform = newTransform;
+                    if (!currentTransform.includes(targetAngle.toFixed(1)) && !currentTransform.includes(Math.round(targetAngle).toString())) {
+                        console.warn('Visual sync failed! Force updating...');
+                        targetZone.style.setProperty('transform', expectedTransform, 'important');
+                        targetZone.offsetHeight;
+                        
+                        // Also update second target if needed
+                        if (secondTarget && 'normal' === 'multiTarget') {
+                            const secondExpected = `translateX(-50%) rotate(${(targetAngle + 180) % 360}deg)`;
+                            secondTarget.style.setProperty('transform', secondExpected, 'important');
+                            secondTarget.offsetHeight;
+                        }
+                    }
+                }, 25);
+                
+                // Mode-appropriate glow effect
+                let glowColor = 'var(--accent-pink)';
+                switch('normal') { // Default to normal mode
+                    case 'reverse': glowColor = '#ff3535'; break;
+                    case 'fastSpin': glowColor = '#00ff00'; break;
+                    case 'shrinkTarget': glowColor = '#ffff00'; break;
+                    case 'multiTarget': glowColor = '#ff00ff'; break;
+                    case 'invisible': glowColor = '#8080ff'; break;
+                    default: glowColor = 'var(--accent-pink)';
+                }
+                
+                targetZone.style.boxShadow = `0 0 40px ${glowColor}, inset 0 2px 4px rgba(255, 255, 255, 0.2)`;
+                setTimeout(() => {
+                    // Restore normal mode styling (removed game mode visuals)
+                    targetZone.style.boxShadow = `0 0 40px var(--accent-pink), inset 0 2px 4px rgba(255, 255, 255, 0.2)`;
+                }, 600);
+                
+                console.log('Target zone transform updated to:', targetZone.style.transform);
+                
+                // VERIFICATION: Ensure visual and logical angles match
+                const finalMatch = targetZone.style.transform.match(/rotate\(([^)]+)deg\)/);
+                if (finalMatch) {
+                    const finalVisualAngle = parseFloat(finalMatch[1]);
+                    if (Math.abs(finalVisualAngle - targetAngle) > 1) {
+                        console.error('DESYNC DETECTED! Visual:', finalVisualAngle, 'Logical:', targetAngle);
+                        targetAngle = finalVisualAngle; // Force sync to visual
+                        currentTargetAngle = finalVisualAngle;
+                    } else {
+                        console.log('SYNC VERIFIED: Visual and logical angles match');
+                    }
+                }
+            } else {
+                console.log('Target zone element not found!');
+            }
+            
+            // Verify the target angle was properly updated
+            console.log('Final target angle after randomization:', targetAngle, 'stored:', currentTargetAngle);
+            
+            // Clear ALL flags after successful completion with staggered releases
+            setTimeout(() => {
+                pendingTargetMove = false;
+                console.log('Target move completed, cleared pending flag');
+            }, 200);
+            
+            setTimeout(() => {
+                targetMoveBlocked = false;
+                console.log('TARGET MOVE BLOCK FULLY RELEASED - Ready for next move');
+            }, 300);
+        }
+
+
+        
+        function handleTap() {
+            console.log('handleTap called, isGameRunning:', isGameRunning);
+            if (!isGameRunning) return;
+            
+            updateInputRate();
+            const hitResult = checkHit();
+            console.log('Hit result:', hitResult);
+            
+            if (hitResult === 'blocked') {
+                // Ignore blocked inputs completely
+                return;
+            }
+
+            // Calculate actual reaction time (simplified for now)
+            const reactionTime = 0.05; // Will be improved with real timing later
+            let scoreBonus = 0;
+            let feedbackText = '';
+            let feedbackClass = '';
+            
+            switch (hitResult) {
+                case 'perfect':
+                    scoreBonus = 300;
+                    feedbackText = 'PERFECT!';
+                    feedbackClass = 'perfect';
+                    gameStats.streak++;
+                    gameStats.maxStreak = Math.max(gameStats.maxStreak, gameStats.streak);
+                    gameStats.hits++;
+                    gameStats.totalLocks++;
+                    gameStats.perfectHits++;
+                    
+                    // Update best time if this is better
+                    if (reactionTime > 0 && reactionTime < gameStats.bestTime) {
+                        gameStats.bestTime = reactionTime;
+                    }
+                    // Move target after successful hit with delay to avoid blocking
+                    setTimeout(() => {
+                        console.log('Moving target after PERFECT hit');
+                        randomizeTarget();
+                    }, 600);
+                    break;
+                case 'good':
+                    scoreBonus = 200;
+                    feedbackText = 'GOOD!';
+                    feedbackClass = 'good';
+                    gameStats.streak++;
+                    gameStats.maxStreak = Math.max(gameStats.maxStreak, gameStats.streak);
+                    gameStats.hits++;
+                    gameStats.totalLocks++;
+                    
+                    // Update best time if this is better
+                    if (reactionTime > 0 && reactionTime < gameStats.bestTime) {
+                        gameStats.bestTime = reactionTime;
+                    }
+                    // Move target after successful hit with delay to avoid blocking
+                    setTimeout(() => {
+                        console.log('Moving target after GOOD hit');
+                        randomizeTarget();
+                    }, 600);
+                    break;
+                case 'miss':
+                    scoreBonus = 0;
+                    feedbackText = 'MISS!';
+                    feedbackClass = 'miss';
+                    gameStats.streak = 0; // Reset streak on miss
+                    gameStats.misses++;
+                    
+                    // Check for game over after 5 misses
+                    if (gameStats.misses >= 5) {
+                        setTimeout(() => {
+                            showGameOver();
+                        }, 1000); // Show game over after feedback display
+                        return; // Exit early to prevent further processing
+                    }
+                    
+                    // Don't move target on miss - player has to try again
+                    break;
+            }
+            
+            // Update game stats
+            gameStats.score += scoreBonus;
+            gameStats.totalInputs++;
+            
+            // Increase speed by 15% every 10 hits (regardless of hit/miss)
+            if (gameStats.totalInputs % 10 === 0) {
+                rotationSpeed = rotationSpeed * 0.85; // Decrease time by 15% = increase speed by 15%
+                document.documentElement.style.setProperty('--rotation-speed', rotationSpeed + 's');
+                
+                // Re-synchronize animation after speed change - force restart
+                const marker = document.querySelector('.marker');
+                if (marker) {
+                    // Temporarily disable animation
+                    marker.style.animation = 'none';
+                    // Force reflow
+                    marker.offsetHeight;
+                    // Re-enable animation with new speed
+                    marker.style.animation = `rotate ${rotationSpeed}s linear infinite`;
+                    // Wait for next frame to ensure animation has started
+                    requestAnimationFrame(() => {
+                        animationStartTime = Date.now();
+                        console.log('Animation restarted and synchronized at:', animationStartTime);
+                    });
+                } else {
+                    animationStartTime = Date.now();
+                }
+                currentAnimationDuration = rotationSpeed;
+                
+                const currentSpeedPercentage = (3.0 / rotationSpeed) * 100;
+                console.log(`Speed increased! Total attempts: ${gameStats.totalInputs}, New rotation speed: ${rotationSpeed.toFixed(2)}s (${currentSpeedPercentage.toFixed(0)}% speed)`);
+                
+                // Show speed increase feedback
+                const speedFeedback = document.createElement('div');
+                speedFeedback.textContent = `SPEED UP! ${currentSpeedPercentage.toFixed(0)}% SPEED`;
+                speedFeedback.style.cssText = `
+                    position: absolute;
+                    top: 30%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: #ffff00;
+                    pointer-events: none;
+                    animation: hit-feedback 2s ease-out forwards;
+                    text-shadow: 0 0 15px #ffff00;
+                    z-index: 1000;
+                `;
+                document.querySelector('.game-area').appendChild(speedFeedback);
+                setTimeout(() => speedFeedback.remove(), 2000);
+            }
+            
+            updateStats();
+            showHitFeedback(feedbackText, feedbackClass);
+        }
+
+        function startGame() {
+            isGameRunning = true;
+            randomizeTarget();
+        }
+
+        function resetGame() {
+            gameStats = { 
+                score: 0, 
+                accuracy: 50, 
+                streak: 0, 
+                bestTime: 999, 
+                totalLocks: 0,
+                sessionTime: { minutes: 0, seconds: 0 },
+                combo: 1.0,
+                hits: 0,
+                misses: 0,
+                totalInputs: 0,
+                lastInputTime: 0,
+                perfectHits: 0,
+                perfectStreak: 0,
+                maxStreak: 0,
+                sessionStartTime: Date.now()
+            };
+            
+            // Reset game state
+            targetAngle = 75;
+            gameStartTime = Date.now();
+            inputTimes = [];
+            
+            // Reset rotation speed to normal speed
+            rotationSpeed = 3.0;
+            document.documentElement.style.setProperty('--rotation-speed', rotationSpeed + 's');
+            
+            // Re-synchronize animation - force restart
+            const marker = document.querySelector('.marker');
+            if (marker) {
+                marker.style.animation = 'none';
+                marker.offsetHeight; // Force reflow
+                marker.style.animation = `rotate ${rotationSpeed}s linear infinite`;
+                // Wait for next frame to ensure animation has started
+                requestAnimationFrame(() => {
+                    animationStartTime = Date.now();
+                    console.log('Animation restarted and synchronized at:', animationStartTime);
+                });
+            } else {
+                animationStartTime = Date.now();
+            }
+            currentAnimationDuration = rotationSpeed;
+            
+            updateStats();
+        }
+
+        function showHitFeedback(text, className) {
+            const feedback = document.createElement('div');
+            feedback.className = 'hit-feedback ' + className;
+            feedback.textContent = text;
+            feedback.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 36px;
+                font-weight: bold;
+                pointer-events: none;
+                animation: hit-feedback 1.2s ease-out forwards;
+                text-shadow: 0 0 25px currentColor;
+            `;
+            document.querySelector('.game-area').appendChild(feedback);
+            setTimeout(() => feedback.remove(), 1200);
+        }
+
+        function updateStats() {
+            const statItems = document.querySelectorAll('.stat-item');
+            if (statItems.length >= 7) {
+                // Calculate real accuracy based on hits vs total attempts
+                if (gameStats.totalInputs > 0) {
+                    gameStats.accuracy = (gameStats.hits / gameStats.totalInputs) * 100;
+                } else {
+                    gameStats.accuracy = 0;
+                }
+                
+                // Update stats with accurate real-time values
+                statItems[0].querySelector('.stat-value').innerHTML = `${gameStats.score.toLocaleString()} <span class="stat-trend trend-up">↗ +pts</span>`;
+                statItems[1].querySelector('.stat-value').innerHTML = `${gameStats.accuracy.toFixed(1)}% <span class="stat-trend ${gameStats.accuracy >= 50 ? 'trend-up' : 'trend-down'}">${gameStats.accuracy >= 50 ? '↗' : '↘'}</span>`;
+                statItems[2].querySelector('.stat-value').innerHTML = `${gameStats.streak} <span class="stat-trend ${gameStats.streak > 0 ? 'trend-up' : 'trend-neutral'}">${gameStats.streak > 0 ? '↗' : '•'}</span>`;
+                statItems[3].querySelector('.stat-value').textContent = gameStats.bestTime < 999 ? gameStats.bestTime.toFixed(3) + 's' : '--';
+                statItems[4].querySelector('.stat-value').innerHTML = `${gameStats.totalLocks.toLocaleString()} <span class="stat-trend trend-up">↗</span>`;
+                
+                // Session time (statItems[5]) is updated by the timer
+                // Input rate (statItems[6]) is updated by updateInputRate()
+            }
+        }
+
+        function updateFPS() {
+            frameCount++;
+            const now = performance.now();
+            if (now - lastFpsTime >= 1000) {
+                const fps = Math.round(frameCount * 1000 / (now - lastFpsTime));
+                const fpsElement = document.getElementById('fps-counter');
+                if (fpsElement) {
+                    fpsElement.textContent = fps;
+                }
+                frameCount = 0;
+                lastFpsTime = now;
+            }
+            requestAnimationFrame(updateFPS);
+        }
+
+        // Game initialization complete - all functions properly defined above
+        
+        // Timer to update session time
+        setInterval(() => {
+            if (isGameRunning) {
+                gameStats.sessionTime.seconds++;
+                if (gameStats.sessionTime.seconds >= 60) {
+                    gameStats.sessionTime.minutes++;
+                    gameStats.sessionTime.seconds = 0;
+                }
+                
+                const timeStr = `${gameStats.sessionTime.minutes}:${gameStats.sessionTime.seconds.toString().padStart(2, '0')}`;
+                document.querySelector('.stat-item:nth-child(7) .stat-value').textContent = timeStr;
+            }
+        }, 1000);
+
+        // Game Over and Restart Functions
+        function showGameOver() {
+            // Pause the game
+            isGameRunning = false;
+            
+            // Update final stats in the modal
+            document.getElementById('finalScore').textContent = gameStats.score.toLocaleString();
+            document.getElementById('finalLocks').textContent = gameStats.totalLocks.toLocaleString();
+            document.getElementById('finalStreak').textContent = gameStats.maxStreak || gameStats.streak;
+            document.getElementById('finalAccuracy').textContent = gameStats.accuracy.toFixed(1) + '%';
+            
+            // Show the game over modal
+            document.getElementById('gameOverModal').style.display = 'flex';
+        }
+        
+        function restartGame() {
+            // Hide the game over modal
+            document.getElementById('gameOverModal').style.display = 'none';
+            
+            // Reset game stats but keep some session stats
+            const sessionStartTime = gameStats.sessionStartTime;
+            gameStats = {
+                score: 0,
+                accuracy: 100.0,
+                streak: 0,
+                bestTime: 999.999,
+                totalLocks: 0,
+                sessionTime: { minutes: 0, seconds: 0 },
+                combo: 1.0,
+                hits: 0,
+                misses: 0,
+                totalInputs: 0,
+                lastInputTime: 0,
+                perfectHits: 0,
+                perfectStreak: 0,
+                maxStreak: 0,
+                sessionStartTime: Date.now()
+            };
+            
+            // Reset rotation speed to normal speed
+            rotationSpeed = 3.0;
+            document.documentElement.style.setProperty('--rotation-speed', rotationSpeed + 's');
+            
+            // Re-synchronize animation - force restart
+            const marker = document.querySelector('.marker');
+            if (marker) {
+                marker.style.animation = 'none';
+                marker.offsetHeight; // Force reflow
+                marker.style.animation = `rotate ${rotationSpeed}s linear infinite`;
+                // Wait for next frame to ensure animation has started
+                requestAnimationFrame(() => {
+                    animationStartTime = Date.now();
+                    console.log('Animation restarted and synchronized at:', animationStartTime);
+                });
+            } else {
+                animationStartTime = Date.now();
+            }
+            currentAnimationDuration = rotationSpeed;
+            
+            // Reset spam protection
+            spamProtection.inputHistory = [];
+            spamProtection.isBlocked = false;
+            spamProtection.blockEndTime = 0;
+            
+            // Clear any blocking flags
+            isTargetBlocked = false;
+            
+            // Restart game directly at normal speed
+            gameStarted = false;
+            autoStartGame();
+            
+            console.log('Game restarted at normal speed');
+        }
+
+        // Auto-start game at normal speed
+        function autoStartGame() {
+            if (gameStarted) return;
+            gameStarted = true;
+            
+            console.log('Auto-starting game at normal speed');
+            
+            // Set normal rotation speed (3.0s = 100%)
+            rotationSpeed = 3.0;
+            
+            // Reset game stats
+            gameStats = {
+                score: 0,
+                accuracy: 100.0,
+                streak: 0,
+                bestTime: 999.999,
+                totalLocks: 0,
+                sessionTime: { minutes: 0, seconds: 0 },
+                combo: 1.0,
+                hits: 0,
+                misses: 0,
+                totalInputs: 0,
+                lastInputTime: 0,
+                perfectHits: 0,
+                perfectStreak: 0,
+                maxStreak: 0,
+                sessionStartTime: Date.now()
+            };
+            
+            // Set rotation speed and start game
+            document.documentElement.style.setProperty('--rotation-speed', rotationSpeed + 's');
+            
+            // Initialize animation synchronization - force restart
+            const marker = document.querySelector('.marker');
+            if (marker) {
+                marker.style.animation = 'none';
+                marker.offsetHeight; // Force reflow
+                marker.style.animation = `rotate ${rotationSpeed}s linear infinite`;
+                // Wait for next frame to ensure animation has started
+                requestAnimationFrame(() => {
+                    animationStartTime = Date.now();
+                    console.log('Initial animation started and synchronized at:', animationStartTime);
+                });
+            } else {
+                animationStartTime = Date.now();
+            }
+            currentAnimationDuration = rotationSpeed;
+            
+            isGameRunning = true;
+            randomizeTarget();
+            updateStats();
+            updateFPS();
+            
+            console.log('Game auto-started at normal speed: 3.0s');
+        }
+
+        // Initialize enhanced game - auto-start at normal speed
+        console.log('Game loaded, auto-starting at normal speed');
+        autoStartGame();
+    </script>
+</body>
+</html>

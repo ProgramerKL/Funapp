@@ -13,7 +13,13 @@
       "Bash(open vex-calculator.html)",
       "WebFetch(domain:www.dropbox.com)",
       "WebFetch(domain:kb.roboticseducation.org)",
-      "WebSearch"
+      "WebSearch",
+      "mcp__ct-devmcp__do_dis",
+      "Bash(git checkout:*)",
+      "Bash(open \"/Users/kyleliu/#Cloud/Dropbox/KyleDropboxShare/KyleCode/KyleCoding/Ai_coding/Funapp/.superdesign/design_iterations/ide_gaming_dashboard_spam_resistant_1.html\")",
+      "Bash(open \"/Users/kyleliu/#Cloud/Dropbox/KyleDropboxShare/KyleCode/KyleCoding/Ai_coding/Funapp/test-game.html\")",
+      "Bash(open \"/Users/kyleliu/#Cloud/Dropbox/KyleDropboxShare/KyleCode/KyleCoding/Ai_coding/Funapp/pop-the-lock-fixed.html\")",
+      "Bash(open:*)"
     ],
     "deny": [],
     "ask": []
