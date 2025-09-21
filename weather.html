@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canadian Weather Dashboard v3.0 - Open-Meteo API</title>
+    <!-- Cache buster: <?php echo time(); ?> -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .search-box {
+            display: flex;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            padding: 10px 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .search-input {
+            background: none;
+            border: none;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            color: white;
+            width: 300px;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            border-radius: 50px;
+            padding: 15px 25px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .weather-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .main-weather {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 3rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .location {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .temp-display {
+            font-size: 4rem;
+            font-weight: 700;
+            margin: 1rem 0;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .weather-desc {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            text-transform: capitalize;
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .detail-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .detail-label {
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-value {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin: 2rem 0;
+        }
+
+        .error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid rgba(244, 67, 54, 0.5);
+            color: #ffcdd2;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .weather-icon {
+            font-size: 4rem;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .weather-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-input {
+                width: 200px;
+            }
+            
+            .temp-display {
+                font-size: 3rem;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">🏠 Back to Portfolio</a>
+    
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🌤️ Canadian Weather</h1>
+            <p class="subtitle">Real-time weather from Open-Meteo API</p>
+        </div>
+
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" class="search-input" id="cityInput" placeholder="Enter Canadian city (e.g., Toronto, Vancouver)" onkeypress="handleEnter(event)">
+                <button class="search-btn" onclick="getWeather()">🔍 Search</button>
+            </div>
+        </div>
+
+        <div class="info-card" id="dataSourceInfo" style="display: none; margin-bottom: 2rem; text-align: center;">
+            <h4 id="dataSourceTitle">🟢 Live Open-Meteo Data</h4>
+            <p id="dataSourceDesc">Real-time weather observations from Open-Meteo's global weather network</p>
+        </div>
+
+        <div id="weatherContent">
+            <div class="loading" id="loadingMessage" style="display: none;">
+                🔄 Loading weather data...
+            </div>
+            
+            <div class="error" id="errorMessage" style="display: none;">
+                ❌ City not found or API error. Please try another Canadian city.
+            </div>
+
+            <div id="weatherDisplay" style="display: none;">
+                <div class="weather-grid">
+                    <div class="main-weather">
+                        <div class="location" id="location">
+                            📍 Loading...
+                        </div>
+                        <div class="weather-icon" id="weatherIcon">🌤️</div>
+                        <div class="temp-display" id="temperature">--°C</div>
+                        <div class="weather-desc" id="description">Loading...</div>
+                        
+                        <div class="weather-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Feels Like</div>
+                                <div class="detail-value" id="feelsLike">--°C</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Humidity</div>
+                                <div class="detail-value" id="humidity">--%</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Wind Speed</div>
+                                <div class="detail-value" id="windSpeed">-- km/h</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Pressure</div>
+                                <div class="detail-value" id="pressure">-- hPa</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar">
+                        <div class="info-card">
+                            <h3>🌡️ Temperature Range</h3>
+                            <p>High: <span id="tempMax">--°C</span></p>
+                            <p>Low: <span id="tempMin">--°C</span></p>
+                        </div>
+                        
+                        <div class="info-card">
+                            <h3>🌅 Sun Times</h3>
+                            <p>Sunrise: <span id="sunrise">--:--</span></p>
+                            <p>Sunset: <span id="sunset">--:--</span></p>
+                        </div>
+                        
+                        <div class="info-card">
+                            <h3>👁️ Visibility</h3>
+                            <p><span id="visibility">-- km</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-card" style="margin-top: 2rem; text-align: center;">
+            <h3>🍁 Popular Canadian Cities</h3>
+            <p style="margin-top: 1rem;">
+                <button class="search-btn" style="margin: 0.25rem;" onclick="searchCity('Toronto')">Toronto</button>
+                <button class="search-btn" style="margin: 0.25rem;" onclick="searchCity('Vancouver')">Vancouver</button>
+                <button class="search-btn" style="margin: 0.25rem;" onclick="searchCity('Montreal')">Montreal</button>
+                <button class="search-btn" style="margin: 0.25rem;" onclick="searchCity('Calgary')">Calgary</button>
+                <button class="search-btn" style="margin: 0.25rem;" onclick="searchCity('Ottawa')">Ottawa</button>
+                <button class="search-btn" style="margin: 0.25rem;" onclick="searchCity('Edmonton')">Edmonton</button>
+            </p>
+            <p style="margin-top: 0.5rem;">
+                <button class="search-btn" style="margin: 0.25rem;" onclick="searchCity('Winnipeg')">Winnipeg</button>
+                <button class="search-btn" style="margin: 0.25rem;" onclick="searchCity('Quebec')">Quebec City</button>
+                <button class="search-btn" style="margin: 0.25rem;" onclick="searchCity('Halifax')">Halifax</button>
+                <button class="search-btn" style="margin: 0.25rem;" onclick="searchCity('Saskatoon')">Saskatoon</button>
+            </p>
+        </div>
+
+        <div class="info-card" style="margin-top: 2rem; text-align: left;">
+            <h3>🔧 API Configuration</h3>
+            <p><strong>Data Sources:</strong></p>
+            <ul style="margin-left: 1rem; opacity: 0.9;">
+                <li>🌍 <strong>Open-Meteo:</strong> Free, open-source weather API (no registration required)</li>
+                <li>🔴 <strong>Demo Data:</strong> Fallback when API is unavailable</li>
+            </ul>
+            <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
+                Open-Meteo provides accurate weather data without requiring API keys. Learn more at <a href="https://open-meteo.com/" target="_blank" style="color: #87CEEB;">open-meteo.com</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Weather icons mapping
+        const weatherIcons = {
+            'clear sky': '☀️',
+            'few clouds': '🌤️',
+            'scattered clouds': '⛅',
+            'broken clouds': '☁️',
+            'shower rain': '🌦️',
+            'rain': '🌧️',
+            'thunderstorm': '⛈️',
+            'snow': '❄️',
+            'mist': '🌫️',
+            'fog': '🌫️',
+            'haze': '🌫️'
+        };
+
+        function handleEnter(event) {
+            if (event.key === 'Enter') {
+                getWeather();
+            }
+        }
+
+        function searchCity(cityName) {
+            document.getElementById('cityInput').value = cityName;
+            getWeather();
+        }
+
+        async function getWeather() {
+            const city = document.getElementById('cityInput').value.trim();
+            
+            if (!city) {
+                showError('Please enter a city name');
+                return;
+            }
+
+            showLoading(true);
+            hideError();
+            hideWeatherDisplay();
+
+            try {
+                // Using Environment Canada API for real Canadian weather data
+                const weatherData = await fetchCanadianWeather(city);
+                displayWeather(weatherData);
+            } catch (error) {
+                console.error('Error fetching weather:', error);
+                showError('Unable to fetch weather data. Please try again.');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Fetch Canadian weather data using Open-Meteo API
+        async function fetchCanadianWeather(city) {
+            console.log(`🌤️ Attempting to fetch Open-Meteo data for ${city}...`);
+            
+            try {
+                const weatherData = await fetchOpenMeteoData(city);
+                if (weatherData) {
+                    console.log(`✅ Successfully fetched Open-Meteo data for ${city}: ${weatherData.temp}°C`);
+                    weatherData.isRealData = true;
+                    weatherData.source = 'Open-Meteo';
+                    return weatherData;
+                }
+            } catch (error) {
+                console.warn(`⚠️ Open-Meteo API failed for ${city}:`, error.message);
+                console.log('🔄 Falling back to demo data...');
+            }
+            
+            // Fallback to realistic demo data if API is unavailable
+            const fallbackData = getFallbackWeatherData(city);
+            fallbackData.isRealData = false;
+            fallbackData.source = 'Demo Data';
+            return fallbackData;
+        }
+
+        // Open-Meteo API implementation for Canadian cities
+        async function fetchOpenMeteoData(city) {
+            // City coordinates for major Canadian cities
+            const cityCoords = {
+                'toronto': { lat: 43.7, lon: -79.4, name: 'Toronto, ON' },
+                'vancouver': { lat: 49.2, lon: -123.1, name: 'Vancouver, BC' },
+                'montreal': { lat: 45.5, lon: -73.6, name: 'Montreal, QC' },
+                'calgary': { lat: 51.0, lon: -114.1, name: 'Calgary, AB' },
+                'ottawa': { lat: 45.4, lon: -75.7, name: 'Ottawa, ON' },
+                'edmonton': { lat: 53.5, lon: -113.5, name: 'Edmonton, AB' },
+                'winnipeg': { lat: 49.9, lon: -97.1, name: 'Winnipeg, MB' },
+                'quebec': { lat: 46.8, lon: -71.2, name: 'Quebec City, QC' },
+                'quebeccity': { lat: 46.8, lon: -71.2, name: 'Quebec City, QC' },
+                'halifax': { lat: 44.6, lon: -63.6, name: 'Halifax, NS' },
+                'saskatoon': { lat: 52.1, lon: -106.7, name: 'Saskatoon, SK' }
+            };
+
+            const normalizedCity = city.toLowerCase().replace(/[^a-z]/g, '');
+            const coords = cityCoords[normalizedCity];
+            
+            if (!coords) {
+                throw new Error('City coordinates not found');
+            }
+
+            // Build Open-Meteo API URL with current and daily weather data
+            const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,surface_pressure,wind_speed_10m,visibility&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=auto&forecast_days=1`;
+
+            try {
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`Open-Meteo API failed: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                if (!data.current) {
+                    throw new Error('No current weather data from Open-Meteo');
+                }
+
+                const current = data.current;
+                const daily = data.daily;
+
+                // Convert weather code to description
+                const weatherDescription = getOpenMeteoDescription(current.weather_code);
+
+                return {
+                    name: coords.name,
+                    temp: Math.round(current.temperature_2m),
+                    feels_like: Math.round(current.apparent_temperature),
+                    humidity: Math.round(current.relative_humidity_2m),
+                    pressure: Math.round(current.surface_pressure),
+                    visibility: Math.round(current.visibility / 1000), // Convert m to km
+                    wind_speed: Math.round(current.wind_speed_10m * 3.6), // Convert m/s to km/h
+                    description: weatherDescription,
+                    temp_min: Math.round(daily.temperature_2m_min[0]),
+                    temp_max: Math.round(daily.temperature_2m_max[0]),
+                    sunrise: formatTime(daily.sunrise[0]),
+                    sunset: formatTime(daily.sunset[0]),
+                    station: 'Open-Meteo Weather Station',
+                    timestamp: new Date().toLocaleString(),
+                    source: 'Open-Meteo'
+                };
+            } catch (error) {
+                console.error('Open-Meteo API error:', error);
+                throw error;
+            }
+        }
+
+        // Convert Open-Meteo weather codes to descriptions
+        function getOpenMeteoDescription(code) {
+            const weatherCodes = {
+                0: 'clear sky',
+                1: 'mainly clear',
+                2: 'partly cloudy',
+                3: 'overcast',
+                45: 'fog',
+                48: 'depositing rime fog',
+                51: 'light drizzle',
+                53: 'moderate drizzle',
+                55: 'dense drizzle',
+                61: 'slight rain',
+                63: 'moderate rain',
+                65: 'heavy rain',
+                71: 'slight snow',
+                73: 'moderate snow',
+                75: 'heavy snow',
+                80: 'slight rain showers',
+                81: 'moderate rain showers',
+                82: 'violent rain showers',
+                95: 'thunderstorm',
+                96: 'thunderstorm with slight hail',
+                99: 'thunderstorm with heavy hail'
+            };
+            
+            return weatherCodes[code] || 'unknown';
+        }
+
+        // Format sunrise/sunset time from ISO string
+        function formatTime(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                hour12: false 
+            });
+        }
+
+        // Fallback weather data if API is unavailable
+        function getFallbackWeatherData(city) {
+            const canadianCities = {
+                'toronto': {
+                    name: 'Toronto, ON',
+                    temp: -2,
+                    feels_like: -6,
+                    humidity: 78,
+                    pressure: 1013,
+                    visibility: 10,
+                    wind_speed: 15,
+                    description: 'light snow',
+                    temp_min: -5,
+                    temp_max: 1,
+                    sunrise: '07:42',
+                    sunset: '17:18'
+                },
+                'vancouver': {
+                    name: 'Vancouver, BC',
+                    temp: 17,
+                    feels_like: 16,
+                    humidity: 76,
+                    pressure: 1019,
+                    visibility: 10,
+                    wind_speed: 12,
+                    description: 'few clouds',
+                    temp_min: 15,
+                    temp_max: 19,
+                    sunrise: '06:52',
+                    sunset: '19:22'
+                },
+                'montreal': {
+                    name: 'Montreal, QC',
+                    temp: -8,
+                    feels_like: -14,
+                    humidity: 72,
+                    pressure: 1021,
+                    visibility: 12,
+                    wind_speed: 18,
+                    description: 'clear sky',
+                    temp_min: -12,
+                    temp_max: -3,
+                    sunrise: '07:35',
+                    sunset: '17:25'
+                },
+                'calgary': {
+                    name: 'Calgary, AB',
+                    temp: -12,
+                    feels_like: -18,
+                    humidity: 65,
+                    pressure: 1025,
+                    visibility: 15,
+                    wind_speed: 22,
+                    description: 'few clouds',
+                    temp_min: -16,
+                    temp_max: -7,
+                    sunrise: '08:15',
+                    sunset: '17:45'
+                },
+                'ottawa': {
+                    name: 'Ottawa, ON',
+                    temp: -5,
+                    feels_like: -11,
+                    humidity: 80,
+                    pressure: 1016,
+                    visibility: 9,
+                    wind_speed: 16,
+                    description: 'broken clouds',
+                    temp_min: -9,
+                    temp_max: -1,
+                    sunrise: '07:38',
+                    sunset: '17:22'
+                },
+                'edmonton': {
+                    name: 'Edmonton, AB',
+                    temp: -15,
+                    feels_like: -22,
+                    humidity: 68,
+                    pressure: 1028,
+                    visibility: 14,
+                    wind_speed: 20,
+                    description: 'snow',
+                    temp_min: -19,
+                    temp_max: -9,
+                    sunrise: '08:32',
+                    sunset: '17:28'
+                },
+                'winnipeg': {
+                    name: 'Winnipeg, MB',
+                    temp: -18,
+                    feels_like: -25,
+                    humidity: 72,
+                    pressure: 1030,
+                    visibility: 12,
+                    wind_speed: 25,
+                    description: 'clear sky',
+                    temp_min: -22,
+                    temp_max: -12,
+                    sunrise: '08:05',
+                    sunset: '17:15'
+                },
+                'quebec': {
+                    name: 'Quebec City, QC',
+                    temp: 18,
+                    feels_like: 17,
+                    humidity: 70,
+                    pressure: 1018,
+                    visibility: 12,
+                    wind_speed: 10,
+                    description: 'clear sky',
+                    temp_min: 16,
+                    temp_max: 20,
+                    sunrise: '06:25',
+                    sunset: '18:54'
+                },
+                'quebeccity': {
+                    name: 'Quebec City, QC',
+                    temp: 18,
+                    feels_like: 17,
+                    humidity: 70,
+                    pressure: 1018,
+                    visibility: 12,
+                    wind_speed: 10,
+                    description: 'clear sky',
+                    temp_min: 16,
+                    temp_max: 20,
+                    sunrise: '06:25',
+                    sunset: '18:54'
+                },
+                'halifax': {
+                    name: 'Halifax, NS',
+                    temp: 2,
+                    feels_like: -2,
+                    humidity: 88,
+                    pressure: 1015,
+                    visibility: 7,
+                    wind_speed: 20,
+                    description: 'light rain',
+                    temp_min: -1,
+                    temp_max: 5,
+                    sunrise: '07:15',
+                    sunset: '17:35'
+                },
+                'saskatoon': {
+                    name: 'Saskatoon, SK',
+                    temp: -20,
+                    feels_like: -28,
+                    humidity: 70,
+                    pressure: 1032,
+                    visibility: 13,
+                    wind_speed: 18,
+                    description: 'clear sky',
+                    temp_min: -25,
+                    temp_max: -15,
+                    sunrise: '08:25',
+                    sunset: '17:20'
+                }
+            };
+
+            const normalizedCity = city.toLowerCase().replace(/[^a-z]/g, '');
+            const weatherData = canadianCities[normalizedCity];
+
+            if (!weatherData) {
+                throw new Error('City not found');
+            }
+
+            return weatherData;
+        }
+
+        function displayWeather(data) {
+            console.log('🔍 DISPLAYING WEATHER DATA:', data);
+            console.log('🌡️ Temperature value:', data.temp);
+            
+            // Update location with data source indicator
+            let locationText = `📍 ${data.name}`;
+            if (data.isRealData && data.source) {
+                if (data.source === 'Open-Meteo') {
+                    locationText += ` 🌍 Open-Meteo`;
+                } else {
+                    locationText += ` 🟢 ${data.source}`;
+                }
+                if (data.station) {
+                    locationText += ` - ${data.station}`;
+                }
+            } else if (data.isRealData) {
+                locationText += ` 🟢 LIVE DATA`;
+            } else {
+                locationText += ` 🔴 DEMO DATA`;
+            }
+            document.getElementById('location').innerHTML = locationText;
+            
+            // Update temperature with debugging
+            const tempText = `${data.temp}°C`;
+            console.log('🔢 Setting temperature text to:', tempText);
+            document.getElementById('temperature').textContent = tempText;
+            
+            // Update weather icon and description
+            const icon = weatherIcons[data.description] || '🌤️';
+            document.getElementById('weatherIcon').textContent = icon;
+            
+            let descText = data.description;
+            if (data.isRealData && data.timestamp) {
+                descText += ` (Updated: ${data.timestamp})`;
+            } else if (!data.isRealData) {
+                descText += ` (Sample Data)`;
+            }
+            document.getElementById('description').textContent = descText;
+            
+            // Update details
+            document.getElementById('feelsLike').textContent = `${data.feels_like}°C`;
+            document.getElementById('humidity').textContent = `${data.humidity}%`;
+            document.getElementById('windSpeed').textContent = `${data.wind_speed} km/h`;
+            document.getElementById('pressure').textContent = `${data.pressure} hPa`;
+            
+            // Update temperature range
+            document.getElementById('tempMax').textContent = `${data.temp_max}°C`;
+            document.getElementById('tempMin').textContent = `${data.temp_min}°C`;
+            
+            // Update sun times
+            document.getElementById('sunrise').textContent = data.sunrise;
+            document.getElementById('sunset').textContent = data.sunset;
+            
+            // Update visibility
+            document.getElementById('visibility').textContent = `${data.visibility} km`;
+            
+            // Update data source banner
+            const sourceInfo = document.getElementById('dataSourceInfo');
+            const sourceTitle = document.getElementById('dataSourceTitle');
+            const sourceDesc = document.getElementById('dataSourceDesc');
+            
+            if (data.isRealData) {
+                if (data.source === 'Open-Meteo') {
+                    sourceTitle.textContent = '🌍 Live Open-Meteo Data';
+                    sourceDesc.textContent = 'Real-time weather conditions from Open-Meteo\'s global network';
+                } else {
+                    sourceTitle.textContent = '🟢 Live Weather Data';
+                    sourceDesc.textContent = `Real-time observations from ${data.source || data.station || 'weather stations'}`;
+                }
+                sourceInfo.style.display = 'block';
+            } else {
+                sourceTitle.textContent = '🔴 Sample Weather Data';
+                sourceDesc.textContent = 'Using realistic sample data - Weather APIs temporarily unavailable';
+                sourceInfo.style.display = 'block';
+            }
+            
+            showWeatherDisplay();
+            
+            // Log data source for debugging
+            if (data.isRealData) {
+                console.log('🟢 REAL Environment Canada data from:', data.station || 'Weather Station');
+            } else {
+                console.log('🔴 Using fallback demo data for:', data.name);
+            }
+        }
+
+        function showLoading(show) {
+            document.getElementById('loadingMessage').style.display = show ? 'block' : 'none';
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        function showWeatherDisplay() {
+            document.getElementById('weatherDisplay').style.display = 'block';
+        }
+
+        function hideWeatherDisplay() {
+            document.getElementById('weatherDisplay').style.display = 'none';
+        }
+
+        // Load Toronto weather by default
+        window.addEventListener('load', function() {
+            console.log('🚀 Weather app v2.3 loaded - Accurate sun times');
+            console.log('📍 Expected: Vancouver=22°C, Quebec City=20°C');
+            console.log('🌅 Sun times: Vancouver 06:52-19:22, Quebec 06:25-18:54');
+            searchCity('Toronto');
+        });
+        
+        // Force refresh on F5 to avoid cache issues
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+                window.location.reload(true);
+            }
+        });
+    </script>
+</body>
+</html>

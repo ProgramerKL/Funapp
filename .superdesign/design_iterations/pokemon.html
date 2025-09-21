@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon Lore Hub - Minimalist</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: #fafafa;
+            color: #2c3e50;
+            line-height: 1.8;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .search-bar {
+            background: white;
+            margin: -30px auto 3rem;
+            max-width: 600px;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            position: relative;
+            z-index: 100;
+        }
+
+        .search-bar input {
+            border: none;
+            outline: none;
+            flex: 1;
+            font-size: 1.1rem;
+            padding: 0.5rem;
+        }
+
+        .search-bar button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .search-bar button:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+        }
+
+        .content-area {
+            display: grid;
+            gap: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        .lore-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .lore-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+
+        .lore-header {
+            padding: 2rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .lore-title {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .lore-meta {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .lore-content {
+            padding: 0 2rem 2rem;
+            font-size: 1.1rem;
+        }
+
+        .lore-excerpt {
+            color: #5a6c7d;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .read-more {
+            color: #667eea;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .read-more:hover {
+            color: #5a67d8;
+            transform: translateX(3px);
+        }
+
+        .category-tags {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tag {
+            background: #f8f9fa;
+            color: #495057;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .sidebar-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .lore-header, .lore-content {
+                padding: 1.5rem;
+            }
+            
+            .search-bar {
+                margin: -20px auto 2rem;
+                padding: 0.75rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="sidebar-toggle">☰</button>
+    
+    <div class="header">
+        <div class="container">
+            <h1>Pokemon Lore Archive</h1>
+            <p>Discover the deep stories and legends of the Pokemon world</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="search-bar">
+            <input type="text" placeholder="Search legends, regions, or Pokemon...">
+            <button>Search</button>
+        </div>
+
+        <div class="content-area">
+            <article class="lore-card">
+                <div class="lore-header">
+                    <div class="category-tags">
+                        <span class="tag">Legendary</span>
+                        <span class="tag">Kanto</span>
+                    </div>
+                    <h2 class="lore-title">The Birth of Mewtwo: A Dark Genesis</h2>
+                    <div class="lore-meta">
+                        <span>📅 Last updated: Sep 2024</span>
+                        <span>👁️ 2,847 views</span>
+                        <span>🏷️ Canonical</span>
+                    </div>
+                </div>
+                <div class="lore-content">
+                    <p class="lore-excerpt">
+                        Deep beneath Cinnabar Island, in the hidden laboratories of the Pokemon Mansion, 
+                        a team of scientists embarked on the most ambitious genetic experiment ever attempted. 
+                        Using DNA recovered from ancient Mew fossils discovered in the jungles of Guyana, 
+                        they sought to create the ultimate Pokemon...
+                    </p>
+                    <a href="#" class="read-more">Continue reading →</a>
+                </div>
+            </article>
+
+            <article class="lore-card">
+                <div class="lore-header">
+                    <div class="category-tags">
+                        <span class="tag">Regional</span>
+                        <span class="tag">Johto</span>
+                    </div>
+                    <h2 class="lore-title">The Burned Tower's Tragic History</h2>
+                    <div class="lore-meta">
+                        <span>📅 Last updated: Sep 2024</span>
+                        <span>👁️ 1,523 views</span>
+                        <span>🏷️ Interpretive</span>
+                    </div>
+                </div>
+                <div class="lore-content">
+                    <p class="lore-excerpt">
+                        Once known as the Brass Tower, this magnificent structure stood as a symbol of harmony 
+                        between humans and Pokemon in ancient Ecruteak City. Built to honor Ho-Oh, the tower 
+                        was said to be where the legendary Phoenix Pokemon would rest during its travels...
+                    </p>
+                    <a href="#" class="read-more">Continue reading →</a>
+                </div>
+            </article>
+
+            <article class="lore-card">
+                <div class="lore-header">
+                    <div class="category-tags">
+                        <span class="tag">Mythology</span>
+                        <span class="tag">Sinnoh</span>
+                    </div>
+                    <h2 class="lore-title">Arceus and the Creation of Reality</h2>
+                    <div class="lore-meta">
+                        <span>📅 Last updated: Sep 2024</span>
+                        <span>👁️ 4,291 views</span>
+                        <span>🏷️ Canonical</span>
+                    </div>
+                </div>
+                <div class="lore-content">
+                    <p class="lore-excerpt">
+                        Before there was time, before there was space, there was only the void. From this 
+                        nothingness emerged Arceus, the Alpha Pokemon, born from an egg that materialized 
+                        in the chaos. With its thousand arms, Arceus shaped the universe itself...
+                    </p>
+                    <a href="#" class="read-more">Continue reading →</a>
+                </div>
+            </article>
+        </div>
+    </div>
+
+    <script>
+        // Simple search functionality
+        document.querySelector('.search-bar button').addEventListener('click', function() {
+            const query = document.querySelector('.search-bar input').value;
+            if (query.trim()) {
+                alert(`Searching for: "${query}"\n\nThis would fetch relevant lore entries from the database.`);
+            }
+        });
+
+        // Enter key support
+        document.querySelector('.search-bar input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.querySelector('.search-bar button').click();
+            }
+        });
+
+        // Card click handler
+        document.querySelectorAll('.lore-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                if (e.target.classList.contains('read-more')) return;
+                const title = this.querySelector('.lore-title').textContent;
+                alert(`Opening full article: "${title}"\n\nThis would navigate to the complete lore entry.`);
+            });
+        });
+
+        // Sidebar toggle (placeholder)
+        document.querySelector('.sidebar-toggle').addEventListener('click', function() {
+            alert('Sidebar would show:\n• Categories\n• Recent articles\n• Popular lore\n• Timeline view');
+        });
+    </script>
+</body>
+</html>

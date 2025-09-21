@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokeAPI Information Hub</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .api-info {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+
+        .endpoint-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            color: #4a5568;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .endpoint-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .endpoint-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .endpoint-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .endpoint-name {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            font-family: 'Courier New', monospace;
+            background: #f7fafc;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .endpoint-desc {
+            color: #4a5568;
+            font-size: 0.95rem;
+        }
+
+        .base-url {
+            background: #2d3748;
+            color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .usage-note {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+
+        .usage-note h3 {
+            margin-top: 0;
+            font-size: 1.4rem;
+        }
+
+        .example {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        .emoji {
+            font-size: 1.5rem;
+            margin-right: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .endpoint-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>=% PokeAPI v2 - Complete Reference</h1>
+            <p style="font-size: 1.2rem; color: #64748b; margin: 0;">
+                The comprehensive RESTful API for all your Pokémon data needs
+            </p>
+        </div>
+
+        <div class="api-info">
+            <h3>< API Base Information</h3>
+            <div class="base-url">https://pokeapi.co/api/v2/</div>
+            <p><strong>Format:</strong> JSON | <strong>Authentication:</strong> None Required | <strong>Rate Limit:</strong> Fair Use Policy</p>
+        </div>
+
+        <div class="endpoint-section">
+            <h2 class="section-title">
+                <span class="emoji">=></span>
+                Pokémon Data Endpoints
+            </h2>
+            <div class="endpoint-grid">
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/pokemon</div>
+                    <div class="endpoint-desc">Complete Pokémon information including stats, abilities, moves, types, and sprites. The core endpoint for individual Pokémon data.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/pokemon-species</div>
+                    <div class="endpoint-desc">Species-specific data including evolution chains, flavor text entries, genus information, and regional variants.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/pokemon-form</div>
+                    <div class="endpoint-desc">Different forms of Pokémon such as Alolan forms, Mega evolutions, and regional variants with specific sprites.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/pokemon-color</div>
+                    <div class="endpoint-desc">Color classifications for Pokémon used in Pokédex entries and game mechanics.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/pokemon-shape</div>
+                    <div class="endpoint-desc">Body shape categories that group Pokémon by their physical appearance structure.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/pokemon-habitat</div>
+                    <div class="endpoint-desc">Natural habitat classifications where Pokémon can typically be found in the wild.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="endpoint-section">
+            <h2 class="section-title">
+                <span class="emoji">”</span>
+                Battle & Game Mechanics
+            </h2>
+            <div class="endpoint-grid">
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/ability</div>
+                    <div class="endpoint-desc">Special abilities that Pokémon can have, including their effects, descriptions, and which Pokémon can have them.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/move</div>
+                    <div class="endpoint-desc">Battle moves with damage values, accuracy, PP, type, category, and detailed descriptions of effects.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/type</div>
+                    <div class="endpoint-desc">Elemental types with effectiveness relationships, damage multipliers, and lists of Pokémon and moves.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/stat</div>
+                    <div class="endpoint-desc">Base stats (HP, Attack, Defense, Sp. Attack, Sp. Defense, Speed) and their game mechanics.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/nature</div>
+                    <div class="endpoint-desc">Personality traits that affect stat growth, including increased/decreased stats and flavor preferences.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/move-damage-class</div>
+                    <div class="endpoint-desc">Classification of moves as Physical, Special, or Status attacks with their battle mechanics.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="endpoint-section">
+            <h2 class="section-title">
+                <span class="emoji">=</span>
+                Evolution System
+            </h2>
+            <div class="endpoint-grid">
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/evolution-chain</div>
+                    <div class="endpoint-desc">Complete evolution paths showing all stages, requirements, and conditions for Pokémon evolution.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/evolution-trigger</div>
+                    <div class="endpoint-desc">Methods that trigger evolution such as leveling up, using stones, trading, or special conditions.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="endpoint-section">
+            <h2 class="section-title">
+                <span class="emoji"><’</span>
+                Items & World Data
+            </h2>
+            <div class="endpoint-grid">
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/item</div>
+                    <div class="endpoint-desc">All game items including Poké Balls, medicines, evolution stones, and their effects and descriptions.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/berry</div>
+                    <div class="endpoint-desc">Berry-specific data with flavors, effects, growth times, and contest stat bonuses.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/location</div>
+                    <div class="endpoint-desc">Game world locations and regions where Pokémon can be found or events occur.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/location-area</div>
+                    <div class="endpoint-desc">Specific areas within locations with encounter data and available Pokémon.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/encounter-method</div>
+                    <div class="endpoint-desc">Ways to encounter Pokémon such as walking in grass, surfing, fishing, or special events.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="endpoint-section">
+            <h2 class="section-title">
+                <span class="emoji"><®</span>
+                Game Information
+            </h2>
+            <div class="endpoint-grid">
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/generation</div>
+                    <div class="endpoint-desc">Pokémon generations with their main series games, introduced Pokémon, moves, and abilities.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/pokedex</div>
+                    <div class="endpoint-desc">Regional Pokédex information with entries and version-specific data.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/version</div>
+                    <div class="endpoint-desc">Individual game versions with their specific features and Pokémon availability.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/version-group</div>
+                    <div class="endpoint-desc">Groups of related game versions that share mechanics and Pokémon data.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="endpoint-section">
+            <h2 class="section-title">
+                <span class="emoji"><Æ</span>
+                Contest & Competition
+            </h2>
+            <div class="endpoint-grid">
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/contest-effect</div>
+                    <div class="endpoint-desc">Contest move effects with appeal points, jam effects, and performance descriptions.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/contest-type</div>
+                    <div class="endpoint-desc">Contest categories (Cool, Beauty, Cute, Smart, Tough) with their associated moves and berries.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/move-learn-method</div>
+                    <div class="endpoint-desc">How Pokémon learn moves: level up, TM/TR, breeding, tutoring, or special events.</div>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-name">/move-target</div>
+                    <div class="endpoint-desc">Move targeting information for battle mechanics (single target, all opponents, etc.).</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="usage-note">
+            <h3>=€ Usage Examples</h3>
+            <p><strong>Get Pikachu's data:</strong></p>
+            <div class="example">GET https://pokeapi.co/api/v2/pokemon/pikachu</div>
+            <div class="example">GET https://pokeapi.co/api/v2/pokemon/25</div>
+            
+            <p><strong>Get all Fire-type moves:</strong></p>
+            <div class="example">GET https://pokeapi.co/api/v2/type/fire</div>
+            
+            <p><strong>Get evolution chain:</strong></p>
+            <div class="example">GET https://pokeapi.co/api/v2/evolution-chain/1</div>
+            
+            <p><strong>=Ý Notes:</strong></p>
+            <ul>
+                <li>All endpoints support both ID numbers and names</li>
+                <li>Responses are paginated with 20 items per page by default</li>
+                <li>No API key required - completely free to use</li>
+                <li>CORS enabled for browser-based applications</li>
+                <li>Rate limiting based on fair use policy</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
