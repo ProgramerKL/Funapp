@@ -1,0 +1,45 @@
+version: "1.0.0"
+generatedBy: "edp-6-mcp"
+timestamp: "2024-09-14T16:30:00Z"
+originalIntent: "Check pokemonprd.md for problems and spaces for improvement, then make the improvements to the prd file"
+scope:
+  allowedPaths:
+    - "pokemonprd.md"
+  forbiddenPaths:
+    - "pokeapi-display.html"
+    - "index.html"
+    - "*.js"
+    - "*.css"
+  newFiles: []
+apiContracts: []
+acceptanceCriteria:
+  - id: "AC-001"
+    description: "Fix architectural mismatch between current simple portfolio and proposed wiki platform"
+    given: "PRD proposes full wiki platform"
+    when: "User reviews updated PRD"
+    then: "Scope matches current project capabilities (static site with API integration)"
+  - id: "AC-002"
+    description: "Resolve scope explosion from simple display to full platform"
+    given: "PRD jumps from Pokemon display to collaborative wiki"
+    when: "User reads updated scope"
+    then: "Realistic incremental phases that build on existing pokeapi-display.html"
+  - id: "AC-003"
+    description: "Address technical feasibility issues"
+    given: "PRD requires backend/database that doesn't exist"
+    when: "User reviews technical requirements"
+    then: "Technical stack aligns with current static file architecture"
+  - id: "AC-004"
+    description: "Clarify ambiguous requirements and success metrics"
+    given: "Vague success metrics and undefined user roles"
+    when: "User reviews updated requirements"
+    then: "Specific, measurable criteria with clear definitions"
+nonGoals:
+  - "Implementing the actual Pokemon wiki system"
+  - "Creating backend infrastructure"
+  - "Adding new HTML/CSS/JS files"
+  - "Modifying existing implementations"
+complexityBudget:
+  maxNewFunctions: 0
+  maxNewFiles: 0
+  maxLinesOfCode: 200
+  maxDependencies: 0

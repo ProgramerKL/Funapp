@@ -1,0 +1,2122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird - Extreme Progression</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #87CEEB 100%);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            animation: skyAnimation 20s ease-in-out infinite alternate;
+        }
+        
+        @keyframes skyAnimation {
+            0% { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #87CEEB 100%); }
+            50% { background: linear-gradient(135deg, #2980b9 0%, #6bb6ff 50%, #87CEEB 100%); }
+            100% { background: linear-gradient(135deg, #74b9ff 0%, #0984e3 50%, #fdcb6e 100%); }
+        }
+
+        .game-container {
+            position: relative;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 30px rgba(255,255,255,0.1);
+            overflow: hidden;
+            transform: scale(0.85);
+            border: 3px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        #gameCanvas {
+            display: block;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 100%);
+            border-radius: 17px;
+        }
+
+        .score-display {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255,215,0,0.8), 2px 2px 8px rgba(0,0,0,0.9);
+            text-align: center;
+            background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(255,255,255,0.1) 100%);
+            padding: 12px 20px;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            animation: scoreGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes scoreGlow {
+            0% { text-shadow: 0 0 10px rgba(255,215,0,0.8), 2px 2px 8px rgba(0,0,0,0.9); }
+            100% { text-shadow: 0 0 20px rgba(255,215,0,1), 2px 2px 8px rgba(0,0,0,0.9); }
+        }
+
+        .level-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(255,69,0,0.8), 1px 1px 4px rgba(0,0,0,0.9);
+            background: linear-gradient(135deg, rgba(255,69,0,0.2) 0%, rgba(0,0,0,0.4) 100%);
+            padding: 12px 18px;
+            border-radius: 25px;
+            border: 2px solid rgba(255,69,0,0.4);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 6px 20px rgba(255,69,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .level-display:hover {
+            transform: scale(1.05);
+            border-color: rgba(255,69,0,0.6);
+            box-shadow: 0 8px 25px rgba(255,69,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+
+        .extreme-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 12px;
+            text-shadow: 0 0 6px rgba(255,0,0,0.8), 1px 1px 3px rgba(0,0,0,0.9);
+            background: linear-gradient(135deg, rgba(255,0,0,0.3) 0%, rgba(139,0,0,0.5) 100%);
+            padding: 10px 15px;
+            border-radius: 20px;
+            text-align: right;
+            border: 2px solid rgba(255,255,255,0.4);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 6px 20px rgba(255,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+            animation: extremeInfoPulse 1.5s ease-in-out infinite alternate;
+        }
+        
+        @keyframes extremeInfoPulse {
+            0% { 
+                border-color: rgba(255,255,255,0.4);
+                box-shadow: 0 6px 20px rgba(255,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+            }
+            100% { 
+                border-color: rgba(255,255,255,0.7);
+                box-shadow: 0 8px 25px rgba(255,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.3);
+            }
+        }
+
+        .intensity-bar {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 16px;
+            background: linear-gradient(90deg, rgba(0,0,0,0.7) 0%, rgba(50,50,50,0.8) 100%);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 3px solid rgba(255,255,255,0.4);
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.1);
+        }
+
+        .intensity-fill {
+            height: 100%;
+            background: linear-gradient(90deg, 
+                #00FF88 0%, 
+                #88FF00 15%, 
+                #FFFF00 30%, 
+                #FFAA00 45%, 
+                #FF6600 60%, 
+                #FF0000 75%, 
+                #CC0000 85%, 
+                #8B0000 100%);
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 0 10px rgba(255,69,0,0.6), inset 0 2px 4px rgba(255,255,255,0.3);
+            border-radius: 9px;
+            animation: intensityGlow 1s ease-in-out infinite alternate;
+        }
+        
+        @keyframes intensityGlow {
+            0% { box-shadow: 0 0 10px rgba(255,69,0,0.6), inset 0 2px 4px rgba(255,255,255,0.3); }
+            100% { box-shadow: 0 0 20px rgba(255,69,0,0.8), inset 0 2px 4px rgba(255,255,255,0.4); }
+        }
+
+        .warning-flash {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,0,0,0.3);
+            display: none;
+            animation: warningPulse 0.5s ease-in-out;
+        }
+
+        @keyframes warningPulse {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .extreme-notification {
+            position: absolute;
+            top: 90px;
+            right: 20px;
+            background: linear-gradient(135deg, #FF4500 0%, #DC143C 100%);
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border: 2px solid #FFD700;
+            animation: slideInRight 1s ease-out;
+            max-width: 150px;
+        }
+
+        @keyframes slideInRight {
+            0% { 
+                transform: translateX(200px); 
+                opacity: 0; 
+            }
+            100% { 
+                transform: translateX(0); 
+                opacity: 1; 
+            }
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            text-align: center;
+            font-size: 14px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            opacity: 0.8;
+        }
+
+        .start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            overflow-y: auto;
+        }
+        
+        .level-selection {
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .level-card {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            border: 2px solid #718096;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 130px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 10;
+            user-select: none;
+        }
+        
+        /* Temporarily disabled for debugging
+        .level-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+            pointer-events: none;
+        }
+        
+        .level-card:hover:before {
+            transform: translateX(100%);
+        }
+        */"}
+        
+        .level-card:hover {
+            border-color: #FF4500;
+            background: linear-gradient(135deg, #FF4500 0%, #FF6500 50%, #DC143C 100%);
+            transform: scale(1.08) translateY(-4px);
+            box-shadow: 0 12px 30px rgba(255,69,0,0.4), inset 0 2px 4px rgba(255,255,255,0.2);
+        }
+        
+        .level-card.selected {
+            border-color: #FFD700;
+            background: linear-gradient(135deg, #FF6500 0%, #FF8500 50%, #E6143C 100%);
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 8px 25px rgba(255,69,0,0.4), inset 0 2px 4px rgba(255,255,255,0.3);
+            transform: scale(1.05);
+            animation: selectedPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes selectedPulse {
+            0%, 100% { 
+                box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 8px 25px rgba(255,69,0,0.4), inset 0 2px 4px rgba(255,255,255,0.3);
+            }
+            50% { 
+                box-shadow: 0 0 35px rgba(255, 215, 0, 1), 0 12px 35px rgba(255,69,0,0.6), inset 0 2px 6px rgba(255,255,255,0.4);
+            }
+        }
+        
+        .level-name {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #FFD700;
+        }
+        
+        .level-desc {
+            font-size: 10px;
+            color: #E2E8F0;
+            line-height: 1.2;
+        }
+
+        .start-screen h1 {
+            font-size: 52px;
+            margin-bottom: 25px;
+            color: #FF4500;
+            text-shadow: 0 0 30px rgba(255,69,0,1), 0 0 60px rgba(255,69,0,0.5), 4px 4px 8px rgba(0,0,0,0.8);
+            background: linear-gradient(45deg, #FF4500, #FFD700, #FF4500);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: titleGlow 3s ease-in-out infinite;
+        }
+        
+        @keyframes titleGlow {
+            0%, 100% { 
+                background-position: 0% 50%;
+                text-shadow: 0 0 30px rgba(255,69,0,1), 0 0 60px rgba(255,69,0,0.5), 4px 4px 8px rgba(0,0,0,0.8);
+            }
+            50% { 
+                background-position: 100% 50%;
+                text-shadow: 0 0 40px rgba(255,215,0,1), 0 0 80px rgba(255,215,0,0.6), 4px 4px 8px rgba(0,0,0,0.8);
+            }
+        }
+
+        .start-button {
+            background: linear-gradient(135deg, #FF4500 0%, #DC143C 100%);
+            color: white;
+            border: none;
+            padding: 18px 35px;
+            font-size: 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(255,69,0,0.4);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            z-index: 20;
+            position: relative;
+        }
+        
+        /* Temporarily disabled for debugging
+        .start-button:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+            pointer-events: none;
+        }
+        
+        .start-button:hover:before {
+            left: 100%;
+        }
+        */"}
+
+        .start-button:hover {
+            background: linear-gradient(135deg, #FF6500 0%, #FF8500 50%, #E6143C 100%);
+            transform: scale(1.08) translateY(-2px);
+            border-color: rgba(255,255,255,0.5);
+            box-shadow: 0 12px 35px rgba(255,69,0,0.6), inset 0 2px 6px rgba(255,255,255,0.3);
+        }
+        
+        .start-button:active {
+            transform: scale(1.02) translateY(0px);
+            box-shadow: 0 4px 15px rgba(255,69,0,0.4), inset 0 2px 4px rgba(255,255,255,0.2);
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+            border: 2px solid #FF4500;
+        }
+
+        .game-over h2 {
+            color: #FF6B6B;
+            margin-bottom: 15px;
+        }
+
+        .chaos-mode {
+            position: absolute;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            color: #FF0000;
+            font-size: 14px;
+            font-weight: bold;
+            writing-mode: vertical-lr;
+            text-orientation: mixed;
+            background: linear-gradient(180deg, rgba(139,0,0,0.8) 0%, rgba(0,0,0,0.9) 100%);
+            padding: 15px 8px;
+            border-radius: 15px;
+            border: 3px solid #FF0000;
+            display: none;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(255,0,0,0.8), inset 0 2px 4px rgba(255,255,255,0.1);
+            text-shadow: 0 0 10px rgba(255,0,0,1), 2px 2px 4px rgba(0,0,0,1);
+            animation: chaosModePulse 0.8s ease-in-out infinite alternate;
+        }
+        
+        @keyframes chaosModePulse {
+            0% { 
+                border-color: #FF0000;
+                box-shadow: 0 0 20px rgba(255,0,0,0.8), inset 0 2px 4px rgba(255,255,255,0.1);
+            }
+            100% { 
+                border-color: #FF6666;
+                box-shadow: 0 0 30px rgba(255,0,0,1), inset 0 2px 4px rgba(255,255,255,0.2);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="800" height="900"></canvas>
+        
+        <div class="score-display">
+            <div>Score: <span id="score">0</span></div>
+        </div>
+
+        <div class="level-display">
+            <div>Level: <span id="level">1</span></div>
+            <div style="font-size: 12px; margin-top: 2px;">Rage: <span id="rageLevel">Calm</span></div>
+        </div>
+
+        <div class="extreme-info">
+            <div>Speed: <span id="speedMultiplier">1.0x</span></div>
+            <div>Gap: <span id="gapSize">100%</span></div>
+            <div>Gravity: <span id="gravityLevel">1.0x</span></div>
+        </div>
+
+        <div class="intensity-bar">
+            <div class="intensity-fill" id="intensityFill"></div>
+        </div>
+
+        <div class="chaos-mode" id="chaosMode">
+            CHAOS MODE ACTIVE
+        </div>
+
+        <div class="warning-flash" id="warningFlash"></div>
+
+        <div class="controls">
+            Press SPACEBAR, W KEY or TAP to flap • Survive the Chaos!
+        </div>
+
+        <div class="extreme-notification" id="extremeNotification">
+            <div id="extremeText">EXTREME LEVEL!</div>
+            <div style="font-size: 16px; margin-top: 8px;" id="extremeSubtext">Difficulty EXPLODED!</div>
+        </div>
+
+        <div class="start-screen" id="startScreen">
+            <h1>🔥 EXTREME FLAPPY</h1>
+            <p style="margin-bottom: 20px; font-size: 18px; color: #FFD700;">
+                Choose Your Difficulty Level
+            </p>
+            
+            <div class="level-selection">
+                <div style="margin: 20px 0;">
+                    <button onclick="selectLevel('easy')" style="background: #4CAF50; color: white; border: 2px solid transparent; padding: 10px 20px; margin: 5px; border-radius: 5px; cursor: pointer; font-size: 14px;">😊 EASY</button>
+                    <button onclick="selectLevel('normal')" style="background: #2196F3; color: white; border: 2px solid transparent; padding: 10px 20px; margin: 5px; border-radius: 5px; cursor: pointer; font-size: 14px;">😐 NORMAL</button>
+                    <button onclick="selectLevel('hard')" style="background: #FF9800; color: white; border: 2px solid transparent; padding: 10px 20px; margin: 5px; border-radius: 5px; cursor: pointer; font-size: 14px;">😠 HARD</button>
+                    <button onclick="selectLevel('extreme')" style="background: #F44336; color: white; border: 2px solid transparent; padding: 10px 20px; margin: 5px; border-radius: 5px; cursor: pointer; font-size: 14px;">🔥 EXTREME</button>
+                    <button onclick="selectLevel('nightmare')" style="background: #9C27B0; color: white; border: 2px solid transparent; padding: 10px 20px; margin: 5px; border-radius: 5px; cursor: pointer; font-size: 14px;">💀 NIGHTMARE</button>
+                    <button onclick="selectLevel('hell')" style="background: #000000; color: white; border: 2px solid transparent; padding: 10px 20px; margin: 5px; border-radius: 5px; cursor: pointer; font-size: 14px;">👹 HELL</button>
+                </div>
+                
+                <div id="levelInfo" style="max-width: 400px; margin: 10px 0; font-size: 12px; color: #A0AEC0;">
+                    <strong>NORMAL:</strong> Standard progression • Chaos at level 7 • Nightmare at level 15
+                </div>
+                
+                <button onclick="
+                    console.log('Starting game with difficulty:', window.selectedDifficulty);
+                    document.getElementById('startScreen').style.display='none';
+                    if (!window.game) {
+                        console.log('Creating new game...');
+                        window.game = new ExtremeFlappyGame(document.getElementById('gameCanvas'));
+                    }
+                    window.game.setDifficulty(window.selectedDifficulty);
+                    window.game.reset();
+                    
+                    // Force generate the first pipe
+                    window.game.generatePipe();
+                    console.log('Generated first pipe. Pipes array length:', window.game.pipes.length);
+                    
+                    window.game.gameState = 'playing';
+                    console.log('Game started! Bird at:', window.game.bird.x, window.game.bird.y);
+                    console.log('Canvas size:', window.game.width, 'x', window.game.height);
+                    console.log('Pipes:', window.game.pipes.length);
+                " style="background: #FF4500; color: white; border: none; padding: 20px 40px; margin: 20px; border-radius: 10px; cursor: pointer; font-size: 18px; font-weight: bold;">START SELECTED LEVEL</button>
+            </div>
+            
+            <p style="font-size: 10px; margin-top: 15px; opacity: 0.6; color: #FF6B6B;">
+                Use SPACEBAR or W KEY to flap • ESC to return to menu
+            </p>
+        </div>
+
+        <div class="game-over" id="gameOver">
+            <h2>CHAOS DEFEATED YOU!</h2>
+            <p>Survived Score: <span id="finalScore">0</span></p>
+            <p>Chaos Level: <span id="finalLevel">1</span></p>
+            <p>Best Survival: <span id="finalBestScore">0</span></p>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+                <button class="start-button" onclick="restartGame()">TRY AGAIN</button>
+                <button class="start-button" onclick="returnToLevelSelect()" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">CHANGE LEVEL</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ExtremeFlappyGame {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.width = canvas.width;
+                this.height = canvas.height;
+                
+                this.gameState = 'start';
+                this.score = 0;
+                this.bestScore = localStorage.getItem('flappyExtremeBest') || 0;
+                this.level = 1;
+                this.selectedDifficulty = 'normal'; // Default difficulty
+                this.pointsForNextLevel = 3; // Will be adjusted by difficulty
+                
+                this.bird = {
+                    x: 150,
+                    y: this.height / 2,
+                    velocity: 0,
+                    radius: 18,
+                    rotation: 0
+                };
+                
+                // EXTREME base difficulty settings (scaled for larger canvas)
+                this.baseDifficulty = {
+                    gravity: 0.4,
+                    flapPower: -8,
+                    pipeSpeed: 3.2,
+                    pipeGap: 200,
+                    pipeSpacing: 350  // Increased further for more comfortable spacing
+                };
+                
+                // Current difficulty (starts at base but EXPLODES)
+                this.difficulty = { ...this.baseDifficulty };
+                
+                this.pipes = [];
+                this.pipeWidth = 80;
+                this.chaosMode = false;
+                
+                this.setupEventListeners();
+                this.setDifficulty('normal'); // Set default difficulty
+                this.updateUI();
+                
+                // Initialize particle systems
+                this.particles = [];
+                this.sparkles = [];
+                this.fireflies = [];
+                
+                this.gameLoop();
+            }
+            
+            setDifficulty(difficulty) {
+                this.selectedDifficulty = difficulty;
+                
+                // Define difficulty presets
+                const presets = {
+                    easy: {
+                        speedIncrease: 0.08,  // 8% per level
+                        gapReduction: 4,      // 4px per level
+                        gravityIncrease: 0.05, // 5% per level
+                        spacingReduction: 8,   // 8px per level
+                        pointsPerLevel: 8,     // Slower progression
+                        chaosLevel: 15,        // Chaos starts later
+                        nightmareLevel: 25,    // Nightmare much later
+                        maxSpeedMultiplier: 3, // Max 300% speed
+                        minGap: 120,          // Larger minimum gap
+                        maxGravityMultiplier: 2.5, // Max 250% gravity
+                        minSpacing: 250       // Minimum spacing between pipes (increased further)
+                    },
+                    normal: {
+                        speedIncrease: 0.15,   // 15% per level
+                        gapReduction: 8,       // 8px per level
+                        gravityIncrease: 0.12, // 12% per level
+                        spacingReduction: 15,  // 15px per level
+                        pointsPerLevel: 5,     // Standard progression
+                        chaosLevel: 10,        // Chaos at level 10
+                        nightmareLevel: 18,    // Nightmare at level 18
+                        maxSpeedMultiplier: 4, // Max 400% speed
+                        minGap: 95,           // Standard minimum gap
+                        maxGravityMultiplier: 3.5, // Max 350% gravity
+                        minSpacing: 220       // Minimum spacing between pipes (increased further)
+                    },
+                    hard: {
+                        speedIncrease: 0.22,   // 22% per level
+                        gapReduction: 10,      // 10px per level
+                        gravityIncrease: 0.16, // 16% per level
+                        spacingReduction: 18,  // 18px per level
+                        pointsPerLevel: 3,     // Fast progression
+                        chaosLevel: 7,         // Early chaos
+                        nightmareLevel: 12,    // Earlier nightmare
+                        maxSpeedMultiplier: 5, // Max 500% speed
+                        minGap: 80,           // Tighter gap
+                        maxGravityMultiplier: 4, // Max 400% gravity
+                        minSpacing: 200       // Minimum spacing between pipes (increased further)
+                    },
+                    extreme: {
+                        speedIncrease: 0.30,   // 30% per level!
+                        gapReduction: 14,      // 14px per level!
+                        gravityIncrease: 0.20, // 20% per level!
+                        spacingReduction: 25,  // 25px per level!
+                        pointsPerLevel: 2,     // Very fast progression
+                        chaosLevel: 5,         // Very early chaos
+                        nightmareLevel: 8,     // Very early nightmare
+                        maxSpeedMultiplier: 7, // Max 700% speed!
+                        minGap: 65,           // Very tight gap
+                        maxGravityMultiplier: 5, // Max 500% gravity
+                        minSpacing: 180       // Minimum spacing between pipes (increased further)
+                    },
+                    nightmare: {
+                        speedIncrease: 0.40,   // 40% per level!!
+                        gapReduction: 16,      // 16px per level!!
+                        gravityIncrease: 0.25, // 25% per level!!
+                        spacingReduction: 35,  // 35px per level!!
+                        pointsPerLevel: 1,     // Insane progression
+                        chaosLevel: 3,         // Immediate chaos
+                        nightmareLevel: 5,     // Immediate nightmare
+                        maxSpeedMultiplier: 10, // Max 1000% speed!!
+                        minGap: 50,           // Impossibly tight
+                        maxGravityMultiplier: 8, // Max 800% gravity
+                        minSpacing: 160       // Close spacing (increased further)
+                    },
+                    hell: {
+                        speedIncrease: 0.60,   // 60% per level!!!
+                        gapReduction: 20,      // 20px per level!!!
+                        gravityIncrease: 0.35, // 35% per level!!!
+                        spacingReduction: 45,  // 45px per level!!!
+                        pointsPerLevel: 1,     // Every point = new level
+                        chaosLevel: 1,         // Chaos from start
+                        nightmareLevel: 2,     // Nightmare immediately
+                        maxSpeedMultiplier: 15, // Max 1500% speed!!!
+                        minGap: 45,           // Developer challenge
+                        maxGravityMultiplier: 12, // Max 1200% gravity
+                        minSpacing: 140       // Very close spacing (increased further)
+                    }
+                };
+                
+                this.difficultyPreset = presets[difficulty];
+                this.pointsForNextLevel = this.difficultyPreset.pointsPerLevel;
+            }
+            
+            calculateExtremeDifficulty() {
+                const levelProgress = (this.level - 1);
+                const preset = this.difficultyPreset;
+                
+                // Speed increases based on difficulty preset
+                const speedMultiplier = 1 + (levelProgress * preset.speedIncrease);
+                this.difficulty.pipeSpeed = Math.min(this.baseDifficulty.pipeSpeed * preset.maxSpeedMultiplier, 
+                                                    this.baseDifficulty.pipeSpeed * speedMultiplier);
+                
+                // Gap shrinks based on preset
+                const gapReduction = levelProgress * preset.gapReduction;
+                this.difficulty.pipeGap = Math.max(preset.minGap, this.baseDifficulty.pipeGap - gapReduction);
+                
+                // Gravity increases based on preset
+                const gravityMultiplier = 1 + (levelProgress * preset.gravityIncrease);
+                this.difficulty.gravity = Math.min(this.baseDifficulty.gravity * preset.maxGravityMultiplier,
+                                                  this.baseDifficulty.gravity * gravityMultiplier);
+                
+                // Spacing gets tight based on preset
+                const spacingReduction = levelProgress * preset.spacingReduction;
+                this.difficulty.pipeSpacing = Math.max(preset.minSpacing, this.baseDifficulty.pipeSpacing - spacingReduction);
+                
+                // Activate modes based on preset
+                this.chaosMode = this.level >= preset.chaosLevel;
+                this.nightmareMode = this.level >= preset.nightmareLevel;
+                
+                this.updateExtremeDisplay();
+                this.showWarningEffects();
+            }
+            
+            updateExtremeDisplay() {
+                // Speed multiplier
+                const speedMult = (this.difficulty.pipeSpeed / this.baseDifficulty.pipeSpeed).toFixed(1);
+                document.getElementById('speedMultiplier').textContent = speedMult + 'x';
+                document.getElementById('speedMultiplier').style.color = 
+                    speedMult >= 3 ? '#FF0000' : speedMult >= 2 ? '#FF8800' : '#FFFF00';
+                
+                // Gap percentage
+                const gapPercent = Math.round((this.difficulty.pipeGap / this.baseDifficulty.pipeGap) * 100);
+                document.getElementById('gapSize').textContent = gapPercent + '%';
+                document.getElementById('gapSize').style.color = 
+                    gapPercent <= 50 ? '#FF0000' : gapPercent <= 70 ? '#FF8800' : '#FFFF00';
+                
+                // Gravity multiplier
+                const gravityMult = (this.difficulty.gravity / this.baseDifficulty.gravity).toFixed(1);
+                document.getElementById('gravityLevel').textContent = gravityMult + 'x';
+                document.getElementById('gravityLevel').style.color = 
+                    gravityMult >= 2.5 ? '#FF0000' : gravityMult >= 1.8 ? '#FF8800' : '#FFFF00';
+                
+                // Rage level indicator
+                let rageLevel = 'Calm';
+                let rageLevelColor = '#00FF00';
+                if (this.level >= 15) { rageLevel = 'INSANE'; rageLevelColor = '#8B0000'; }
+                else if (this.level >= 12) { rageLevel = 'FURIOUS'; rageLevelColor = '#FF0000'; }
+                else if (this.level >= 9) { rageLevel = 'ENRAGED'; rageLevelColor = '#FF4500'; }
+                else if (this.level >= 6) { rageLevel = 'ANGRY'; rageLevelColor = '#FF8800'; }
+                else if (this.level >= 3) { rageLevel = 'ANNOYED'; rageLevelColor = '#FFFF00'; }
+                
+                document.getElementById('rageLevel').textContent = rageLevel;
+                document.getElementById('rageLevel').style.color = rageLevelColor;
+                
+                // Intensity progress bar
+                const intensityPercent = Math.min(100, ((this.level - 1) / 19) * 100);
+                document.getElementById('intensityFill').style.width = intensityPercent + '%';
+                
+                // Chaos mode indicator
+                document.getElementById('chaosMode').style.display = this.chaosMode ? 'block' : 'none';
+            }
+            
+            showWarningEffects() {
+                if (this.level >= 8) {
+                    const flash = document.getElementById('warningFlash');
+                    flash.style.display = 'block';
+                    setTimeout(() => {
+                        flash.style.display = 'none';
+                    }, 500);
+                }
+            }
+            
+            checkLevelUp() {
+                const newLevel = Math.floor(this.score / this.pointsForNextLevel) + 1;
+                
+                if (newLevel > this.level) {
+                    this.level = newLevel;
+                    this.calculateExtremeDifficulty();
+                    this.showExtremeNotification();
+                    this.updateUI();
+                }
+            }
+            
+            showExtremeNotification() {
+                const notification = document.getElementById('extremeNotification');
+                const extremeText = document.getElementById('extremeText');
+                const subtextElement = document.getElementById('extremeSubtext');
+                
+                let levelText = `LEVEL ${this.level}`;
+                let subtext = 'Difficulty EXPLODED!';
+                
+                if (this.level >= 15) {
+                    levelText = `🔥 HELLSCAPE ${this.level} 🔥`;
+                    subtext = 'ABSOLUTE CHAOS UNLEASHED!';
+                } else if (this.level >= 10) {
+                    levelText = `⚡ CHAOS LEVEL ${this.level} ⚡`;
+                    subtext = 'MADNESS ACTIVATED!';
+                } else if (this.level >= 5) {
+                    levelText = `💥 RAGE LEVEL ${this.level} 💥`;
+                    subtext = 'EXTREME DIFFICULTY!';
+                }
+                
+                extremeText.textContent = levelText;
+                subtextElement.textContent = subtext;
+                
+                notification.style.display = 'block';
+                
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 1500);
+            }
+            
+            setupEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space' || e.code === 'KeyW') {
+                        e.preventDefault();
+                        this.flap();
+                    }
+                    if (e.code === 'Escape' && this.gameState !== 'start') {
+                        e.preventDefault();
+                        this.returnToMenu();
+                    }
+                });
+                
+                this.canvas.addEventListener('click', () => {
+                    this.flap();
+                });
+            }
+            
+            flap() {
+                if (this.gameState === 'playing') {
+                    // Flap power stays same for fairness, but gravity fights back harder
+                    this.bird.velocity = this.difficulty.flapPower;
+                    this.bird.rotation = -20;
+                }
+            }
+            
+            update() {
+                if (this.gameState !== 'playing') return;
+                
+                // Update bird with EXTREME physics
+                this.bird.velocity += this.difficulty.gravity;
+                
+                // Terminal velocity increases BRUTALLY with level
+                const terminalVelocity = 8 + (this.level * 0.8);
+                this.bird.velocity = Math.min(this.bird.velocity, terminalVelocity);
+                
+                // Chaos mode effects - controlled chaos without upward launches
+                if (this.chaosMode) {
+                    // Only add downward or small horizontal velocity adjustments
+                    const chaosEffect = Math.random() * 0.3; // 0 to 0.3 downward only
+                    this.bird.velocity += chaosEffect;
+                    // Random screen shake effect (horizontal only)
+                    if (Math.random() < 0.1) {
+                        this.bird.x += (Math.random() - 0.5) * 2;
+                    }
+                }
+                
+                // NIGHTMARE MODE effects - extreme but controlled
+                if (this.nightmareMode) {
+                    // Extreme downward chaos only
+                    const nightmareEffect = Math.random() * 0.6; // 0 to 0.6 downward only
+                    this.bird.velocity += nightmareEffect;
+                    // More frequent position chaos (horizontal only)
+                    if (Math.random() < 0.15) {
+                        this.bird.x += (Math.random() - 0.5) * 4;
+                    }
+                    // Controlled gravity fluctuations (only increases)
+                    if (Math.random() < 0.1) {
+                        this.difficulty.gravity += Math.random() * 0.1;
+                    }
+                }
+                
+                this.bird.y += this.bird.velocity;
+                
+                // More dramatic rotation
+                this.bird.rotation = Math.max(-35, Math.min(70, this.bird.velocity * 4));
+                
+                // Generate pipes with extreme spacing
+                if (this.pipes.length === 0 || this.pipes[this.pipes.length - 1].x < this.width - this.difficulty.pipeSpacing) {
+                    this.generatePipe();
+                }
+                
+                // Update pipes at EXTREME speed
+                this.pipes.forEach(pipe => {
+                    pipe.x -= this.difficulty.pipeSpeed;
+                });
+                
+                // Remove pipes and update score
+                this.pipes = this.pipes.filter(pipe => {
+                    if (pipe.x + this.pipeWidth < 0) {
+                        if (!pipe.scored) {
+                            this.score++;
+                            pipe.scored = true;
+                            this.checkLevelUp();
+                            this.updateUI();
+                        }
+                        return false;
+                    }
+                    return true;
+                });
+                
+                this.checkCollisions();
+            }
+            
+            generatePipe() {
+                // BRUTAL gap positioning - extremely dangerous
+                const minGapY = 20 + (this.level * 2); // Gets closer to edges with level
+                const maxGapY = this.height - this.difficulty.pipeGap - (20 + this.level * 2);
+                let gapY = minGapY + Math.random() * (maxGapY - minGapY);
+                
+                // Chaos mode: unpredictable gap positioning
+                if (this.chaosMode) {
+                    gapY += (Math.random() - 0.5) * 30;
+                }
+                
+                // Nightmare mode: EXTREME positioning chaos
+                if (this.nightmareMode) {
+                    gapY += (Math.random() - 0.5) * 60;
+                }
+                
+                gapY = Math.max(minGapY, Math.min(maxGapY, gapY));
+                
+                this.pipes.push({
+                    x: this.width,
+                    topHeight: gapY,
+                    bottomY: gapY + this.difficulty.pipeGap,
+                    scored: false
+                });
+            }
+            
+            checkCollisions() {
+                // BRUTAL collision detection at higher levels
+                const collisionTolerance = Math.max(-1, 2 - (this.level * 0.3));
+                
+                // Ground and ceiling
+                if (this.bird.y - this.bird.radius + collisionTolerance < 0 || 
+                    this.bird.y + this.bird.radius - collisionTolerance > this.height) {
+                    this.gameOver();
+                    return;
+                }
+                
+                // Pipes with tighter hitboxes
+                this.pipes.forEach(pipe => {
+                    if (this.bird.x + this.bird.radius - collisionTolerance > pipe.x && 
+                        this.bird.x - this.bird.radius + collisionTolerance < pipe.x + this.pipeWidth) {
+                        if (this.bird.y - this.bird.radius + collisionTolerance < pipe.topHeight || 
+                            this.bird.y + this.bird.radius - collisionTolerance > pipe.bottomY) {
+                            this.gameOver();
+                        }
+                    }
+                });
+            }
+            
+            render() {
+                // Debug: Log render calls occasionally
+                if (Math.random() < 0.01) { // 1% chance to log
+                    console.log('Render called. GameState:', this.gameState, 'Bird position:', this.bird.x, this.bird.y);
+                }
+                
+                // BRUTAL background that transforms with level
+                const intensityLevel = Math.min(1, this.level / 12);
+                const hueShift = this.level * 12; // MASSIVE color shifts
+                const time = Date.now() * 0.002;
+                
+                // Enhanced animated gradient background with multiple layers
+                const gradient = this.ctx.createLinearGradient(0, 0, 0, this.height);
+                const baseHue1 = 200 - hueShift + Math.sin(time) * 15;
+                const baseHue2 = 120 - hueShift + Math.cos(time * 0.7) * 20;
+                const baseHue3 = 60 - hueShift + Math.sin(time * 1.2) * 12;
+                
+                gradient.addColorStop(0, `hsl(${baseHue1}, ${70 + intensityLevel * 30}%, ${85 - intensityLevel * 35}%)`);
+                gradient.addColorStop(0.3, `hsl(${baseHue2}, ${65 + intensityLevel * 35}%, ${80 - intensityLevel * 30}%)`);
+                gradient.addColorStop(0.6, `hsl(${baseHue3}, ${60 + intensityLevel * 40}%, ${75 - intensityLevel * 35}%)`);
+                gradient.addColorStop(0.8, `hsl(${baseHue3 - 15}, ${70 + intensityLevel * 30}%, ${85 - intensityLevel * 40}%)`);
+                gradient.addColorStop(1, `hsl(${baseHue3 - 30}, ${80 + intensityLevel * 20}%, ${90 - intensityLevel * 45}%)`);
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.width, this.height);
+                
+                // Add subtle moving clouds in background
+                this.drawBackgroundClouds();
+                
+                // Animated particles/stars at higher levels
+                if (this.level >= 5) {
+                    this.drawAnimatedParticles();
+                }
+                
+                // Draw dramatic storm clouds at level 6+
+                if (this.level >= 6) {
+                    this.drawStormClouds();
+                }
+                
+                // Lightning effects in nightmare mode
+                if (this.nightmareMode && Math.random() < 0.05) {
+                    this.drawLightning();
+                }
+                
+                // Draw enhanced pipes with 3D effects and textures
+                const dangerHue = Math.max(0, 120 - (this.level * 8)); // Green to red progression
+                const pipeTime = Date.now() * 0.001;
+                
+                this.pipes.forEach((pipe, index) => {
+                    this.drawSimplePipe(pipe, dangerHue, pipeTime, index);
+                });
+                
+                // Draw simple particle effects
+                this.updateAndDrawSimpleParticles();
+                
+                // Draw original enhanced bird
+                this.drawExtremeBird();
+            }
+            
+            
+            drawAnimatedParticles() {
+                const particleTime = Date.now() * 0.001;
+                const particleCount = Math.min(20, this.level * 2);
+                
+                this.ctx.fillStyle = `rgba(255, 255, 255, ${0.3 + Math.sin(particleTime) * 0.2})`;
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const x = (i * 30 + Math.sin(particleTime + i) * 20) % this.width;
+                    const y = (i * 25 + Math.cos(particleTime * 0.8 + i) * 30) % this.height;
+                    const size = 1 + Math.sin(particleTime * 2 + i) * 1;
+                    
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+            }
+            
+            drawStormClouds() {
+                const stormTime = Date.now() * 0.001;
+                const opacity = 0.4 + (this.level - 6) * 0.06 + Math.sin(stormTime) * 0.1;
+                this.ctx.fillStyle = `rgba(40, 40, 60, ${opacity})`;
+                
+                // Animated cloud positions
+                this.drawCloud(60 + Math.sin(stormTime * 0.3) * 10, 80 + Math.cos(stormTime * 0.2) * 5, 45);
+                this.drawCloud(200 + Math.cos(stormTime * 0.4) * 8, 60 + Math.sin(stormTime * 0.3) * 6, 55);
+                this.drawCloud(340 + Math.sin(stormTime * 0.2) * 12, 90 + Math.cos(stormTime * 0.5) * 4, 50);
+                this.drawCloud(120 + Math.cos(stormTime * 0.6) * 6, 110 + Math.sin(stormTime * 0.4) * 8, 40);
+                this.drawCloud(280 + Math.sin(stormTime * 0.5) * 9, 100 + Math.cos(stormTime * 0.3) * 7, 45);
+            }
+            
+            drawLightning() {
+                this.ctx.strokeStyle = `rgba(255, 255, 255, ${0.8 + Math.random() * 0.2})`;
+                this.ctx.lineWidth = 3;
+                this.ctx.shadowBlur = 15;
+                this.ctx.shadowColor = 'white';
+                
+                const startX = Math.random() * this.width;
+                let currentX = startX;
+                let currentY = 0;
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(currentX, currentY);
+                
+                while (currentY < this.height) {
+                    currentY += 20 + Math.random() * 30;
+                    currentX += (Math.random() - 0.5) * 40;
+                    this.ctx.lineTo(currentX, currentY);
+                }
+                
+                this.ctx.stroke();
+                this.ctx.shadowBlur = 0;
+            }
+
+            drawCloud(x, y, size) {
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, size * 0.6, 0, Math.PI * 2);
+                this.ctx.arc(x + size * 0.4, y, size * 0.8, 0, Math.PI * 2);
+                this.ctx.arc(x - size * 0.4, y, size * 0.7, 0, Math.PI * 2);
+                this.ctx.arc(x, y - size * 0.3, size * 0.5, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+            
+            drawEnhancedCloud(x, y, size) {
+                // Multiple cloud bubbles with soft edges
+                this.ctx.shadowBlur = 15;
+                this.ctx.shadowColor = 'rgba(255, 255, 255, 0.3)';
+                
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, size * 0.6, 0, Math.PI * 2);
+                this.ctx.arc(x + size * 0.4, y, size * 0.8, 0, Math.PI * 2);
+                this.ctx.arc(x - size * 0.4, y, size * 0.7, 0, Math.PI * 2);
+                this.ctx.arc(x, y - size * 0.3, size * 0.5, 0, Math.PI * 2);
+                this.ctx.arc(x + size * 0.2, y - size * 0.2, size * 0.4, 0, Math.PI * 2);
+                this.ctx.arc(x - size * 0.2, y + size * 0.1, size * 0.3, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                this.ctx.shadowBlur = 0;
+            }
+            
+            drawBackgroundClouds() {
+                const time = Date.now() * 0.0005;
+                
+                // Multiple layers of clouds moving at different speeds with better styling
+                for (let layer = 0; layer < 4; layer++) {
+                    const speed = 0.2 + layer * 0.15;
+                    const offsetX = (time * speed * 100) % (this.width + 300);
+                    const opacity = 0.05 + (layer * 0.03) + Math.sin(time * 2 + layer) * 0.02;
+                    
+                    // Create gradient for each cloud layer
+                    const cloudGradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, 100);
+                    cloudGradient.addColorStop(0, `rgba(255, 255, 255, ${opacity * 1.5})`);
+                    cloudGradient.addColorStop(0.6, `rgba(255, 255, 255, ${opacity})`);
+                    cloudGradient.addColorStop(1, `rgba(255, 255, 255, ${opacity * 0.3})`);
+                    this.ctx.fillStyle = cloudGradient;
+                    
+                    for (let i = 0; i < 5; i++) {
+                        const x = (i * 200 - offsetX) % (this.width + 300);
+                        const y = 80 + layer * 60 + Math.sin(time * 3 + i) * 25;
+                        const size = 25 + layer * 8 + Math.cos(time + i) * 5;
+                        
+                        this.ctx.save();
+                        this.ctx.translate(x, y);
+                        this.drawEnhancedCloud(0, 0, size);
+                        this.ctx.restore();
+                    }
+                }
+            }
+            
+            drawBirdTrail() {
+                if (!this.birdTrail) {
+                    this.birdTrail = [];
+                }
+                
+                // Add current position to trail
+                this.birdTrail.push({
+                    x: this.bird.x,
+                    y: this.bird.y,
+                    time: Date.now()
+                });
+                
+                // Remove old trail points
+                const currentTime = Date.now();
+                this.birdTrail = this.birdTrail.filter(point => currentTime - point.time < 300);
+                
+                // Draw trail
+                this.birdTrail.forEach((point, index) => {
+                    const age = currentTime - point.time;
+                    const opacity = Math.max(0, 1 - age / 300);
+                    const size = 3 + (opacity * 5);
+                    
+                    const trailGradient = this.ctx.createRadialGradient(point.x, point.y, 0, point.x, point.y, size);
+                    trailGradient.addColorStop(0, `rgba(255, 215, 0, ${opacity * 0.8})`);
+                    trailGradient.addColorStop(0.5, `rgba(255, 165, 0, ${opacity * 0.5})`);
+                    trailGradient.addColorStop(1, `rgba(255, 69, 0, ${opacity * 0.2})`);
+                    
+                    this.ctx.fillStyle = trailGradient;
+                    this.ctx.beginPath();
+                    this.ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+            }
+            
+            drawScreenEffects() {
+                const time = Date.now() * 0.01;
+                
+                // Enhanced chromatic aberration for extreme levels
+                if (this.level >= 15) {
+                    this.ctx.globalCompositeOperation = 'screen';
+                    this.ctx.fillStyle = `rgba(255, 0, 0, ${0.04 + Math.sin(time * 1.5) * 0.03})`;
+                    this.ctx.fillRect(2, 0, this.width, this.height);
+                    this.ctx.fillStyle = `rgba(0, 255, 0, ${0.03 + Math.cos(time * 1.3) * 0.02})`;
+                    this.ctx.fillRect(-2, 0, this.width, this.height);
+                    this.ctx.fillStyle = `rgba(0, 0, 255, ${0.025 + Math.sin(time * 1.7) * 0.015})`;
+                    this.ctx.fillRect(0, 1, this.width, this.height);
+                    this.ctx.globalCompositeOperation = 'source-over';
+                }
+                
+                // Enhanced vignette for nightmare mode
+                if (this.nightmareMode) {
+                    const vignetteGradient = this.ctx.createRadialGradient(
+                        this.width / 2, this.height / 2, 0,
+                        this.width / 2, this.height / 2, Math.max(this.width, this.height) * 0.6
+                    );
+                    vignetteGradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+                    vignetteGradient.addColorStop(0.6, 'rgba(0, 0, 0, 0)');
+                    vignetteGradient.addColorStop(0.85, 'rgba(139, 0, 0, 0.2)');
+                    vignetteGradient.addColorStop(1, 'rgba(0, 0, 0, 0.6)');
+                    
+                    this.ctx.fillStyle = vignetteGradient;
+                    this.ctx.fillRect(0, 0, this.width, this.height);
+                    
+                    // Add red pulsing border
+                    this.ctx.strokeStyle = `rgba(255, 0, 0, ${0.3 + Math.sin(time * 2) * 0.2})`;
+                    this.ctx.lineWidth = 8;
+                    this.ctx.strokeRect(4, 4, this.width - 8, this.height - 8);
+                }
+                
+                // Screen shake effect for chaos mode
+                if (this.chaosMode && Math.random() < 0.05) {
+                    const shakeX = (Math.random() - 0.5) * 4;
+                    const shakeY = (Math.random() - 0.5) * 4;
+                    this.ctx.translate(shakeX, shakeY);
+                }
+            }
+            
+            updateAndDrawSimpleParticles() {
+                // Gentle floating particles that complement the natural bird
+                if (Math.random() < 0.02) {
+                    this.particles.push({
+                        x: this.width + 5,
+                        y: Math.random() * this.height,
+                        vx: -0.8 - Math.random() * 0.4,
+                        vy: (Math.random() - 0.5) * 0.2,
+                        size: 0.8 + Math.random() * 1.5,
+                        life: 1.0,
+                        twinkle: Math.random() * Math.PI * 2,
+                        color: `hsl(${45 + Math.random() * 30}, 40%, ${70 + Math.random() * 20}%)`
+                    });
+                }
+                
+                this.particles = this.particles.filter(particle => {
+                    particle.x += particle.vx;
+                    particle.y += particle.vy + Math.sin(Date.now() * 0.002 + particle.twinkle) * 0.1;
+                    particle.life -= 0.008;
+                    particle.twinkle += 0.05;
+                    
+                    if (particle.life > 0 && particle.x > -10) {
+                        const alpha = Math.sin(particle.twinkle) * 0.3 + 0.7;
+                        this.ctx.globalAlpha = particle.life * alpha;
+                        this.ctx.fillStyle = particle.color;
+                        this.ctx.beginPath();
+                        this.ctx.arc(particle.x, particle.y, particle.size * particle.life, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        this.ctx.globalAlpha = 1;
+                        return true;
+                    }
+                    return false;
+                });
+            }
+            
+            drawSimpleBird() {
+                this.ctx.save();
+                this.ctx.translate(this.bird.x, this.bird.y);
+                this.ctx.rotate(this.bird.rotation * Math.PI / 180);
+                
+                // Round bird body
+                const bodyGradient = this.ctx.createRadialGradient(-2, -2, 0, 0, 0, 14);
+                bodyGradient.addColorStop(0, '#FFE135');
+                bodyGradient.addColorStop(0.7, '#FFD700');
+                bodyGradient.addColorStop(1, '#E6C200');
+                
+                this.ctx.fillStyle = bodyGradient;
+                this.ctx.beginPath();
+                this.ctx.arc(0, 0, 14, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Wing
+                this.ctx.fillStyle = '#FF8C00';
+                this.ctx.beginPath();
+                this.ctx.arc(-4, 0, 7, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Beak
+                this.ctx.fillStyle = '#FF6B35';
+                this.ctx.beginPath();
+                this.ctx.moveTo(12, -2);
+                this.ctx.lineTo(18, 0);
+                this.ctx.lineTo(12, 2);
+                this.ctx.closePath();
+                this.ctx.fill();
+                
+                // Eye
+                this.ctx.fillStyle = '#FFF';
+                this.ctx.beginPath();
+                this.ctx.arc(5, -3, 3, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                this.ctx.fillStyle = '#000';
+                this.ctx.beginPath();
+                this.ctx.arc(6, -3, 2, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                this.ctx.restore();
+            }
+            
+            updateAndDrawParticles() {
+                const currentTime = Date.now();
+                
+                // Spawn new particles based on game intensity
+                if (Math.random() < 0.1 + (this.level * 0.02)) {
+                    this.particles.push({
+                        x: this.width + 10,
+                        y: Math.random() * this.height,
+                        vx: -1 - Math.random() * 2,
+                        vy: (Math.random() - 0.5) * 0.5,
+                        size: 1 + Math.random() * 3,
+                        life: 1.0,
+                        decay: 0.005 + Math.random() * 0.01,
+                        color: `hsl(${190 + Math.random() * 60}, 70%, 70%)`
+                    });
+                }
+                
+                // Update and draw particles
+                this.particles = this.particles.filter(particle => {
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    particle.life -= particle.decay;
+                    particle.size *= 0.998;
+                    
+                    if (particle.life > 0 && particle.x > -10) {
+                        this.ctx.save();
+                        this.ctx.globalAlpha = particle.life;
+                        this.ctx.fillStyle = particle.color;
+                        this.ctx.beginPath();
+                        this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        this.ctx.restore();
+                        return true;
+                    }
+                    return false;
+                });
+            }
+            
+            drawFloatingSparkles() {
+                const time = Date.now() * 0.003;
+                
+                // Add sparkles occasionally
+                if (Math.random() < 0.05) {
+                    this.sparkles.push({
+                        x: Math.random() * this.width,
+                        y: Math.random() * this.height,
+                        life: 1.0,
+                        size: 2 + Math.random() * 3,
+                        twinkle: Math.random() * Math.PI * 2
+                    });
+                }
+                
+                // Update and draw sparkles
+                this.sparkles = this.sparkles.filter(sparkle => {
+                    sparkle.life -= 0.01;
+                    sparkle.twinkle += 0.2;
+                    
+                    if (sparkle.life > 0) {
+                        const opacity = sparkle.life * (0.5 + Math.sin(sparkle.twinkle) * 0.5);
+                        this.ctx.save();
+                        this.ctx.globalAlpha = opacity;
+                        this.ctx.fillStyle = 'white';
+                        this.ctx.shadowBlur = 10;
+                        this.ctx.shadowColor = 'white';
+                        
+                        // Draw star shape
+                        this.ctx.translate(sparkle.x, sparkle.y);
+                        this.ctx.rotate(sparkle.twinkle);
+                        this.drawStar(0, 0, sparkle.size);
+                        
+                        this.ctx.restore();
+                        return true;
+                    }
+                    return false;
+                });
+            }
+            
+            drawFireflies() {
+                const time = Date.now() * 0.002;
+                
+                // Add fireflies in calmer levels
+                if (this.level < 8 && Math.random() < 0.02) {
+                    this.fireflies.push({
+                        x: Math.random() * this.width,
+                        y: Math.random() * this.height,
+                        vx: (Math.random() - 0.5) * 0.5,
+                        vy: (Math.random() - 0.5) * 0.5,
+                        life: 1.0,
+                        glow: Math.random() * Math.PI * 2
+                    });
+                }
+                
+                // Update and draw fireflies
+                this.fireflies = this.fireflies.filter(firefly => {
+                    firefly.x += firefly.vx + Math.sin(time + firefly.glow) * 0.3;
+                    firefly.y += firefly.vy + Math.cos(time + firefly.glow) * 0.2;
+                    firefly.life -= 0.003;
+                    firefly.glow += 0.1;
+                    
+                    if (firefly.life > 0 && firefly.x > 0 && firefly.x < this.width) {
+                        const glowIntensity = 0.5 + Math.sin(firefly.glow) * 0.5;
+                        this.ctx.save();
+                        this.ctx.globalAlpha = firefly.life * glowIntensity;
+                        this.ctx.fillStyle = '#FFFF88';
+                        this.ctx.shadowBlur = 15;
+                        this.ctx.shadowColor = '#FFFF88';
+                        this.ctx.beginPath();
+                        this.ctx.arc(firefly.x, firefly.y, 2, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        this.ctx.restore();
+                        return true;
+                    }
+                    return false;
+                });
+            }
+            
+            drawStar(x, y, size) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(x, y - size);
+                this.ctx.lineTo(x + size * 0.3, y - size * 0.3);
+                this.ctx.lineTo(x + size, y);
+                this.ctx.lineTo(x + size * 0.3, y + size * 0.3);
+                this.ctx.lineTo(x, y + size);
+                this.ctx.lineTo(x - size * 0.3, y + size * 0.3);
+                this.ctx.lineTo(x - size, y);
+                this.ctx.lineTo(x - size * 0.3, y - size * 0.3);
+                this.ctx.closePath();
+                this.ctx.fill();
+            }
+            
+            drawSimplePipe(pipe, dangerHue, time, index) {
+                // Ultra-premium metallic pipe with cinematic depth
+                const pulseIntensity = 1 + Math.sin(time * 1.2 + index) * 0.04;
+                const shimmer = Math.sin(time * 3 + index) * 0.02;
+                
+                // Multi-layer shadow system for ultra depth
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                this.ctx.fillRect(pipe.x + 4, 4, this.pipeWidth, pipe.topHeight);
+                this.ctx.fillRect(pipe.x + 4, pipe.bottomY + 4, this.pipeWidth, this.height - pipe.bottomY);
+                
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+                this.ctx.fillRect(pipe.x + 2, 2, this.pipeWidth, pipe.topHeight);
+                this.ctx.fillRect(pipe.x + 2, pipe.bottomY + 2, this.pipeWidth, this.height - pipe.bottomY);
+                
+                // Premium cylindrical gradient with metallic sheen
+                const pipeGradient = this.ctx.createLinearGradient(pipe.x, 0, pipe.x + this.pipeWidth, 0);
+                pipeGradient.addColorStop(0, `hsl(${dangerHue}, 70%, ${62 * pulseIntensity}%)`);
+                pipeGradient.addColorStop(0.12, `hsl(${dangerHue}, 80%, ${55 * pulseIntensity}%)`);
+                pipeGradient.addColorStop(0.25, `hsl(${dangerHue}, 85%, ${48 * pulseIntensity}%)`);
+                pipeGradient.addColorStop(0.5, `hsl(${dangerHue}, 85%, ${40 * pulseIntensity}%)`);
+                pipeGradient.addColorStop(0.75, `hsl(${dangerHue}, 80%, ${45 * pulseIntensity}%)`);
+                pipeGradient.addColorStop(0.88, `hsl(${dangerHue}, 75%, ${52 * pulseIntensity}%)`);
+                pipeGradient.addColorStop(1, `hsl(${dangerHue}, 70%, ${58 * pulseIntensity}%)`);
+                
+                this.ctx.fillStyle = pipeGradient;
+                this.ctx.fillRect(pipe.x, 0, this.pipeWidth, pipe.topHeight);
+                this.ctx.fillRect(pipe.x, pipe.bottomY, this.pipeWidth, this.height - pipe.bottomY);
+                
+                // Ultra-enhanced caps with industrial styling
+                const capHeight = 32;
+                const capExtend = 12;
+                
+                // Multi-layer cap shadows
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                this.ctx.fillRect(pipe.x - capExtend + 3, pipe.topHeight - capHeight + 3, this.pipeWidth + (capExtend * 2), capHeight);
+                this.ctx.fillRect(pipe.x - capExtend + 3, pipe.bottomY + 3, this.pipeWidth + (capExtend * 2), capHeight);
+                
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                this.ctx.fillRect(pipe.x - capExtend + 1, pipe.topHeight - capHeight + 1, this.pipeWidth + (capExtend * 2), capHeight);
+                this.ctx.fillRect(pipe.x - capExtend + 1, pipe.bottomY + 1, this.pipeWidth + (capExtend * 2), capHeight);
+                
+                // Premium cap gradient with metallic finish
+                const capGradient = this.ctx.createRadialGradient(
+                    pipe.x + this.pipeWidth/2, pipe.topHeight - capHeight/2, 0,
+                    pipe.x + this.pipeWidth/2, pipe.topHeight - capHeight/2, this.pipeWidth + capExtend + 5
+                );
+                capGradient.addColorStop(0, `hsl(${dangerHue}, 90%, ${70 * pulseIntensity}%)`);
+                capGradient.addColorStop(0.3, `hsl(${dangerHue}, 85%, ${62 * pulseIntensity}%)`);
+                capGradient.addColorStop(0.7, `hsl(${dangerHue}, 80%, ${55 * pulseIntensity}%)`);
+                capGradient.addColorStop(1, `hsl(${dangerHue}, 70%, ${48 * pulseIntensity}%)`);
+                
+                this.ctx.fillStyle = capGradient;
+                this.ctx.fillRect(pipe.x - capExtend, pipe.topHeight - capHeight, this.pipeWidth + (capExtend * 2), capHeight);
+                this.ctx.fillRect(pipe.x - capExtend, pipe.bottomY, this.pipeWidth + (capExtend * 2), capHeight);
+                
+                // Industrial texture with enhanced detail
+                this.ctx.strokeStyle = `hsl(${dangerHue}, 40%, 28%)`;
+                this.ctx.lineWidth = 1.2;
+                for (let i = 0; i < 8; i++) {
+                    const lineX = pipe.x + (i * this.pipeWidth / 7);
+                    this.ctx.globalAlpha = 0.7;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(lineX, 0);
+                    this.ctx.lineTo(lineX, pipe.topHeight);
+                    this.ctx.moveTo(lineX, pipe.bottomY);
+                    this.ctx.lineTo(lineX, this.height);
+                    this.ctx.stroke();
+                }
+                this.ctx.globalAlpha = 1;
+                
+                // Enhanced cap detail rings
+                this.ctx.strokeStyle = `hsl(${dangerHue}, 50%, 32%)`;
+                this.ctx.lineWidth = 1.5;
+                for (let i = 0; i < 4; i++) {
+                    const bandY = (i + 1) * (capHeight / 5);
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(pipe.x - capExtend, pipe.topHeight - capHeight + bandY);
+                    this.ctx.lineTo(pipe.x + this.pipeWidth + capExtend, pipe.topHeight - capHeight + bandY);
+                    this.ctx.moveTo(pipe.x - capExtend, pipe.bottomY + bandY);
+                    this.ctx.lineTo(pipe.x + this.pipeWidth + capExtend, pipe.bottomY + bandY);
+                    this.ctx.stroke();
+                }
+                
+                // Premium shimmer highlight with animation
+                const highlightGradient = this.ctx.createLinearGradient(
+                    pipe.x + shimmer * 10, 0, 
+                    pipe.x + this.pipeWidth * 0.35 + shimmer * 10, 0
+                );
+                highlightGradient.addColorStop(0, `hsl(${dangerHue}, 80%, ${82 + shimmer * 5}%)`);
+                highlightGradient.addColorStop(0.5, `hsl(${dangerHue}, 60%, ${70 + shimmer * 3}%)`);
+                highlightGradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
+                
+                this.ctx.fillStyle = highlightGradient;
+                this.ctx.fillRect(pipe.x, 0, this.pipeWidth * 0.3, pipe.topHeight);
+                this.ctx.fillRect(pipe.x, pipe.bottomY, this.pipeWidth * 0.3, this.height - pipe.bottomY);
+                
+                // Secondary highlight for extra depth
+                this.ctx.fillStyle = `hsl(${dangerHue}, 70%, 80%)`;
+                this.ctx.globalAlpha = 0.4;
+                this.ctx.fillRect(pipe.x + 2, 0, 2, pipe.topHeight);
+                this.ctx.fillRect(pipe.x + 2, pipe.bottomY, 2, this.height - pipe.bottomY);
+                this.ctx.globalAlpha = 1;
+                
+                // Professional border system
+                this.ctx.strokeStyle = `hsl(${dangerHue}, 35%, 20%)`;
+                this.ctx.lineWidth = 3;
+                this.ctx.strokeRect(pipe.x, 0, this.pipeWidth, pipe.topHeight);
+                this.ctx.strokeRect(pipe.x, pipe.bottomY, this.pipeWidth, this.height - pipe.bottomY);
+                
+                // Cap border system with multiple layers
+                this.ctx.strokeStyle = `hsl(${dangerHue}, 40%, 25%)`;
+                this.ctx.lineWidth = 2.5;
+                this.ctx.strokeRect(pipe.x - capExtend, pipe.topHeight - capHeight, this.pipeWidth + (capExtend * 2), capHeight);
+                this.ctx.strokeRect(pipe.x - capExtend, pipe.bottomY, this.pipeWidth + (capExtend * 2), capHeight);
+                
+                // Inner cap detail borders
+                this.ctx.strokeStyle = `hsl(${dangerHue}, 55%, 35%)`;
+                this.ctx.lineWidth = 1.5;
+                this.ctx.strokeRect(pipe.x - capExtend + 4, pipe.topHeight - capHeight + 4, this.pipeWidth + (capExtend * 2) - 8, capHeight - 8);
+                this.ctx.strokeRect(pipe.x - capExtend + 4, pipe.bottomY + 4, this.pipeWidth + (capExtend * 2) - 8, capHeight - 8);
+                
+                // Innermost cap accent
+                this.ctx.strokeStyle = `hsl(${dangerHue}, 65%, 45%)`;
+                this.ctx.lineWidth = 1;
+                this.ctx.strokeRect(pipe.x - capExtend + 8, pipe.topHeight - capHeight + 8, this.pipeWidth + (capExtend * 2) - 16, capHeight - 16);
+                this.ctx.strokeRect(pipe.x - capExtend + 8, pipe.bottomY + 8, this.pipeWidth + (capExtend * 2) - 16, capHeight - 16);
+                
+                // Enhanced danger effects with multiple glows
+                if (this.level >= 8) {
+                    const glowIntensity = 0.4 + Math.sin(time * 6 + index) * 0.3;
+                    const dangerColor = Math.max(0, dangerHue - 90);
+                    
+                    // Outer glow
+                    this.ctx.shadowColor = `hsl(${dangerColor}, 100%, 55%)`;
+                    this.ctx.shadowBlur = 12 + glowIntensity * 8;
+                    this.ctx.strokeStyle = `hsl(${dangerColor}, 100%, 65%)`;
+                    this.ctx.lineWidth = 2 + glowIntensity * 2;
+                    this.ctx.strokeRect(pipe.x - 2, -2, this.pipeWidth + 4, pipe.topHeight + 4);
+                    this.ctx.strokeRect(pipe.x - 2, pipe.bottomY - 2, this.pipeWidth + 4, this.height - pipe.bottomY + 4);
+                    
+                    // Inner danger glow
+                    this.ctx.shadowBlur = 6;
+                    this.ctx.strokeStyle = `hsl(${dangerColor}, 100%, 75%)`;
+                    this.ctx.lineWidth = 1;
+                    this.ctx.strokeRect(pipe.x, 0, this.pipeWidth, pipe.topHeight);
+                    this.ctx.strokeRect(pipe.x, pipe.bottomY, this.pipeWidth, this.height - pipe.bottomY);
+                    
+                    this.ctx.shadowBlur = 0;
+                }
+            }
+            
+            drawDynamicLighting() {
+                if (this.level < 5) return;
+                
+                const time = Date.now() * 0.005;
+                
+                // Create dynamic light source following the bird
+                const lightGradient = this.ctx.createRadialGradient(
+                    this.bird.x, this.bird.y, 0,
+                    this.bird.x, this.bird.y, 150 + Math.sin(time) * 30
+                );
+                
+                const intensity = 0.1 + (this.level * 0.01);
+                lightGradient.addColorStop(0, `rgba(255, 215, 0, ${intensity})`);
+                lightGradient.addColorStop(0.3, `rgba(255, 165, 0, ${intensity * 0.7})`);
+                lightGradient.addColorStop(0.6, `rgba(255, 69, 0, ${intensity * 0.4})`);
+                lightGradient.addColorStop(1, 'rgba(255, 69, 0, 0)');
+                
+                this.ctx.save();
+                this.ctx.globalCompositeOperation = 'screen';
+                this.ctx.fillStyle = lightGradient;
+                this.ctx.fillRect(0, 0, this.width, this.height);
+                this.ctx.restore();
+                
+                // Add rim lighting to pipes
+                this.pipes.forEach(pipe => {
+                    this.ctx.save();
+                    this.ctx.globalCompositeOperation = 'screen';
+                    this.ctx.strokeStyle = `rgba(255, 215, 0, ${intensity * 0.5})`;
+                    this.ctx.lineWidth = 3;
+                    this.ctx.shadowBlur = 10;
+                    this.ctx.shadowColor = 'rgba(255, 215, 0, 0.5)';
+                    this.ctx.strokeRect(pipe.x, 0, this.pipeWidth, pipe.topHeight);
+                    this.ctx.strokeRect(pipe.x, pipe.bottomY, this.pipeWidth, this.height - pipe.bottomY);
+                    this.ctx.restore();
+                });
+            }
+            
+            drawEnhanced3DPipe(pipe, dangerHue, time, index) {
+                const pipeDepth = 12; // 3D depth effect
+                const animationOffset = Math.sin(time + index) * 2;
+                
+                // Draw pipe shadow (deeper and more realistic)
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                this.ctx.fillRect(pipe.x + 6, 6, this.pipeWidth, pipe.topHeight);
+                this.ctx.fillRect(pipe.x + 6, pipe.bottomY + 6, this.pipeWidth, this.height - pipe.bottomY);
+                
+                // Draw 3D side faces for depth
+                const sideGradient = this.ctx.createLinearGradient(pipe.x + this.pipeWidth, 0, pipe.x + this.pipeWidth + pipeDepth, 0);
+                sideGradient.addColorStop(0, `hsl(${dangerHue}, 60%, 35%)`);
+                sideGradient.addColorStop(1, `hsl(${dangerHue}, 40%, 20%)`);
+                
+                this.ctx.fillStyle = sideGradient;
+                // Top pipe side face
+                this.ctx.beginPath();
+                this.ctx.moveTo(pipe.x + this.pipeWidth, 0);
+                this.ctx.lineTo(pipe.x + this.pipeWidth + pipeDepth, -pipeDepth);
+                this.ctx.lineTo(pipe.x + this.pipeWidth + pipeDepth, pipe.topHeight - pipeDepth);
+                this.ctx.lineTo(pipe.x + this.pipeWidth, pipe.topHeight);
+                this.ctx.closePath();
+                this.ctx.fill();
+                
+                // Bottom pipe side face
+                this.ctx.beginPath();
+                this.ctx.moveTo(pipe.x + this.pipeWidth, pipe.bottomY);
+                this.ctx.lineTo(pipe.x + this.pipeWidth + pipeDepth, pipe.bottomY - pipeDepth);
+                this.ctx.lineTo(pipe.x + this.pipeWidth + pipeDepth, this.height - pipeDepth);
+                this.ctx.lineTo(pipe.x + this.pipeWidth, this.height);
+                this.ctx.closePath();
+                this.ctx.fill();
+                
+                // Main pipe body with enhanced gradient and animation
+                const mainGradient = this.ctx.createLinearGradient(pipe.x, 0, pipe.x + this.pipeWidth, 0);
+                const pulseIntensity = 1 + Math.sin(time * 3 + index) * 0.1;
+                mainGradient.addColorStop(0, `hsl(${dangerHue}, ${70 * pulseIntensity}%, ${60 + animationOffset}%)`);
+                mainGradient.addColorStop(0.2, `hsl(${dangerHue}, ${80 * pulseIntensity}%, ${50 + animationOffset}%)`);
+                mainGradient.addColorStop(0.5, `hsl(${dangerHue}, ${90 * pulseIntensity}%, ${45 + animationOffset}%)`);
+                mainGradient.addColorStop(0.8, `hsl(${dangerHue}, ${80 * pulseIntensity}%, ${40 + animationOffset}%)`);
+                mainGradient.addColorStop(1, `hsl(${dangerHue}, ${70 * pulseIntensity}%, ${30 + animationOffset}%)`);
+                
+                this.ctx.fillStyle = mainGradient;
+                this.ctx.fillRect(pipe.x, 0, this.pipeWidth, pipe.topHeight);
+                this.ctx.fillRect(pipe.x, pipe.bottomY, this.pipeWidth, this.height - pipe.bottomY);
+                
+                // Advanced texture pattern
+                this.drawPipeTexture(pipe, dangerHue, time, index);
+                
+                // Enhanced pipe caps with 3D effect
+                this.drawEnhanced3DCaps(pipe, dangerHue, time, pipeDepth);
+                
+                // Danger glow effects
+                if (this.level >= 6) {
+                    this.drawPipeDangerEffects(pipe, dangerHue, time, index);
+                }
+                
+                // Metallic highlights
+                this.drawMetallicHighlights(pipe, dangerHue);
+            }
+            
+            drawPipeTexture(pipe, dangerHue, time, index) {
+                // Vertical texture lines with depth
+                this.ctx.strokeStyle = `hsl(${dangerHue}, 50%, 25%)`;
+                this.ctx.lineWidth = 1.5;
+                for (let i = 1; i < 4; i++) {
+                    const lineX = pipe.x + (i * this.pipeWidth / 4);
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(lineX, 0);
+                    this.ctx.lineTo(lineX, pipe.topHeight);
+                    this.ctx.moveTo(lineX, pipe.bottomY);
+                    this.ctx.lineTo(lineX, this.height);
+                    this.ctx.stroke();
+                }
+                
+                // Horizontal decorative bands
+                this.ctx.strokeStyle = `hsl(${dangerHue}, 60%, 35%)`;
+                this.ctx.lineWidth = 2;
+                const bandSpacing = 40;
+                for (let y = bandSpacing; y < pipe.topHeight; y += bandSpacing) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(pipe.x, y);
+                    this.ctx.lineTo(pipe.x + this.pipeWidth, y);
+                    this.ctx.stroke();
+                }
+                
+                for (let y = pipe.bottomY + bandSpacing; y < this.height; y += bandSpacing) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(pipe.x, y);
+                    this.ctx.lineTo(pipe.x + this.pipeWidth, y);
+                    this.ctx.stroke();
+                }
+                
+                // Rivets/bolts pattern
+                this.ctx.fillStyle = `hsl(${dangerHue}, 40%, 20%)`;
+                for (let i = 0; i < 3; i++) {
+                    for (let j = 0; j < Math.floor(pipe.topHeight / 50); j++) {
+                        const rivetX = pipe.x + 15 + i * 25;
+                        const rivetY = 20 + j * 50;
+                        if (rivetY < pipe.topHeight - 20) {
+                            this.ctx.beginPath();
+                            this.ctx.arc(rivetX, rivetY, 2, 0, Math.PI * 2);
+                            this.ctx.fill();
+                        }
+                    }
+                    
+                    for (let j = 0; j < Math.floor((this.height - pipe.bottomY) / 50); j++) {
+                        const rivetX = pipe.x + 15 + i * 25;
+                        const rivetY = pipe.bottomY + 20 + j * 50;
+                        if (rivetY < this.height - 20) {
+                            this.ctx.beginPath();
+                            this.ctx.arc(rivetX, rivetY, 2, 0, Math.PI * 2);
+                            this.ctx.fill();
+                        }
+                    }
+                }
+            }
+            
+            drawEnhanced3DCaps(pipe, dangerHue, time, pipeDepth) {
+                const capHeight = 30;
+                const capExtension = 8;
+                const pulseIntensity = 1 + Math.sin(time * 2) * 0.1;
+                
+                // 3D cap gradients
+                const topCapGradient = this.ctx.createLinearGradient(pipe.x - capExtension, pipe.topHeight - capHeight, pipe.x + this.pipeWidth + capExtension, pipe.topHeight);
+                topCapGradient.addColorStop(0, `hsl(${dangerHue}, ${90 * pulseIntensity}%, 70%)`);
+                topCapGradient.addColorStop(0.5, `hsl(${dangerHue}, ${95 * pulseIntensity}%, 60%)`);
+                topCapGradient.addColorStop(1, `hsl(${dangerHue}, ${85 * pulseIntensity}%, 45%)`);
+                
+                // Top cap 3D sides
+                const capSideGradient = this.ctx.createLinearGradient(pipe.x + this.pipeWidth + capExtension, 0, pipe.x + this.pipeWidth + capExtension + pipeDepth, 0);
+                capSideGradient.addColorStop(0, `hsl(${dangerHue}, 70%, 45%)`);
+                capSideGradient.addColorStop(1, `hsl(${dangerHue}, 50%, 25%)`);
+                
+                // Draw top cap 3D side
+                this.ctx.fillStyle = capSideGradient;
+                this.ctx.beginPath();
+                this.ctx.moveTo(pipe.x + this.pipeWidth + capExtension, pipe.topHeight - capHeight);
+                this.ctx.lineTo(pipe.x + this.pipeWidth + capExtension + pipeDepth, pipe.topHeight - capHeight - pipeDepth);
+                this.ctx.lineTo(pipe.x + this.pipeWidth + capExtension + pipeDepth, pipe.topHeight - pipeDepth);
+                this.ctx.lineTo(pipe.x + this.pipeWidth + capExtension, pipe.topHeight);
+                this.ctx.closePath();
+                this.ctx.fill();
+                
+                // Draw top cap shadow
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                this.ctx.fillRect(pipe.x - capExtension + 4, pipe.topHeight - capHeight + 4, this.pipeWidth + (capExtension * 2), capHeight);
+                
+                // Draw top cap main face
+                this.ctx.fillStyle = topCapGradient;
+                this.ctx.fillRect(pipe.x - capExtension, pipe.topHeight - capHeight, this.pipeWidth + (capExtension * 2), capHeight);
+                
+                // Top cap outline and details
+                this.ctx.strokeStyle = `hsl(${dangerHue}, 70%, 30%)`;
+                this.ctx.lineWidth = 3;
+                this.ctx.strokeRect(pipe.x - capExtension, pipe.topHeight - capHeight, this.pipeWidth + (capExtension * 2), capHeight);
+                
+                // Bottom cap (similar process)
+                const bottomCapGradient = this.ctx.createLinearGradient(pipe.x - capExtension, pipe.bottomY, pipe.x + this.pipeWidth + capExtension, pipe.bottomY + capHeight);
+                bottomCapGradient.addColorStop(0, `hsl(${dangerHue}, ${90 * pulseIntensity}%, 70%)`);
+                bottomCapGradient.addColorStop(0.5, `hsl(${dangerHue}, ${95 * pulseIntensity}%, 60%)`);
+                bottomCapGradient.addColorStop(1, `hsl(${dangerHue}, ${85 * pulseIntensity}%, 45%)`);
+                
+                // Draw bottom cap 3D side
+                this.ctx.fillStyle = capSideGradient;
+                this.ctx.beginPath();
+                this.ctx.moveTo(pipe.x + this.pipeWidth + capExtension, pipe.bottomY);
+                this.ctx.lineTo(pipe.x + this.pipeWidth + capExtension + pipeDepth, pipe.bottomY - pipeDepth);
+                this.ctx.lineTo(pipe.x + this.pipeWidth + capExtension + pipeDepth, pipe.bottomY + capHeight - pipeDepth);
+                this.ctx.lineTo(pipe.x + this.pipeWidth + capExtension, pipe.bottomY + capHeight);
+                this.ctx.closePath();
+                this.ctx.fill();
+                
+                // Draw bottom cap shadow
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                this.ctx.fillRect(pipe.x - capExtension + 4, pipe.bottomY + 4, this.pipeWidth + (capExtension * 2), capHeight);
+                
+                // Draw bottom cap main face
+                this.ctx.fillStyle = bottomCapGradient;
+                this.ctx.fillRect(pipe.x - capExtension, pipe.bottomY, this.pipeWidth + (capExtension * 2), capHeight);
+                
+                // Bottom cap outline
+                this.ctx.strokeStyle = `hsl(${dangerHue}, 70%, 30%)`;
+                this.ctx.lineWidth = 3;
+                this.ctx.strokeRect(pipe.x - capExtension, pipe.bottomY, this.pipeWidth + (capExtension * 2), capHeight);
+            }
+            
+            drawPipeDangerEffects(pipe, dangerHue, time, index) {
+                const glowIntensity = 0.3 + Math.sin(time * 4 + index) * 0.2;
+                
+                // Pulsing danger glow
+                this.ctx.save();
+                this.ctx.globalCompositeOperation = 'screen';
+                this.ctx.strokeStyle = `rgba(255, ${Math.max(0, 120 - this.level * 8)}, 0, ${glowIntensity})`;
+                this.ctx.lineWidth = 6;
+                this.ctx.shadowBlur = 20;
+                this.ctx.shadowColor = `rgba(255, ${Math.max(0, 120 - this.level * 8)}, 0, 0.8)`;
+                
+                this.ctx.strokeRect(pipe.x - 2, -2, this.pipeWidth + 4, pipe.topHeight + 4);
+                this.ctx.strokeRect(pipe.x - 2, pipe.bottomY - 2, this.pipeWidth + 4, this.height - pipe.bottomY + 4);
+                this.ctx.restore();
+                
+                // Sparks for extreme levels
+                if (this.level >= 12 && Math.random() < 0.1) {
+                    for (let i = 0; i < 3; i++) {
+                        const sparkX = pipe.x + Math.random() * this.pipeWidth;
+                        const sparkY = Math.random() < 0.5 ? Math.random() * pipe.topHeight : pipe.bottomY + Math.random() * (this.height - pipe.bottomY);
+                        
+                        this.ctx.fillStyle = `hsl(${30 + Math.random() * 30}, 100%, 70%)`;
+                        this.ctx.beginPath();
+                        this.ctx.arc(sparkX, sparkY, 1 + Math.random() * 2, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                }
+            }
+            
+            drawMetallicHighlights(pipe, dangerHue) {
+                // Left edge highlight
+                const highlightGradient = this.ctx.createLinearGradient(pipe.x, 0, pipe.x + 8, 0);
+                highlightGradient.addColorStop(0, `hsl(${dangerHue}, 60%, 80%)`);
+                highlightGradient.addColorStop(1, `hsl(${dangerHue}, 60%, 60%)`);
+                
+                this.ctx.fillStyle = highlightGradient;
+                this.ctx.fillRect(pipe.x, 0, 8, pipe.topHeight);
+                this.ctx.fillRect(pipe.x, pipe.bottomY, 8, this.height - pipe.bottomY);
+                
+                // Right edge shadow
+                const shadowGradient = this.ctx.createLinearGradient(pipe.x + this.pipeWidth - 8, 0, pipe.x + this.pipeWidth, 0);
+                shadowGradient.addColorStop(0, `hsl(${dangerHue}, 60%, 35%)`);
+                shadowGradient.addColorStop(1, `hsl(${dangerHue}, 40%, 20%)`);
+                
+                this.ctx.fillStyle = shadowGradient;
+                this.ctx.fillRect(pipe.x + this.pipeWidth - 8, 0, 8, pipe.topHeight);
+                this.ctx.fillRect(pipe.x + this.pipeWidth - 8, pipe.bottomY, 8, this.height - pipe.bottomY);
+            }
+            
+            drawExtremeBird() {
+                this.ctx.save();
+                this.ctx.translate(this.bird.x, this.bird.y);
+                this.ctx.rotate(this.bird.rotation * Math.PI / 180);
+                
+                // Bird gets more intense coloring with level
+                const birdIntensity = Math.min(1, this.level / 10);
+                const birdHue = 45 - (this.level * 2); // Golden to red
+                
+                // Bird shadow for depth
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                this.ctx.beginPath();
+                this.ctx.arc(2, 2, this.bird.radius, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Bird body with gradient and dynamic coloring
+                const bodyGradient = this.ctx.createRadialGradient(-3, -3, 2, 0, 0, this.bird.radius);
+                bodyGradient.addColorStop(0, `hsl(${birdHue}, 100%, ${80 - birdIntensity * 15}%)`);
+                bodyGradient.addColorStop(0.7, `hsl(${birdHue}, 100%, ${65 - birdIntensity * 20}%)`);
+                bodyGradient.addColorStop(1, `hsl(${birdHue - 10}, 90%, ${50 - birdIntensity * 15}%)`);
+                this.ctx.fillStyle = bodyGradient;
+                this.ctx.beginPath();
+                this.ctx.arc(0, 0, this.bird.radius, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Intense outline at higher levels
+                this.ctx.strokeStyle = `hsl(${Math.max(0, birdHue - 30)}, 100%, 50%)`;
+                this.ctx.lineWidth = 2 + (this.level * 0.2);
+                this.ctx.stroke();
+                
+                // Enhanced wing with better animation and multiple layers
+                const wingOffset = Math.sin(Date.now() * 0.015) * 3;
+                const wingTilt = Math.cos(Date.now() * 0.02) * 0.2;
+                
+                // Wing shadow
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                this.ctx.beginPath();
+                this.ctx.ellipse(-1, 1 + wingOffset, 8, 5, wingTilt, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Main wing
+                const wingGradient = this.ctx.createLinearGradient(-8, -3, -2, 3);
+                wingGradient.addColorStop(0, `hsl(${birdHue - 10}, 95%, 75%)`);
+                wingGradient.addColorStop(0.3, `hsl(${birdHue - 15}, 90%, 65%)`);
+                wingGradient.addColorStop(0.7, `hsl(${birdHue - 20}, 85%, 55%)`);
+                wingGradient.addColorStop(1, `hsl(${birdHue - 25}, 80%, 45%)`);
+                this.ctx.fillStyle = wingGradient;
+                this.ctx.beginPath();
+                this.ctx.ellipse(-2, -1 + wingOffset, 8, 5, wingTilt, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Wing outline
+                this.ctx.strokeStyle = `hsl(${birdHue - 30}, 70%, 35%)`;
+                this.ctx.lineWidth = 1.5;
+                this.ctx.stroke();
+                
+                // Wing feather details
+                this.ctx.strokeStyle = `hsl(${birdHue - 25}, 60%, 40%)`;
+                this.ctx.lineWidth = 1;
+                this.ctx.beginPath();
+                this.ctx.moveTo(-7, -2 + wingOffset);
+                this.ctx.lineTo(-4, 1 + wingOffset);
+                this.ctx.moveTo(-6, -1 + wingOffset);
+                this.ctx.lineTo(-3, 2 + wingOffset);
+                this.ctx.moveTo(-5, 0 + wingOffset);
+                this.ctx.lineTo(-2, 2.5 + wingOffset);
+                this.ctx.stroke();
+                
+                // Enhanced beak with gradient
+                const beakGradient = this.ctx.createLinearGradient(this.bird.radius - 1, -2, this.bird.radius + 8, 2);
+                beakGradient.addColorStop(0, '#FF6500');
+                beakGradient.addColorStop(1, '#FF4500');
+                this.ctx.fillStyle = beakGradient;
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.bird.radius - 1, -2);
+                this.ctx.lineTo(this.bird.radius + 8, 0);
+                this.ctx.lineTo(this.bird.radius - 1, 3);
+                this.ctx.closePath();
+                this.ctx.fill();
+                
+                // Beak outline
+                this.ctx.strokeStyle = '#CC3300';
+                this.ctx.lineWidth = 1;
+                this.ctx.stroke();
+                
+                // Eye with better shading
+                const eyeGradient = this.ctx.createRadialGradient(2, -4, 1, 3, -3, 3);
+                eyeGradient.addColorStop(0, 'white');
+                eyeGradient.addColorStop(1, '#F0F0F0');
+                this.ctx.fillStyle = eyeGradient;
+                this.ctx.beginPath();
+                this.ctx.arc(3, -3, 3.5, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Eye outline
+                this.ctx.strokeStyle = '#CCC';
+                this.ctx.lineWidth = 0.5;
+                this.ctx.stroke();
+                
+                // Pupil gets redder with level - improved
+                const pupilGradient = this.ctx.createRadialGradient(4, -2.5, 0.5, 4, -2, 1.5);
+                pupilGradient.addColorStop(0, `hsl(${Math.max(0, 360 - this.level * 15)}, 100%, 25%)`);
+                pupilGradient.addColorStop(1, `hsl(${Math.max(0, 360 - this.level * 15)}, 100%, 15%)`);
+                this.ctx.fillStyle = pupilGradient;
+                this.ctx.beginPath();
+                this.ctx.arc(4, -2, 1.8, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Eye shine - multiple highlights
+                this.ctx.fillStyle = 'white';
+                this.ctx.beginPath();
+                this.ctx.arc(4.5, -2.8, 0.7, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                this.ctx.beginPath();
+                this.ctx.arc(3.5, -1.8, 0.3, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Additional details at higher levels
+                if (this.level >= 5) {
+                    // Feather details on head
+                    this.ctx.strokeStyle = `hsl(${birdHue - 20}, 80%, 45%)`;
+                    this.ctx.lineWidth = 1;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(-8, -6);
+                    this.ctx.lineTo(-5, -8);
+                    this.ctx.moveTo(-6, -7);
+                    this.ctx.lineTo(-3, -9);
+                    this.ctx.stroke();
+                }
+                
+                this.ctx.restore();
+            }
+            
+            gameOver() {
+                this.gameState = 'gameOver';
+                if (this.score > this.bestScore) {
+                    this.bestScore = this.score;
+                    localStorage.setItem('flappyExtremeBest', this.bestScore);
+                }
+                
+                document.getElementById('finalScore').textContent = this.score;
+                document.getElementById('finalLevel').textContent = this.level;
+                document.getElementById('finalBestScore').textContent = this.bestScore;
+                document.getElementById('gameOver').style.display = 'block';
+            }
+            
+            returnToMenu() {
+                this.gameState = 'start';
+                document.getElementById('startScreen').style.display = 'flex';
+                document.getElementById('gameOver').style.display = 'none';
+                this.reset();
+            }
+            
+            reset() {
+                console.log('Resetting game...');
+                this.score = 0;
+                this.level = 1;
+                this.bird.y = this.height / 2;
+                this.bird.velocity = 0;
+                this.bird.rotation = 0;
+                this.bird.x = 150; // Make sure bird x position is set
+                this.pipes = [];
+                this.difficulty = { ...this.baseDifficulty };
+                this.chaosMode = false;
+                this.nightmareMode = false;
+                
+                // Initialize particle systems
+                this.particles = [];
+                this.sparkles = [];
+                this.fireflies = [];
+                this.birdTrail = [];
+                
+                try {
+                    const gameOverEl = document.getElementById('gameOver');
+                    if (gameOverEl) gameOverEl.style.display = 'none';
+                    
+                    const chaosModeEl = document.getElementById('chaosMode');
+                    if (chaosModeEl) chaosModeEl.style.display = 'none';
+                    
+                    this.updateUI();
+                    this.updateExtremeDisplay();
+                } catch (error) {
+                    console.log('Error updating UI elements:', error);
+                }
+                
+                console.log('Game reset complete. Bird position:', this.bird.x, this.bird.y);
+            }
+            
+            updateUI() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('level').textContent = this.level;
+            }
+            
+            gameLoop() {
+                this.update();
+                this.render();
+                requestAnimationFrame(this.gameLoop.bind(this));
+            }
+        }
+        
+        window.game = null;
+        window.selectedDifficulty = 'normal';
+        
+        // Level selection functions
+        function selectLevel(difficulty, clickedButton) {
+            console.log('selectLevel called with:', difficulty); // Debug log
+            selectedDifficulty = difficulty;
+            
+            // Update button colors to show selection
+            try {
+                document.querySelectorAll('button').forEach(btn => {
+                    if (btn.onclick && btn.onclick.toString().includes('selectLevel')) {
+                        btn.style.border = '2px solid transparent';
+                    }
+                });
+                
+                // Highlight selected button
+                if (clickedButton) {
+                    clickedButton.style.border = '3px solid #FFD700';
+                }
+            } catch (error) {
+                console.log('Button highlighting error:', error);
+            }
+            
+            // Update info text
+            const infoTexts = {
+                easy: "<strong>EASY:</strong> Relaxed pace • 8 points per level • Chaos at level 15 • Max 300% speed",
+                normal: "<strong>NORMAL:</strong> Standard progression • 5 points per level • Chaos at level 10 • Max 400% speed", 
+                hard: "<strong>HARD:</strong> Fast progression • 3 points per level • Chaos at level 7 • Max 500% speed",
+                extreme: "<strong>EXTREME:</strong> Brutal challenge • 2 points per level • Chaos at level 5 • Max 700% speed",
+                nightmare: "<strong>NIGHTMARE:</strong> Insane difficulty • 1 point per level • Chaos at level 3 • Max 1000% speed",
+                hell: "<strong>HELL:</strong> Developer challenge • Every point = level • Immediate chaos • Max 1500% speed"
+            };
+            
+            try {
+                const infoElement = document.getElementById('levelInfo');
+                if (infoElement) {
+                    infoElement.innerHTML = infoTexts[difficulty];
+                }
+            } catch (error) {
+                console.log('Info update error:', error);
+            }
+        }
+        
+        function startGame() {
+            console.log('startGame called with difficulty:', selectedDifficulty); // Debug log
+            
+            try {
+                const startScreen = document.getElementById('startScreen');
+                if (startScreen) {
+                    startScreen.style.display = 'none';
+                }
+                
+                const canvas = document.getElementById('gameCanvas');
+                if (!canvas) {
+                    console.error('Game canvas not found!');
+                    return;
+                }
+                
+                if (!game) {
+                    game = new ExtremeFlappyGame(canvas);
+                }
+                
+                if (game.setDifficulty) {
+                    game.setDifficulty(selectedDifficulty);
+                }
+                
+                game.gameState = 'playing';
+                console.log('Game started successfully!');
+                
+            } catch (error) {
+                console.error('Error starting game:', error);
+            }
+        }
+        
+        // Attach functions to window object to ensure they're accessible
+        window.selectLevel = selectLevel;
+        window.startGame = startGame;
+        
+        function restartGame() {
+            game.reset();
+            game.setDifficulty(selectedDifficulty);
+            game.gameState = 'playing';
+        }
+        
+        function returnToLevelSelect() {
+            document.getElementById('startScreen').style.display = 'flex';
+            document.getElementById('gameOver').style.display = 'none';
+            game.reset();
+        }
+        
+        window.addEventListener('load', () => {
+            try {
+                const canvas = document.getElementById('gameCanvas');
+                if (canvas) {
+                    window.game = new ExtremeFlappyGame(canvas);
+                    console.log('Game initialized successfully');
+                } else {
+                    console.error('Game canvas not found during initialization');
+                }
+            } catch (error) {
+                console.error('Error initializing game:', error);
+            }
+        });
+    </script>
+</body>
+</html>

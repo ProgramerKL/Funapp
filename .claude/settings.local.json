@@ -19,11 +19,21 @@
       "Bash(open \"/Users/kyleliu/#Cloud/Dropbox/KyleDropboxShare/KyleCode/KyleCoding/Ai_coding/Funapp/.superdesign/design_iterations/ide_gaming_dashboard_spam_resistant_1.html\")",
       "Bash(open \"/Users/kyleliu/#Cloud/Dropbox/KyleDropboxShare/KyleCode/KyleCoding/Ai_coding/Funapp/test-game.html\")",
       "Bash(open \"/Users/kyleliu/#Cloud/Dropbox/KyleDropboxShare/KyleCode/KyleCoding/Ai_coding/Funapp/pop-the-lock-fixed.html\")",
-      "Bash(open:*)"
+      "Bash(open:*)",
+      "mcp__ct-devmcp__do_ide",
+      "WebFetch(domain:pokeapi.co)",
+      "mcp__ct-devmcp__do_bld",
+      "mcp__ct-devmcp__do_pla",
+      "mcp__context7__resolve-library-id",
+      "WebFetch(domain:api.weather.gc.ca)",
+      "WebFetch(domain:weather.gc.ca)",
+      "WebFetch(domain:www.accuweather.com)",
+      "WebFetch(domain:api.open-meteo.com)"
     ],
     "deny": [],
     "ask": []
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "context7",
     "ct-devmcp"

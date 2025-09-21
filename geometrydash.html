@@ -275,6 +275,98 @@
             }
         }
         
+        .powerup-shop-screen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(45deg, rgba(0, 100, 150, 0.95), rgba(0, 50, 100, 0.95));
+            border: 3px solid #00ff00;
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            z-index: 16;
+            width: 350px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .powerup-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #333;
+            border-radius: 8px;
+            margin: 5px 0;
+            padding: 8px;
+            font-size: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .powerup-item:hover {
+            border-color: #00ff00;
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .powerup-item.selected {
+            border-color: #ffff00;
+            background: rgba(255, 255, 0, 0.2);
+        }
+
+        .powerup-item.insufficient-funds {
+            opacity: 0.5;
+            border-color: #666;
+        }
+
+        .powerup-item.limit-reached {
+            opacity: 0.4;
+            border-color: #444;
+            background: rgba(100, 100, 100, 0.1);
+        }
+
+        .powerup-info {
+            flex: 1;
+            text-align: left;
+            margin-right: 10px;
+        }
+
+        .powerup-name {
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .powerup-effect {
+            font-size: 8px;
+            color: #ccc;
+        }
+
+        .powerup-price {
+            color: #ffdd00;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .powerup-buy-btn {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 8px;
+            cursor: pointer;
+            font-family: "Press Start 2P", monospace;
+        }
+
+        .powerup-buy-btn:hover {
+            background: #44ff44;
+        }
+
+        .powerup-buy-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
         .insert-coin {
             position: absolute;
             top: 50%;
@@ -865,6 +957,34 @@
                     PRESS START TO PLAY AGAIN
                 </div>
             </div>
+            
+            <!-- Power-up Shop Screen -->
+            <div class="powerup-shop-screen" id="powerupShopScreen" style="display: none;">
+                <div style="font-size: 18px; color: #00ff00; margin-bottom: 15px; text-shadow: 0 0 10px #00ff00;">⚡ POWER-UP SHOP ⚡</div>
+                <div style="font-size: 12px; margin-bottom: 10px; color: #ffff00;">
+                    COINS: <span id="shopCoins">0</span>
+                </div>
+                <div style="font-size: 10px; margin-bottom: 5px; color: #ccc;">
+                    Click to buy and activate power-ups for your next game!
+                </div>
+                <div style="font-size: 9px; margin-bottom: 10px; color: #ffaa00;">
+                    LIMIT: <span id="powerupCount">0</span>/3 POWER-UPS
+                </div>
+                <div id="powerupList" style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;">
+                    <!-- Power-ups will be dynamically generated here -->
+                </div>
+                <div style="font-size: 8px; margin-bottom: 10px; color: #888;">
+                    ACTIVE NEXT GAME: <span id="selectedPowerups">None</span>
+                </div>
+                <button class="arcade-button" id="startWithPowerupsBtn" style="margin: 5px;">
+                    START GAME<br>
+                    <div style="font-size: 7px; margin-top: 2px;">WITH POWER-UPS</div>
+                </button>
+                <button class="arcade-button" id="skipShopBtn" style="margin: 5px;">
+                    START<br>
+                    <div style="font-size: 7px; margin-top: 2px;">WITHOUT POWER-UPS</div>
+                </button>
+            </div>
         </div>
         
         <div class="control-panel">
@@ -916,9 +1036,9 @@
             coins: 0,
             totalCoins: 0, // Persistent coins across rounds
             combo: 0,
-            jumpPower: 13, // Faster, higher jump for quick movement
-            horizontalJumpBoost: 1.32, // 10% longer horizontal jump (1.2 * 1.1 = 1.32)
-            gravityStrength: 1.092, // 5% faster falling
+            jumpPower: 16, // Higher jump for easier obstacle navigation
+            horizontalJumpBoost: 1.8, // Longer horizontal jump for better distance
+            gravityStrength: 0.95, // Slightly reduced gravity for more air time
             selectedAvatar: 'default',
             purchasedAvatars: ['default'] // Avatars bought with coins
         };
@@ -997,6 +1117,223 @@
             playEnhancedSound(800, 0.12, 'sine', 0.1);
             setTimeout(() => playEnhancedSound(1000, 0.08, 'sine', 0.08), 60);
         }
+
+        function playPowerUpSound() {
+            // Ascending power-up sound
+            const notes = [440, 523, 659, 784];
+            notes.forEach((note, i) => {
+                setTimeout(() => playEnhancedSound(note, 0.15, 'triangle', 0.1), i * 50);
+            });
+        }
+
+        // Enhanced power-up system with more variety (affordable prices)
+        const powerUpTypes = {
+            shield: {
+                name: 'Shield',
+                color: '#00ddff',
+                emoji: '🛡️',
+                duration: 8000,
+                effect: 'Protects from one collision',
+                price: 15
+            },
+            slowMotion: {
+                name: 'Slow Motion',
+                color: '#9966ff',
+                emoji: '⏰',
+                duration: 6000,
+                effect: 'Slows down game speed',
+                price: 12
+            },
+            doubleJump: {
+                name: 'Multi Jump',
+                color: '#ff6600',
+                emoji: '⚡',
+                duration: 10000,
+                effect: 'Allows extra jumps in air',
+                price: 18
+            },
+            magneticCoins: {
+                name: 'Coin Magnet',
+                color: '#ffdd00',
+                emoji: '🧲',
+                duration: 7000,
+                effect: 'Attracts coins from distance',
+                price: 14
+            },
+            speedBoost: {
+                name: 'Speed Boost',
+                color: '#ff4444',
+                emoji: '🚀',
+                duration: 5000,
+                effect: 'Increases movement speed',
+                price: 10
+            },
+            invincibility: {
+                name: 'Invincibility',
+                color: '#gold',
+                emoji: '⭐',
+                duration: 4000,
+                effect: 'Complete immunity to damage',
+                price: 25
+            },
+            coinMultiplier: {
+                name: 'Coin Boost',
+                color: '#00ff88',
+                emoji: '💰',
+                duration: 8000,
+                effect: 'Double coin collection value',
+                price: 20
+            },
+            jumpBoost: {
+                name: 'Super Jump',
+                color: '#ff88ff',
+                emoji: '🏃',
+                duration: 6000,
+                effect: 'Higher and faster jumps',
+                price: 16
+            },
+            ghostMode: {
+                name: 'Ghost Mode',
+                color: '#bbbbbb',
+                emoji: '👻',
+                duration: 3000,
+                effect: 'Phase through obstacles',
+                price: 30
+            },
+            timeFreeze: {
+                name: 'Time Freeze',
+                color: '#88ddff',
+                emoji: '❄️',
+                duration: 2000,
+                effect: 'Freezes all obstacles',
+                price: 22
+            }
+        };
+
+        function spawnPowerUp() {
+            const types = Object.keys(powerUpTypes);
+            const type = types[Math.floor(Math.random() * types.length)];
+            const powerUpData = powerUpTypes[type];
+            
+            powerUps.push({
+                x: canvas.width + 20,
+                y: Math.random() * (canvas.height - 150) + 50,
+                size: 16,
+                type: type,
+                color: powerUpData.color,
+                emoji: powerUpData.emoji,
+                collected: false,
+                sparkle: 0,
+                pulsePhase: 0,
+                glowIntensity: 1
+            });
+        }
+
+        function activatePowerUp(type) {
+            const powerUp = powerUpTypes[type];
+            player.activePowerUps[type].active = true;
+            player.activePowerUps[type].timer = powerUp.duration;
+            
+            playPowerUpSound();
+            
+            // Apply immediate effects and visual glow
+            switch(type) {
+                case 'shield':
+                    player.glowIntensity = 1;
+                    break;
+                case 'slowMotion':
+                    gameState.speed *= 0.6;
+                    player.glowIntensity = 1;
+                    break;
+                case 'doubleJump':
+                    player.maxJumps = 5;
+                    player.glowIntensity = 1;
+                    break;
+                case 'speedBoost':
+                    gameState.speed *= 1.5; // Increase speed by 50%
+                    player.glowIntensity = 1.5;
+                    break;
+                case 'invincibility':
+                    player.glowIntensity = 2; // Stronger glow for invincibility
+                    break;
+                case 'jumpBoost':
+                    gameState.jumpPower *= 1.35; // 35% higher jumps (adjusted for new base)
+                    player.glowIntensity = 1;
+                    break;
+                case 'ghostMode':
+                    player.glowIntensity = 1.5; // Ghostly appearance
+                    break;
+                case 'timeFreeze':
+                    player.glowIntensity = 1.5;
+                    break;
+                case 'magneticCoins':
+                    player.glowIntensity = 1;
+                    break;
+                case 'coinMultiplier':
+                    player.glowIntensity = 1;
+                    break;
+            }
+        }
+
+        function updatePowerUps() {
+            // Update active power-up timers
+            Object.keys(player.activePowerUps).forEach(type => {
+                const powerUp = player.activePowerUps[type];
+                if (powerUp.active) {
+                    powerUp.timer -= 16; // Assuming 60fps (16ms per frame)
+                    
+                    if (powerUp.timer <= 0) {
+                        deactivatePowerUp(type);
+                    }
+                }
+            });
+        }
+
+        function deactivatePowerUp(type) {
+            player.activePowerUps[type].active = false;
+            player.activePowerUps[type].timer = 0;
+            
+            // Remove effects
+            switch(type) {
+                case 'shield':
+                case 'invincibility':
+                case 'ghostMode':
+                    player.glowIntensity = 0;
+                    break;
+                case 'slowMotion':
+                case 'speedBoost':
+                    gameState.speed = gameState.baseSpeed; // Reset to base speed
+                    break;
+                case 'doubleJump':
+                    player.maxJumps = 3; // Reset to default
+                    break;
+                case 'jumpBoost':
+                    gameState.jumpPower = 16; // Reset to new default
+                    break;
+                // timeFreeze, magneticCoins, coinMultiplier don't need cleanup
+            }
+        }
+
+        // Enhanced collision detection with better accuracy
+        function preciseCollisionDetection(player, obstacle) {
+            // Add small buffer to make collision feel fair
+            const buffer = 2;
+            const playerLeft = player.x + buffer;
+            const playerRight = player.x + player.size - buffer;
+            const playerTop = player.y + buffer;
+            const playerBottom = player.y + player.size - buffer;
+            
+            const obstacleLeft = obstacle.x;
+            const obstacleRight = obstacle.x + obstacle.width;
+            const obstacleTop = obstacle.y;
+            const obstacleBottom = obstacle.y + obstacle.height;
+            
+            // Check for overlap with improved accuracy
+            return playerLeft < obstacleRight &&
+                   playerRight > obstacleLeft &&
+                   playerTop < obstacleBottom &&
+                   playerBottom > obstacleTop;
+        }
         
         function playMilestoneSound() {
             // Warning sound for new obstacle
@@ -1073,37 +1410,78 @@
             launchCooldown: 0, // Prevent multiple launch activations
             isFlying: false, // Flying rocket mode
             flyingTimer: 0, // Duration in flying mode
+            activePowerUps: {
+                shield: { active: false, timer: 0 },
+                slowMotion: { active: false, timer: 0 },
+                doubleJump: { active: false, timer: 0 },
+                magneticCoins: { active: false, timer: 0 },
+                speedBoost: { active: false, timer: 0 },
+                invincibility: { active: false, timer: 0 },
+                coinMultiplier: { active: false, timer: 0 },
+                jumpBoost: { active: false, timer: 0 },
+                ghostMode: { active: false, timer: 0 },
+                timeFreeze: { active: false, timer: 0 }
+            },
+            purchasedPowerUps: [], // Power-ups bought for this game session
+            selectedPowerUps: [] // Power-ups selected to activate for next game
         };
         
         const obstacles = [];
         const coins = [];
+        const powerUps = []; // New power-up system
         const particles = [];
         const backgroundElements = [];
         let obstacleTimer = 0;
         let coinTimer = 0;
+        let powerUpTimer = 0;
         let frameCounter = 0;
         let currentMilestoneSection = 0;
         let milestoneObstaclesSpawned = 0;
         let milestoneObstacleTimer = 0;
         let milestoneNotification = { active: false, message: '', timer: 0, alpha: 0 };
         
-        // Optimized particle system
-        function createAdvancedParticles(x, y, color, count = 1) {
-            // Ultra-minimal particles for maximum performance
-            for (let i = 0; i < 1; i++) {
-                particles.push({
-                    x: x,
-                    y: y,
-                    vX: (Math.random() - 0.5) * 2,
-                    vY: -1,
+        // Enhanced particle system with multiple effects
+        function createAdvancedParticles(x, y, color, count = 1, type = 'default') {
+            for (let i = 0; i < count; i++) {
+                const particle = {
+                    x: x + (Math.random() - 0.5) * 10,
+                    y: y + (Math.random() - 0.5) * 10,
+                    vX: (Math.random() - 0.5) * 4,
+                    vY: -Math.random() * 3 - 1,
                     life: 1,
                     maxLife: 1,
                     color: color,
-                    size: 2,
-                    glowSize: 1,
-                    rotation: 0,
-                    rotationSpeed: 0
-                });
+                    size: Math.random() * 3 + 2,
+                    glowSize: Math.random() * 2 + 1,
+                    rotation: Math.random() * Math.PI * 2,
+                    rotationSpeed: (Math.random() - 0.5) * 0.2,
+                    type: type,
+                    sparkle: Math.random() * Math.PI * 2,
+                    sparkleSpeed: Math.random() * 0.3 + 0.1
+                };
+                
+                // Special particle effects based on type
+                switch(type) {
+                    case 'powerup':
+                        particle.vY *= 0.5; // Slower falling
+                        particle.life = 1.5;
+                        particle.maxLife = 1.5;
+                        particle.size *= 1.5;
+                        break;
+                    case 'explosion':
+                        particle.vX *= 2;
+                        particle.vY *= 2;
+                        particle.life = 0.8;
+                        particle.maxLife = 0.8;
+                        break;
+                    case 'trail':
+                        particle.life = 0.3;
+                        particle.maxLife = 0.3;
+                        particle.size = 1;
+                        break;
+                }
+                
+                particles.push(particle);
             }
         }
 
@@ -1283,9 +1661,13 @@
         }
         
         // Event listeners
-        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('startBtn').addEventListener('click', showPowerUpShop);
         document.getElementById('jumpBtn').addEventListener('click', jump);
         document.getElementById('soundBtn').addEventListener('click', toggleSound);
+        
+        // Power-up shop event listeners
+        document.getElementById('startWithPowerupsBtn').addEventListener('click', startGameWithPowerUps);
+        document.getElementById('skipShopBtn').addEventListener('click', startGameWithoutPowerUps);
         document.querySelector('.avatar-select-btn').addEventListener('click', showAvatarSelector);
         document.querySelector('.avatar-selector .avatar-btn:nth-child(1)').addEventListener('click', confirmAvatarSelection);
         document.querySelector('.avatar-selector .avatar-btn:nth-child(2)').addEventListener('click', hideAvatarSelector);
@@ -1369,6 +1751,7 @@
             // Clear arrays
             obstacles.length = 0;
             coins.length = 0;
+            powerUps.length = 0; // Clear power-ups
             particles.length = 0;
             backgroundElements.length = 0;
             
@@ -1382,6 +1765,16 @@
             player.trail = [];
             player.glowIntensity = 0;
             player.alive = true; // Player is alive again
+            
+            // Reset all power-ups (clear selected ones for next purchase)
+            Object.keys(player.activePowerUps).forEach(type => {
+                player.activePowerUps[type].active = false;
+                player.activePowerUps[type].timer = 0;
+            });
+            player.maxJumps = 3; // Reset max jumps
+            gameState.jumpPower = 16; // Reset jump power to new default
+            player.selectedPowerUps = []; // Clear selected power-ups for next shop visit
+            
             frameCounter = 0;
             currentMilestoneSection = 0;
             milestoneObstaclesSpawned = 0;
@@ -1493,21 +1886,53 @@
             gameState.score += speedBonus + distanceBonus;
             
             
-            // Enhanced level progression with consistent speed
+            // Enhanced level progression with rewards and structured challenges
             const newLevel = Math.floor(gameState.distance / 120) + 1;
             if (newLevel > gameState.level) {
+                const oldLevel = gameState.level;
                 gameState.level = newLevel;
-                // Keep speed consistent - no speed increases
+                
+                // Level-up rewards
+                const levelRewards = {
+                    coins: Math.floor(newLevel * 10), // 10 coins per level
+                    scoreBonus: newLevel * 500, // 500 points per level
+                };
+                
+                gameState.coins += levelRewards.coins;
+                gameState.score += levelRewards.scoreBonus;
+                
                 playLevelUpSound();
                 
-                // Create minimal celebration particles
-                for (let i = 0; i < 3; i++) {
+                // Show level-up notification
+                milestoneNotification = {
+                    active: true,
+                    message: `LEVEL ${newLevel}! +${levelRewards.coins} COINS +${levelRewards.scoreBonus} SCORE`,
+                    timer: 180, // 3 seconds
+                    alpha: 1
+                };
+                
+                // Enhanced celebration particles based on level
+                const particleCount = Math.min(8, 3 + newLevel);
+                for (let i = 0; i < particleCount; i++) {
                     createAdvancedParticles(
                         Math.random() * canvas.width, 
                         Math.random() * canvas.height / 2, 
-                        '#ffff00', 
+                        newLevel % 2 === 0 ? '#ffff00' : '#00ffff', 
                         1
                     );
+                }
+                
+                // Special level bonuses
+                if (newLevel % 5 === 0) {
+                    // Every 5 levels: spawn a guaranteed power-up
+                    spawnPowerUp();
+                    milestoneNotification.message += ' + BONUS POWER-UP!';
+                }
+                
+                if (newLevel % 10 === 0) {
+                    // Every 10 levels: extra life (not implemented yet, but bonus score)
+                    gameState.score += 2000;
+                    milestoneNotification.message += ' + MILESTONE BONUS!';
                 }
             }
             
@@ -1581,13 +2006,45 @@
                 return;
             }
             
-            // Optimized player trail
-            if (frameCounter % 5 === 0) {
-                // Removed trail generation for performance
+            // Enhanced player trail with power-up effects
+            if (frameCounter % 3 === 0) {
+                let trailColor = player.color;
+                
+                // Special trail colors for active power-ups (priority order)
+                if (player.activePowerUps.invincibility.active) {
+                    trailColor = '#gold';
+                } else if (player.activePowerUps.ghostMode.active) {
+                    trailColor = '#bbbbbb';
+                } else if (player.activePowerUps.timeFreeze.active) {
+                    trailColor = '#88ddff';
+                } else if (player.activePowerUps.shield.active) {
+                    trailColor = '#00ddff';
+                } else if (player.activePowerUps.speedBoost.active) {
+                    trailColor = '#ff4444';
+                } else if (player.activePowerUps.slowMotion.active) {
+                    trailColor = '#9966ff';
+                } else if (player.activePowerUps.doubleJump.active) {
+                    trailColor = '#ff6600';
+                } else if (player.activePowerUps.jumpBoost.active) {
+                    trailColor = '#ff88ff';
+                } else if (player.activePowerUps.coinMultiplier.active) {
+                    trailColor = '#00ff88';
+                } else if (player.activePowerUps.magneticCoins.active) {
+                    trailColor = '#ffdd00';
+                }
+                
+                createAdvancedParticles(
+                    player.x + player.size/2, 
+                    player.y + player.size/2, 
+                    trailColor, 
+                    1, 
+                    'trail'
+                );
             }
             
-            // Fade glow intensity
-            if (player.glowIntensity > 0) {
+            // Fade glow intensity only when no power-ups are active
+            const hasActivePowerUps = Object.values(player.activePowerUps).some(powerUp => powerUp.active);
+            if (player.glowIntensity > 0 && !hasActivePowerUps) {
                 player.glowIntensity -= 0.05;
             }
             
@@ -1774,6 +2231,13 @@
                 coinTimer = 0;
             }
             
+            // Enhanced power-up generation (less frequent than coins)
+            powerUpTimer += gameState.speed;
+            if (powerUpTimer > 800 && Math.random() < 0.15) { // Less frequent than coins
+                spawnPowerUp();
+                powerUpTimer = 0;
+            }
+            
             // Update background elements
             backgroundElements.forEach(element => {
                 element.x -= element.speed;
@@ -1785,7 +2249,10 @@
             
             // Enhanced obstacle updates
             for (let i = obstacles.length - 1; i >= 0; i--) {
-                obstacles[i].x -= gameState.speed;
+                // Time freeze effect - don't move obstacles
+                if (!player.activePowerUps.timeFreeze.active) {
+                    obstacles[i].x -= gameState.speed;
+                }
                 
                 // Debug collision bounds for obstacles near player
                 if (Math.abs(obstacles[i].x - player.x) < 100) {
@@ -1804,10 +2271,7 @@
                 }
                 
                 // Enhanced collision detection with platform support
-                if (player.x < obstacles[i].x + obstacles[i].width &&
-                    player.x + player.size > obstacles[i].x &&
-                    player.y < obstacles[i].y + obstacles[i].height &&
-                    player.y + player.size > obstacles[i].y) {
+                if (preciseCollisionDetection(player, obstacles[i])) {
                     console.log('Collision detected with obstacle type:', obstacles[i].type);
                     
                     if (obstacles[i].type === 'platform') {
@@ -1873,10 +2337,32 @@
                         }
                     } else {
                         // Death collision for spikes and other deadly obstacles
-                        console.log('Player hit deadly obstacle - triggering explosion');
-                        createExplosion(player.x + player.size/2, player.y + player.size/2, player.color);
-                        gameOver();
-                        return;
+                        if (player.activePowerUps.invincibility.active) {
+                            // Invincibility - completely immune
+                            console.log('Invincibility absorbed collision!');
+                            createAdvancedParticles(player.x + player.size/2, player.y + player.size/2, '#gold', 4, 'explosion');
+                            playEnhancedSound(800, 0.15, 'sine', 0.1);
+                            continue; // Don't remove obstacle or die
+                        } else if (player.activePowerUps.ghostMode.active) {
+                            // Ghost mode - phase through obstacles
+                            console.log('Ghost mode - phasing through obstacle!');
+                            createAdvancedParticles(player.x + player.size/2, player.y + player.size/2, '#bbbbbb', 3, 'trail');
+                            continue; // Don't remove obstacle or die
+                        } else if (player.activePowerUps.shield.active) {
+                            // Shield protects from one collision
+                            console.log('Shield absorbed collision!');
+                            deactivatePowerUp('shield');
+                            createAdvancedParticles(player.x + player.size/2, player.y + player.size/2, '#00ddff', 6, 'explosion');
+                            playEnhancedSound(600, 0.2, 'triangle', 0.15); // Shield break sound
+                            obstacles.splice(i, 1); // Remove the obstacle
+                            continue;
+                        } else {
+                            // Death collision for spikes and other deadly obstacles
+                            console.log('Player hit deadly obstacle - triggering explosion');
+                            createExplosion(player.x + player.size/2, player.y + player.size/2, player.color);
+                            gameOver();
+                            return;
+                        }
                     }
                 }
                 
@@ -1888,23 +2374,40 @@
             
             // Enhanced coin updates
             for (let i = coins.length - 1; i >= 0; i--) {
-                coins[i].x -= gameState.speed;
+                // Time freeze effect - don't move coins
+                if (!player.activePowerUps.timeFreeze.active) {
+                    coins[i].x -= gameState.speed;
+                }
                 coins[i].sparkle += 0.4;
                 coins[i].pulsePhase += 0.2;
                 coins[i].glowIntensity = 0.5 + Math.sin(coins[i].pulsePhase) * 0.5;
                 
                 // Enhanced coin collection with magnetic effect
-                const collectRange = 20;
+                const collectRange = player.activePowerUps.magneticCoins.active ? 50 : 20;
                 if (player.x < coins[i].x + collectRange &&
                     player.x + player.size > coins[i].x - collectRange &&
                     player.y < coins[i].y + collectRange &&
                     player.y + player.size > coins[i].y - collectRange) {
                     
                     coins[i].collected = true;
-                    gameState.score += 200;
-                    gameState.coins++;
+                    
+                    // Coin multiplier effect
+                    const coinValue = player.activePowerUps.coinMultiplier.active ? 2 : 1;
+                    const scoreValue = player.activePowerUps.coinMultiplier.active ? 400 : 200;
+                    
+                    gameState.score += scoreValue;
+                    gameState.coins += coinValue;
+                    gameState.totalCoins += coinValue; // Also add to persistent total
+                    
                     playCoinSound();
-                    createAdvancedParticles(coins[i].x, coins[i].y, '#ffff00', 1);
+                    
+                    // Enhanced visual feedback for coin multiplier
+                    if (player.activePowerUps.coinMultiplier.active) {
+                        createAdvancedParticles(coins[i].x, coins[i].y, '#00ff88', 3, 'powerup');
+                    } else {
+                        createAdvancedParticles(coins[i].x, coins[i].y, '#ffff00', 1);
+                    }
+                    
                     coins.splice(i, 1);
                     continue;
                 }
@@ -1913,6 +2416,35 @@
                     coins.splice(i, 1);
                 }
             }
+            
+            // Enhanced power-up updates and collision
+            for (let i = powerUps.length - 1; i >= 0; i--) {
+                powerUps[i].x -= gameState.speed;
+                powerUps[i].sparkle += 0.3;
+                powerUps[i].pulsePhase += 0.15;
+                powerUps[i].glowIntensity = 0.7 + Math.sin(powerUps[i].pulsePhase) * 0.3;
+                
+                // Power-up collection with magnetic effect (enhanced for coin magnet power-up)
+                const collectRange = player.activePowerUps.magneticCoins.active ? 40 : 25;
+                if (player.x < powerUps[i].x + collectRange &&
+                    player.x + player.size > powerUps[i].x - collectRange &&
+                    player.y < powerUps[i].y + collectRange &&
+                    player.y + player.size > powerUps[i].y - collectRange) {
+                    
+                    activatePowerUp(powerUps[i].type);
+                    gameState.score += 300; // Higher score for power-ups
+                    createAdvancedParticles(powerUps[i].x, powerUps[i].y, powerUps[i].color, 4, 'powerup');
+                    powerUps.splice(i, 1);
+                    continue;
+                }
+                
+                if (powerUps[i].x + powerUps[i].size < 0) {
+                    powerUps.splice(i, 1);
+                }
+            }
+            
+            // Update active power-ups
+            updatePowerUps();
             
             // Enhanced particle updates with firework physics
             for (let i = particles.length - 1; i >= 0; i--) {
@@ -2111,7 +2643,33 @@
                     
                     ctx.restore();
                 } else {
-                    // Normal cube rendering
+                    // Normal cube rendering with power-up glow effects
+                    ctx.save();
+                    
+                    // Apply glow effect based on active power-ups
+                    if (player.glowIntensity > 0) {
+                        let glowColor = avatars[gameState.selectedAvatar].color;
+                        
+                        // Different glow colors for different power-ups
+                        if (player.activePowerUps.invincibility.active) {
+                            glowColor = '#gold';
+                        } else if (player.activePowerUps.shield.active) {
+                            glowColor = '#00ddff';
+                        } else if (player.activePowerUps.ghostMode.active) {
+                            glowColor = '#bbbbbb';
+                            ctx.globalAlpha = 0.7; // Make ghost mode semi-transparent
+                        } else if (player.activePowerUps.speedBoost.active) {
+                            glowColor = '#ff4444';
+                        } else if (player.activePowerUps.slowMotion.active) {
+                            glowColor = '#9966ff';
+                        } else if (player.activePowerUps.timeFreeze.active) {
+                            glowColor = '#88ddff';
+                        }
+                        
+                        ctx.shadowColor = glowColor;
+                        ctx.shadowBlur = player.glowIntensity * 15;
+                    }
+                    
                     ctx.fillStyle = avatars[gameState.selectedAvatar].color;
                     ctx.fillRect(player.x, player.y, player.size, player.size);
                     
@@ -2122,6 +2680,8 @@
                     ctx.fillRect(player.x + 3 + eyeOffset, player.y + 3, 4, 4);
                     ctx.fillRect(player.x + 11 + eyeOffset, player.y + 3, 4, 4);
                     ctx.fillRect(player.x + 5, player.y + 12, 8, 3);
+                    
+                    ctx.restore();
                 }
             }
             
@@ -2229,6 +2789,37 @@
                 ctx.restore();
             });
             
+            // Enhanced power-up rendering
+            powerUps.forEach(powerUp => {
+                ctx.save();
+                ctx.translate(powerUp.x + powerUp.size/2, powerUp.y + powerUp.size/2);
+                
+                // Glow effect
+                ctx.shadowColor = powerUp.color;
+                ctx.shadowBlur = 8 + Math.sin(powerUp.pulsePhase) * 4;
+                
+                // Main power-up body
+                ctx.fillStyle = powerUp.color;
+                ctx.fillRect(-powerUp.size/2, -powerUp.size/2, powerUp.size, powerUp.size);
+                
+                // Inner highlight
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(-powerUp.size/3, -powerUp.size/3, powerUp.size/1.5, powerUp.size/1.5);
+                
+                // Power-up icon (emoji-style)
+                ctx.font = '12px Arial';
+                ctx.fillStyle = '#000000';
+                ctx.textAlign = 'center';
+                ctx.fillText(powerUp.emoji, 0, 4);
+                
+                // Sparkle border
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(-powerUp.size/2, -powerUp.size/2, powerUp.size, powerUp.size);
+                
+                ctx.restore();
+            });
+            
             // Enhanced particle rendering
             if (particles.length > 0) {
                 console.log('Rendering', particles.length, 'particles');
@@ -2282,8 +2873,23 @@
                 ctx.fillStyle = p.color;
                 ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
                 
-                // Extra sparkle for special particles
-                if (p.sparkle && Math.random() < 0.15) {
+                // Enhanced effects based on particle type
+                if (p.type === 'powerup') {
+                    // Rotating sparkle effect for power-ups
+                    p.sparkle += p.sparkleSpeed;
+                    ctx.save();
+                    ctx.rotate(p.sparkle);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(-1, -p.size, 2, p.size * 2);
+                    ctx.fillRect(-p.size, -1, p.size * 2, 2);
+                    ctx.restore();
+                } else if (p.type === 'explosion') {
+                    // Intense glow for explosions
+                    ctx.shadowBlur = p.size * 3;
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(-1, -1, 2, 2);
+                } else if (p.sparkle && Math.random() < 0.15) {
+                    // Default sparkle
                     ctx.fillStyle = '#ffffff';
                     ctx.fillRect(-1, -1, 2, 2);
                 }
@@ -2300,6 +2906,24 @@
             ctx.shadowColor = '#00ff00';
             ctx.shadowBlur = 5;
             ctx.fillText(`Distance: ${Math.floor(gameState.distance)}m`, 10, 30);
+            ctx.shadowBlur = 0;
+            
+            // Display active power-ups
+            let powerUpY = 50;
+            Object.keys(player.activePowerUps).forEach(type => {
+                const powerUp = player.activePowerUps[type];
+                if (powerUp.active) {
+                    const powerUpData = powerUpTypes[type];
+                    const timeLeft = Math.ceil(powerUp.timer / 1000);
+                    
+                    ctx.fillStyle = powerUpData.color;
+                    ctx.font = '14px monospace';
+                    ctx.shadowColor = powerUpData.color;
+                    ctx.shadowBlur = 3;
+                    ctx.fillText(`${powerUpData.emoji} ${powerUpData.name}: ${timeLeft}s`, 10, powerUpY);
+                    powerUpY += 20;
+                }
+            });
             ctx.shadowBlur = 0;
             
             // Display milestone notification
@@ -2529,6 +3153,134 @@
             document.getElementById('shopScreen').style.display = 'none';
         }
 
+        // Power-up shop functions
+        function showPowerUpShop() {
+            document.getElementById('powerupShopScreen').style.display = 'block';
+            document.getElementById('gameOverScreen').style.display = 'none';
+            document.getElementById('shopScreen').style.display = 'none';
+            updatePowerUpShop();
+        }
+
+        function hidePowerUpShop() {
+            document.getElementById('powerupShopScreen').style.display = 'none';
+        }
+
+        function updatePowerUpShop() {
+            // Update coin display
+            document.getElementById('shopCoins').textContent = gameState.totalCoins;
+            
+            // Update power-up count display
+            const selectedCount = player.selectedPowerUps.length;
+            document.getElementById('powerupCount').textContent = selectedCount;
+            
+            // Check if limit is reached
+            const limitReached = selectedCount >= 3;
+            
+            // Populate power-up list
+            const powerupList = document.getElementById('powerupList');
+            powerupList.innerHTML = '';
+            
+            Object.keys(powerUpTypes).forEach(powerupKey => {
+                const powerup = powerUpTypes[powerupKey];
+                const item = document.createElement('div');
+                item.className = 'powerup-item';
+                
+                const canAfford = gameState.totalCoins >= powerup.price;
+                const isSelected = player.selectedPowerUps.includes(powerupKey);
+                const canPurchase = canAfford && (!limitReached || isSelected);
+                
+                if (!canAfford) item.classList.add('insufficient-funds');
+                if (isSelected) item.classList.add('selected');
+                if (limitReached && !isSelected) item.classList.add('limit-reached');
+                
+                item.innerHTML = `
+                    <div class="powerup-info">
+                        <div class="powerup-name">${powerup.emoji} ${powerup.name}</div>
+                        <div class="powerup-effect">${powerup.effect}</div>
+                        <div style="font-size: 8px; color: #aaa;">${powerup.duration/1000}s duration</div>
+                    </div>
+                    <div class="powerup-price">${powerup.price} 🪙</div>
+                    <button class="powerup-buy-btn" 
+                            ${!canPurchase ? 'disabled' : ''} 
+                            onclick="togglePowerUp('${powerupKey}')">
+                        ${isSelected ? 'REMOVE' : (limitReached ? 'LIMIT REACHED' : 'BUY & USE')}
+                    </button>
+                `;
+                
+                powerupList.appendChild(item);
+            });
+            
+            // Update selected power-ups display
+            updateSelectedPowerUpsDisplay();
+        }
+
+        function togglePowerUp(powerupKey) {
+            const powerup = powerUpTypes[powerupKey];
+            const isSelected = player.selectedPowerUps.includes(powerupKey);
+            const limitReached = player.selectedPowerUps.length >= 3;
+            
+            if (isSelected) {
+                // Remove power-up and refund coins
+                const index = player.selectedPowerUps.indexOf(powerupKey);
+                player.selectedPowerUps.splice(index, 1);
+                gameState.totalCoins += powerup.price;
+                playEnhancedSound(300, 0.1, 'sine', 0.1); // Removal sound
+            } else if (gameState.totalCoins >= powerup.price && !limitReached) {
+                // Buy and select power-up only if under limit
+                gameState.totalCoins -= powerup.price;
+                player.selectedPowerUps.push(powerupKey);
+                playPowerUpSound(); // Purchase sound
+            }
+            
+            // Save total coins to localStorage
+            localStorage.setItem('geometryDashTotalCoins', gameState.totalCoins);
+            updatePowerUpShop();
+        }
+
+        function updateSelectedPowerUpsDisplay() {
+            const selectedElement = document.getElementById('selectedPowerups');
+            if (player.selectedPowerUps.length === 0) {
+                selectedElement.textContent = 'None';
+            } else {
+                const names = player.selectedPowerUps.map(key => powerUpTypes[key].emoji);
+                selectedElement.textContent = names.join(' ');
+            }
+        }
+
+        function startGameWithPowerUps() {
+            hidePowerUpShop();
+            startGameWithSelectedPowerUps();
+        }
+
+        function startGameWithSelectedPowerUps() {
+            // Store selected power-ups before reset
+            const powerUpsToActivate = [...player.selectedPowerUps];
+            
+            // Start game normally (this will clear power-ups)
+            startGame();
+            
+            // Restore and activate selected power-ups after reset
+            player.selectedPowerUps = powerUpsToActivate;
+            powerUpsToActivate.forEach(powerupKey => {
+                activatePowerUp(powerupKey);
+            });
+        }
+
+        function startGameWithoutPowerUps() {
+            // Clear selected power-ups and refund coins
+            player.selectedPowerUps.forEach(powerupKey => {
+                const powerup = powerUpTypes[powerupKey];
+                gameState.totalCoins += powerup.price;
+            });
+            player.selectedPowerUps = [];
+            
+            // Save updated coin count
+            localStorage.setItem('geometryDashTotalCoins', gameState.totalCoins);
+            
+            hidePowerUpShop();
+            startGame();
+        }
+
         function populateShopGrid() {
             console.log('=== POPULATE SHOP GRID CALLED ===');
             const grid = document.querySelector('.shop-avatar-grid');
@@ -2653,6 +3405,9 @@
                 selectedAvatar: gameState.selectedAvatar
             };
             localStorage.setItem('geometryDashRetro', JSON.stringify(saveData));
+            
+            // Also save total coins separately for power-up shop
+            localStorage.setItem('geometryDashTotalCoins', gameState.totalCoins);
         }
 
         function loadGameData() {
@@ -2663,6 +3418,16 @@
                 gameState.purchasedAvatars = data.purchasedAvatars || ['default'];
                 gameState.selectedAvatar = data.selectedAvatar || 'default';
             }
+            
+            // Load persistent total coins separately for power-up shop
+            const persistentCoins = localStorage.getItem('geometryDashTotalCoins');
+            if (persistentCoins) {
+                gameState.totalCoins = parseInt(persistentCoins);
+            }
+            
+            // 🎁 BONUS COINS GIFT! 🎁
+            gameState.totalCoins += 1000;
+            localStorage.setItem('geometryDashTotalCoins', gameState.totalCoins);
         }
         
         // Unique Visitor Counter System

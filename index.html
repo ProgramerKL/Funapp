@@ -12,60 +12,70 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
             min-height: 100vh;
             padding: 20px;
-            color: #333;
+            color: #1e293b;
+            font-weight: 400;
+            line-height: 1.6;
         }
 
         .main-container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 3rem;
+            gap: 4rem;
+            padding: 2rem 0;
         }
 
         .section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            padding: 3rem;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.2);
+            padding: 4rem;
             text-align: center;
+            border: 1px solid rgba(226, 232, 240, 0.5);
         }
 
         .section-title {
-            font-size: 2.5rem;
-            font-weight: 300;
-            color: #4a5568;
-            margin-bottom: 2rem;
-            letter-spacing: -0.5px;
+            font-size: 2.75rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.75px;
+            line-height: 1.2;
         }
 
         .section-subtitle {
-            font-size: 1.2rem;
-            color: #718096;
-            margin-bottom: 2rem;
-            font-weight: 400;
+            font-size: 1.125rem;
+            color: #64748b;
+            margin-bottom: 3rem;
+            font-weight: 500;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         /* Portfolio Section */
         .portfolio-grid {
             display: grid;
             grid-template-columns: 1fr 2fr;
-            gap: 3rem;
+            gap: 4rem;
             text-align: left;
-            margin-top: 2rem;
+            margin-top: 3rem;
+            align-items: start;
         }
 
         .profile-card {
-            background: #f7fafc;
-            border-radius: 15px;
-            border: 2px solid #e2e8f0;
-            padding: 2rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 20px;
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            padding: 2.5rem;
             height: fit-content;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
         }
 
         .avatar {
@@ -119,41 +129,45 @@
         }
 
         .social-link {
-            background: #4299e1;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: white;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             text-decoration: none;
-            font-size: 1.2rem;
-            transition: all 0.2s ease;
+            font-size: 1.3rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
         }
 
         .social-link:hover {
-            background: #3182ce;
-            transform: translateY(-2px);
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
         }
 
         .accomplishments-area {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            gap: 2rem;
         }
 
         .accomplishment-item {
-            background: #f7fafc;
-            border-radius: 15px;
-            border: 2px solid #e2e8f0;
-            padding: 2rem;
-            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 20px;
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            padding: 2.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
         }
 
         .accomplishment-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+            border-color: rgba(99, 102, 241, 0.3);
         }
 
         .accomplishment-title {
@@ -187,30 +201,34 @@
         /* Games Section */
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .game-card {
-            background: #f7fafc;
-            border-radius: 15px;
-            border: 2px solid #e2e8f0;
-            padding: 2rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 20px;
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            padding: 2.5rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: center;
-            min-height: 200px;
+            min-height: 220px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
         }
 
         .game-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-            border-color: #4299e1;
+            transform: translateY(-12px) scale(1.03);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.18);
+            border-color: rgba(99, 102, 241, 0.4);
         }
 
         .game-icon {
@@ -220,8 +238,35 @@
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
+            0%, 100% { 
+                transform: translateY(0px) rotate(0deg); 
+            }
+            50% { 
+                transform: translateY(-12px) rotate(2deg); 
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .section:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+        
+        .section:nth-child(2) {
+            animation-delay: 0.3s;
         }
 
         .game-title {
@@ -467,17 +512,17 @@
                     <h2 class="profile-name">Kyle Liu</h2>
                     <p class="profile-role">Creative Developer</p>
                     <p class="profile-bio">
-                        Passionate about crafting beautiful digital experiences through thoughtful design and clean code.
+                        Full-stack developer specializing in creating engaging interactive experiences. Passionate about clean code, user-centered design, and building products that delight users.
                     </p>
                     <div class="vibe-status">
                         <span id="vibeEmoji">🎯</span>
                         <span id="vibeText">In the zone</span>
                     </div>
                     <div class="social-links">
-                        <a href="#" class="social-link">📧</a>
-                        <a href="#" class="social-link">💼</a>
-                        <a href="#" class="social-link">🐙</a>
-                        <a href="#" class="social-link">🐦</a>
+                        <a href="mailto:kyle@example.com" class="social-link" title="Email">✉️</a>
+                        <a href="https://linkedin.com/in/kyle-liu" class="social-link" title="LinkedIn">💼</a>
+                        <a href="https://github.com/kyle-liu" class="social-link" title="GitHub">⚡</a>
+                        <a href="https://twitter.com/kyle_codes" class="social-link" title="Twitter">🐦</a>
                     </div>
                 </div>
 
@@ -523,6 +568,21 @@
                     <div class="game-icon">🔓</div>
                     <h3 class="game-title">Pop the Lock</h3>
                     <p class="game-desc">Precision timing game - tap when the marker aligns with the target zone</p>
+                </div>
+                <div class="game-card" onclick="showFlappyBird()">
+                    <div class="game-icon">🐦</div>
+                    <h3 class="game-title">Extreme Flappy Bird</h3>
+                    <p class="game-desc">Brutally difficult Flappy Bird with progressive levels and nightmare mode</p>
+                </div>
+                <div class="game-card" onclick="showPokemonLore()">
+                    <div class="game-icon">📚</div>
+                    <h3 class="game-title">Pokemon Lore Archive</h3>
+                    <p class="game-desc">Immersive fullscreen Pokemon lore reader with detailed stories, API data, and magical animations</p>
+                </div>
+                <div class="game-card" onclick="showWeatherApp()">
+                    <div class="game-icon">🌤️</div>
+                    <h3 class="game-title">Canadian Weather Dashboard</h3>
+                    <p class="game-desc">Real-time weather data for Canadian cities using Open-Meteo API with detailed forecasts</p>
                 </div>
             </div>
         </div>
@@ -586,6 +646,13 @@
         <button class="back-button" onclick="closeGame()">🏠 Back to Portfolio</button>
         <div class="game-content" id="popLockGameContent">
             <!-- Pop the Lock game will be loaded here -->
+        </div>
+    </div>
+
+    <div class="game-container" id="flappyGameContainer">
+        <button class="back-button" onclick="closeGame()">🏠 Back to Portfolio</button>
+        <div class="game-content" id="flappyGameContent">
+            <!-- Extreme Flappy Bird game will be loaded here -->
         </div>
     </div>
 
@@ -742,14 +809,24 @@
         // Portfolio data
         const portfolioProjects = [
             {
-                title: "🎮 Interactive Games Hub",
-                description: "A collection of browser-based games including Whack-a-Mole, Geometry Dash, Cyberpunk Pong, and Hangman with modern UI/UX design and smooth gameplay mechanics.",
-                tags: ["JavaScript", "HTML5 Canvas", "CSS3", "Game Development"]
+                title: "🎮 Interactive Gaming Platform",
+                description: "A comprehensive gaming platform featuring 7 distinct games with advanced mechanics, responsive design, and real-time scoring systems. Built with vanilla JavaScript for optimal performance and cross-browser compatibility.",
+                tags: ["JavaScript", "HTML5 Canvas", "CSS3", "Game Development", "Performance Optimization"]
             },
             {
-                title: "🤖 AI Code Assistant",
-                description: "Integration with Claude AI for intelligent code suggestions and automated development workflows, enhancing productivity.",
-                tags: ["AI/ML", "API Integration", "Automation", "Developer Tools"]
+                title: "📚 Pokemon Lore Archive",
+                description: "Immersive fullscreen reading experience with API-integrated Pokemon data, comprehensive tooltips, animated backgrounds, and detailed lore stories. Features visual stat displays, type effectiveness charts, and friendly magical interface.",
+                tags: ["API Integration", "Data Visualization", "UX Design", "Responsive Design", "CSS Animations"]
+            },
+            {
+                title: "📊 VEX IQ Score Calculator",
+                description: "Professional scoring application for VEX IQ robotics competitions with comprehensive validation, real-time calculations, and tournament-grade accuracy. Used by competition organizers worldwide.",
+                tags: ["JavaScript", "Data Validation", "UI/UX Design", "Educational Tools"]
+            },
+            {
+                title: "🤖 AI-Powered Development Tools",
+                description: "Integration with Claude AI for intelligent code analysis, automated documentation generation, and enhanced development workflows. Streamlines the development process with smart automation.",
+                tags: ["AI/ML", "API Integration", "Automation", "Developer Productivity"]
             }
         ];
 
@@ -802,6 +879,24 @@
             hideAllHintButtons();
         }
 
+        function showFlappyBird() {
+            currentGame = 'flappy';
+            document.getElementById('flappyGameContainer').classList.add('active');
+            loadFlappyBirdGame();
+            hideAllHintButtons();
+        }
+
+
+        function showPokemonLore() {
+            // Navigate to the Pokemon Lore Archive
+            window.location.href = 'pokemon.html';
+        }
+
+        function showWeatherApp() {
+            // Navigate to the Weather Dashboard
+            window.location.href = 'weather.html';
+        }
+
         function closeGame() {
             document.querySelectorAll('.game-container').forEach(container => {
                 container.classList.remove('active');
@@ -846,6 +941,11 @@
         function loadPopTheLockGame() {
             const container = document.getElementById('popLockGameContent');
             container.innerHTML = '<iframe src=".superdesign/design_iterations/ide_gaming_dashboard_spam_resistant_1.html" style="width: 100%; height: 100vh; border: none; background: transparent;"></iframe>';
+        }
+
+        function loadFlappyBirdGame() {
+            const container = document.getElementById('flappyGameContent');
+            container.innerHTML = '<iframe src=".superdesign/design_iterations/ide_flappy_extreme_minimal_4.html" style="width: 100%; height: 100vh; border: none; background: transparent;"></iframe>';
         }
 
         // Generate accomplishments

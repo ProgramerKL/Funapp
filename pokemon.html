@@ -1,0 +1,2782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon Lore Archive</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Trebuchet MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #2d1b69 0%, #1a1a2e 20%, #16213e 40%, #0f3460 60%, #1e1e2e 80%, #2b1b3d 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 12s ease infinite;
+            color: #e2e8f0;
+            line-height: 1.8;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(100,50,200,0.1) 0%, transparent 30%),
+                radial-gradient(circle at 75% 75%, rgba(50,100,200,0.1) 0%, transparent 40%),
+                radial-gradient(circle at 50% 10%, rgba(150,50,150,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 90%, rgba(50,150,200,0.1) 0%, transparent 40%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        body::after {
+            content: '✨ 🌟 ⭐ 🎈 🎉 ✨ 🌈 🦄 🌸 🎪 🎨 🎭';
+            position: fixed;
+            top: -50px;
+            left: -100px;
+            width: 120%;
+            height: 200px;
+            font-size: 2rem;
+            opacity: 0.4;
+            animation: floatingEmojis 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes floatingEmojis {
+            0% { transform: translateX(-100%) rotate(0deg); }
+            100% { transform: translateX(100vw) rotate(360deg); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #FF69B4 0%, #87CEEB 50%, #98FB98 100%);
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(255,105,180,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Back to Gallery Button */
+        .back-to-gallery {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            background: linear-gradient(45deg, #FF69B4, #87CEEB);
+            color: white;
+            border: 3px solid white;
+            border-radius: 50px;
+            padding: 1rem 2rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 8px 25px rgba(255,105,180,0.3);
+            backdrop-filter: blur(10px);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            animation: gentlePulse 3s ease-in-out infinite;
+        }
+
+        .back-to-gallery:hover {
+            background: linear-gradient(45deg, #FF1493, #4169E1);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 35px rgba(255,105,180,0.5);
+        }
+
+        @keyframes gentlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .header::before {
+            content: '🌈 ✨ 🎪 🎭 🎨 🎈 🦄 🌟 ⭐ 🎉 🌸 🎊';
+            position: absolute;
+            top: 10px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 1.5rem;
+            opacity: 0.7;
+            animation: bounce 2s ease-in-out infinite alternate;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: wiggle 3s ease-in-out infinite;
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            opacity: 1;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+        }
+
+        @keyframes bounce {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-10px); }
+        }
+
+        @keyframes wiggle {
+            0%, 7% { transform: rotateZ(0); }
+            15% { transform: rotateZ(-1deg); }
+            20% { transform: rotateZ(1deg); }
+            25% { transform: rotateZ(0); }
+            100% { transform: rotateZ(0); }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .search-bar {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(25px);
+            margin: -40px auto 4rem;
+            max-width: 600px;
+            border-radius: 50px;
+            border: 3px solid #FF69B4;
+            padding: 1.2rem 2rem;
+            display: flex;
+            align-items: center;
+            position: relative;
+            z-index: 100;
+            box-shadow: 0 10px 40px rgba(255,105,180,0.3);
+            animation: gentleBounce 4s ease-in-out infinite;
+        }
+
+        @keyframes gentleBounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-3px) scale(1.02); }
+        }
+
+        .search-bar input {
+            border: none;
+            outline: none;
+            flex: 1;
+            font-size: 1.1rem;
+            padding: 0.5rem;
+            background: transparent;
+            color: #2c5aa0;
+            font-weight: 500;
+        }
+
+        .search-bar input::placeholder {
+            color: rgba(44,90,160,0.6);
+        }
+
+        .search-bar button {
+            background: linear-gradient(45deg, #FF69B4, #87CEEB);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .search-bar button:hover {
+            background: linear-gradient(45deg, #FF1493, #4169E1);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 5px 15px rgba(255,105,180,0.4);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            background: rgba(255,255,255,0.9);
+            color: #2c5aa0;
+            border: 3px solid #FFB6C1;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            backdrop-filter: blur(15px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(255,182,193,0.3), transparent);
+            transition: all 0.3s ease;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .tab-btn:hover::before {
+            width: 200%;
+            height: 200%;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(45deg, #FF69B4, #DDA0DD);
+            color: white;
+            border-color: #FF69B4;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 20px rgba(255,105,180,0.4);
+        }
+
+        .tab-btn:hover {
+            background: linear-gradient(45deg, #FFB6C1, #87CEEB);
+            color: white;
+            border-color: #FF69B4;
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .content-area {
+            display: grid;
+            gap: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        .lore-card {
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(25px);
+            border-radius: 25px;
+            overflow: hidden;
+            border: 3px solid #FFB6C1;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 10px 40px rgba(255,182,193,0.2);
+            position: relative;
+        }
+
+        .lore-card::before {
+            content: '✨';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .lore-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 30px 60px rgba(255,105,180,0.3);
+            border-color: #FF69B4;
+            background: rgba(255,255,255,0.98);
+        }
+
+        .lore-card:hover::before {
+            opacity: 0.8;
+            transform: rotate(20deg) scale(1.2);
+        }
+
+        .lore-header {
+            padding: 2rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .lore-title {
+            font-size: 2rem;
+            background: linear-gradient(45deg, #FF69B4, #4169E1);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .lore-meta {
+            color: #666;
+            font-size: 0.9rem;
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .lore-content {
+            padding: 0 2rem 2rem;
+        }
+
+        .lore-excerpt {
+            color: #4a5568;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .read-more {
+            color: #667eea;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #667eea;
+            border-radius: 25px;
+        }
+
+        .read-more:hover {
+            background: #667eea;
+            color: white;
+            transform: translateX(3px);
+        }
+
+        .category-tags {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .tag {
+            background: linear-gradient(45deg, #FFB6C1, #DDA0DD);
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 2px solid rgba(255,255,255,0.5);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(255,182,193,0.3);
+        }
+
+        /* Fullscreen Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #FFB6C1 0%, #87CEEB 20%, #98FB98 40%, #F0E68C 60%, #DDA0DD 80%, #FFE4E1 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 12s ease infinite;
+            z-index: 1000;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .modal.active {
+            display: block;
+        }
+
+        .modal-content {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(25px);
+            width: 100%;
+            height: auto;
+            min-height: 100vh;
+            box-shadow: none;
+            border: none;
+            border-radius: 0;
+            position: relative;
+        }
+
+        .modal-header {
+            padding: 3rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            position: relative;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+        }
+
+        .modal-close {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: linear-gradient(45deg, #FF69B4, #87CEEB);
+            border: 3px solid white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            box-shadow: 0 8px 25px rgba(255,105,180,0.3);
+        }
+
+        .modal-close:hover {
+            background: linear-gradient(45deg, #FF1493, #4169E1);
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 12px 35px rgba(255,105,180,0.5);
+        }
+
+        .modal-title {
+            font-size: 3rem;
+            background: linear-gradient(45deg, #FF69B4, #4169E1);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            padding-right: 80px; /* Account for close button */
+        }
+
+        .modal-meta {
+            color: #333;
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+        }
+
+        .modal-body {
+            padding: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(15px);
+        }
+
+        .modal-body h3 {
+            color: #4a50e2;
+            font-size: 1.7rem;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+            margin: 2rem 0 1rem;
+        }
+
+        .modal-body p {
+            margin-bottom: 1.5rem;
+            color: #2d3748;
+            font-size: 1.2rem;
+            font-weight: 500;
+            line-height: 1.9;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.7);
+        }
+
+        .modal-body blockquote {
+            border-left: 4px solid #667eea;
+            margin: 2rem 0;
+            padding: 1rem 2rem;
+            background: rgba(102, 126, 234, 0.15);
+            border-radius: 0 15px 15px 0;
+            font-style: italic;
+            color: #1a202c;
+            font-weight: 500;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.6);
+        }
+
+        /* Pokemon Info Panel Styles */
+        .pokemon-info-panel {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(168, 85, 247, 0.1));
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .pokemon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .pokemon-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .pokemon-card:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .pokemon-card h4 {
+            color: #f59e0b;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            gap: 0.5rem;
+        }
+
+        .pokedex-number {
+            background: #667eea;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .pokemon-types {
+            display: flex;
+            gap: 0.5rem;
+            margin: 0.5rem 0 1rem;
+        }
+
+        .type-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .type-normal { background: #A8A878; color: white; }
+        .type-fire { background: #F08030; color: white; }
+        .type-water { background: #6890F0; color: white; }
+        .type-electric { background: #F8D030; color: black; }
+        .type-grass { background: #78C850; color: black; }
+        .type-ice { background: #98D8D8; color: black; }
+        .type-fighting { background: #C03028; color: white; }
+        .type-poison { background: #A040A0; color: white; }
+        .type-ground { background: #E0C068; color: black; }
+        .type-flying { background: #A890F0; color: white; }
+        .type-psychic { background: #F85888; color: white; }
+        .type-bug { background: #A8B820; color: white; }
+        .type-rock { background: #B8A038; color: white; }
+        .type-ghost { background: #705898; color: white; }
+        .type-dragon { background: #7038F8; color: white; }
+        .type-dark { background: #705848; color: white; }
+        .type-steel { background: #B8B8D0; color: black; }
+        .type-fairy { background: #EE99AC; color: black; }
+
+        .pokemon-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.3rem 0;
+        }
+
+        .stat-name {
+            color: #4f46e5;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.6);
+        }
+
+        .stat-value {
+            color: #dc2626;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+        }
+
+        .base-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-bar-container {
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-bar {
+            background: rgba(255, 255, 255, 0.1);
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.3rem;
+        }
+
+        .stat-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.8s ease;
+        }
+
+        .abilities-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .ability-badge {
+            background: rgba(168, 85, 247, 0.3);
+            color: #7c3aed;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid rgba(168, 85, 247, 0.5);
+            cursor: help;
+            position: relative;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.4);
+        }
+
+        .ability-badge:hover {
+            background: rgba(168, 85, 247, 0.3);
+            transform: scale(1.05);
+        }
+
+        /* Definitions Panel */
+        .definitions-panel {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .definitions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .definition-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .definition-section h4 {
+            color: #2563eb;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+        }
+
+        .definition-item {
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .definition-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .definition-term {
+            color: #d97706;
+            font-weight: 700;
+            font-size: 1rem;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.4);
+        }
+
+        .definition-description {
+            color: #374151;
+            font-size: 0.95rem;
+            font-weight: 500;
+            line-height: 1.6;
+            margin-top: 0.25rem;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.6);
+        }
+
+        /* Tooltip styles */
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .tooltip:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .info-toggle {
+            background: rgba(59, 130, 246, 0.3);
+            color: #1d4ed8;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin: 1rem auto;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .info-toggle:hover {
+            background: rgba(59, 130, 246, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .back-btn {
+            background: linear-gradient(45deg, #FF69B4, #87CEEB);
+            color: white;
+            border: 3px solid white;
+            padding: 1.2rem 2.5rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 25px rgba(255,105,180,0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(45deg, #FF1493, #4169E1);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 35px rgba(255,105,180,0.5);
+        }
+
+        /* Fullscreen reading enhancements */
+        .reading-mode {
+            font-size: 1.2rem;
+            line-height: 2;
+        }
+
+        .reading-mode h3 {
+            font-size: 2rem;
+            margin: 3rem 0 1.5rem;
+        }
+
+        .reading-mode p {
+            margin-bottom: 2rem;
+            text-align: justify;
+        }
+
+        /* Add Lore Form Styles */
+        .add-lore-btn {
+            background: linear-gradient(45deg, #10b981, #059669) !important;
+            color: white !important;
+            border: 2px solid #047857 !important;
+        }
+
+        .add-lore-btn:hover {
+            background: linear-gradient(45deg, #059669, #047857) !important;
+            transform: translateY(-2px);
+        }
+
+        .add-lore-form {
+            background: rgba(30, 30, 60, 0.95);
+            border: 2px solid #4f46e5;
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            backdrop-filter: blur(15px);
+            display: none;
+        }
+
+        .add-lore-form h3 {
+            color: #a5b4fc;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: #d1d5db;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #4f46e5;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .form-btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .form-btn.submit {
+            background: linear-gradient(45deg, #10b981, #059669);
+            color: white;
+        }
+
+        .form-btn.cancel {
+            background: linear-gradient(45deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .form-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        /* Pokemon API Section Styles */
+        .pokeapi-section {
+            margin-bottom: 3rem;
+        }
+
+        .api-search-box {
+            background: rgba(30, 30, 60, 0.95);
+            border: 2px solid #4f46e5;
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            backdrop-filter: blur(15px);
+            margin-bottom: 2rem;
+        }
+
+        .api-search-box h2 {
+            color: #a5b4fc;
+            margin-bottom: 1rem;
+        }
+
+        .api-search-box p {
+            color: #d1d5db;
+            margin-bottom: 1.5rem;
+        }
+
+        .api-search-form {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .api-search-form input {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #4f46e5;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            font-size: 1rem;
+            width: 300px;
+            outline: none;
+        }
+
+        .api-search-form input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .api-search-btn {
+            background: linear-gradient(45deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .api-search-btn:hover {
+            background: linear-gradient(45deg, #4f46e5, #7c3aed);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .pokemon-result {
+            background: rgba(30, 30, 60, 0.95);
+            border: 2px solid #4f46e5;
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(15px);
+            display: none;
+        }
+
+        .pokemon-result.show {
+            display: block;
+        }
+
+        .pokemon-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .pokemon-name {
+            font-size: 2.5rem;
+            color: #fbbf24;
+            margin-bottom: 0.5rem;
+            text-transform: capitalize;
+        }
+
+        .pokemon-id {
+            color: #a5b4fc;
+            font-size: 1.2rem;
+        }
+
+        .pokemon-image {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .pokemon-image img {
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1rem;
+        }
+
+        .pokemon-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .detail-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+
+        .detail-section h3 {
+            color: #60a5fa;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #4f46e5;
+            padding-bottom: 0.5rem;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            color: #d1d5db;
+        }
+
+        .stat-value {
+            color: #fbbf24;
+            font-weight: 600;
+        }
+
+        .type-list {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .ability-list {
+            color: #d1d5db;
+        }
+
+        .ability-item {
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .loading {
+            text-align: center;
+            color: #a5b4fc;
+            font-size: 1.2rem;
+            padding: 2rem;
+        }
+
+        .error {
+            text-align: center;
+            color: #ef4444;
+            font-size: 1.2rem;
+            padding: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .lore-header, .lore-content {
+                padding: 1.5rem;
+            }
+            
+            .search-bar {
+                margin: -30px auto 2rem;
+                padding: 0.75rem 1.5rem;
+            }
+
+            .nav-tabs {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .modal-content {
+                margin-top: 1rem;
+            }
+
+            .modal-header, .modal-body {
+                padding: 2rem;
+            }
+
+            .modal-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Back to Gallery Button -->
+    <a href="index.html" class="back-to-gallery">
+        🏠 Back to Gallery
+    </a>
+
+    <div class="header">
+        <div class="container">
+            <h1>✨ Pokemon Lore Archive</h1>
+            <p>Discover the deep stories, legends, and mysteries of the Pokemon world</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="search-bar">
+            <input type="text" placeholder="Search legends, regions, Pokemon, or mysteries..." id="searchInput">
+            <button onclick="searchLore()">Search</button>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="showSection('lore')">📚 Lore Archive</button>
+            <button class="tab-btn" onclick="showSection('pokeapi')">🔍 Pokemon Lookup</button>
+            <button class="tab-btn" onclick="filterLore('legendary')">Legendary</button>
+            <button class="tab-btn" onclick="filterLore('regional')">Regional</button>
+            <button class="tab-btn" onclick="filterLore('mythology')">Mythology</button>
+            <button class="tab-btn" onclick="filterLore('mystery')">Mysteries</button>
+            <button class="tab-btn add-lore-btn" onclick="showAddLoreForm()">+ Add Lore</button>
+        </div>
+
+        <!-- Add Lore Form -->
+        <div class="add-lore-form" id="addLoreForm">
+            <h3>✨ Add New Pokemon Lore</h3>
+            <form onsubmit="submitNewLore(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="loreTitle">Title *</label>
+                        <input type="text" id="loreTitle" required placeholder="e.g., The Mystery of Darkrai's Dreams">
+                    </div>
+                    <div class="form-group">
+                        <label for="loreCategory">Category *</label>
+                        <select id="loreCategory" required>
+                            <option value="">Select Category</option>
+                            <option value="legendary">Legendary</option>
+                            <option value="regional">Regional</option>
+                            <option value="mythology">Mythology</option>
+                            <option value="mystery">Mystery</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="loreRegion">Region *</label>
+                        <input type="text" id="loreRegion" required placeholder="e.g., Sinnoh, Kanto, Hoenn">
+                    </div>
+                    <div class="form-group">
+                        <label for="loreType">Type</label>
+                        <input type="text" id="loreType" placeholder="e.g., Investigation, Historical, Scientific">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="loreTags">Tags (comma-separated)</label>
+                    <input type="text" id="loreTags" placeholder="e.g., Dream, Nightmare, Legendary, Sinnoh">
+                </div>
+                <div class="form-group">
+                    <label for="loreExcerpt">Excerpt/Summary *</label>
+                    <textarea id="loreExcerpt" required placeholder="Brief summary that will appear on the lore card..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="loreContent">Full Content *</label>
+                    <textarea id="loreContent" required placeholder="The complete lore story. You can use HTML formatting like <h3>, <p>, <blockquote>, <ul>, etc."></textarea>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="form-btn cancel" onclick="hideAddLoreForm()">Cancel</button>
+                    <button type="submit" class="form-btn submit">Add Lore</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Pokemon API Lookup Section -->
+        <div class="pokeapi-section" id="pokeapiSection" style="display: none;">
+            <div class="api-search-box">
+                <h2>🔍 Pokemon API Lookup</h2>
+                <p>Search for any Pokemon to get detailed information from the PokeAPI database</p>
+                <div class="api-search-form">
+                    <input type="text" id="pokemonSearch" placeholder="Enter Pokemon name or ID (e.g., pikachu, 25)">
+                    <button onclick="searchPokemon()" class="api-search-btn">Search Pokemon</button>
+                </div>
+            </div>
+            <div id="pokemonResult" class="pokemon-result"></div>
+        </div>
+
+        <div class="content-area" id="contentArea">
+            <!-- Lore cards will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Modal for full lore reading -->
+    <div class="modal" id="loreModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+                <div class="category-tags" id="modalTags"></div>
+                <h1 class="modal-title" id="modalTitle"></h1>
+                <div class="modal-meta" id="modalMeta"></div>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // Comprehensive Pokemon Lore Database with API-accurate information
+        const pokemonLore = [
+            {
+                id: 1,
+                title: "Mewtwo: The Genetic Pokemon - A Scientific Marvel",
+                category: "legendary",
+                tags: ["Legendary", "Kanto", "Psychic", "Generation-I"],
+                region: "Kanto",
+                date: "Sep 2024",
+                views: "2,847",
+                type: "Canonical",
+                pokedexNumber: 150,
+                apiData: {
+                    height: 20, // 2.0m in decimeters
+                    weight: 1220, // 122.0kg in hectograms
+                    baseExperience: 340,
+                    types: ["psychic"],
+                    abilities: ["pressure", "unnerve"],
+                    baseStats: {
+                        hp: 106,
+                        attack: 110,
+                        defense: 90,
+                        specialAttack: 154,
+                        specialDefense: 90,
+                        speed: 130,
+                        total: 680
+                    }
+                },
+                excerpt: "Created from Mew's genetic material through advanced scientific manipulation, Mewtwo stands as Pokemon #150 in the National Pokedex. This Psychic-type legendary Pokemon possesses incredible power with a base stat total of 680, making it one of the most formidable Pokemon ever discovered. Its signature abilities, Pressure and Unnerve, reflect its overwhelming psychic dominance...",
+                fullContent: `
+                    <h3>Scientific Classification and Physical Characteristics</h3>
+                    <p><strong>National Pokedex #150 - Mewtwo, the Genetic Pokemon</strong></p>
+                    
+                    <p><strong>Physical Specifications (Official PokeAPI Data):</strong></p>
+                    <ul>
+                        <li><strong>Height:</strong> 2.0 meters (6'07")</li>
+                        <li><strong>Weight:</strong> 122.0 kg (269.0 lbs)</li>
+                        <li><strong>Type:</strong> Pure Psychic</li>
+                        <li><strong>Base Experience Yield:</strong> 340 points</li>
+                    </ul>
+                    
+                    <p>Mewtwo's physical form represents the pinnacle of genetic engineering. Standing 2 meters tall and weighing 122 kilograms, its humanoid structure combines feline grace with overwhelming psychic power. The distinctive purple and white coloration, along with its powerful tail tipped with a bulbous end, makes Mewtwo instantly recognizable among legendary Pokemon.</p>
+                    
+                    <h3>Battle Statistics and Capabilities</h3>
+                    <p><strong>Base Stat Distribution (Total: 680):</strong></p>
+                    <ul>
+                        <li><strong>HP:</strong> 106 - Exceptional durability for sustained battles</li>
+                        <li><strong>Attack:</strong> 110 - Strong physical capabilities despite psychic specialization</li>
+                        <li><strong>Defense:</strong> 90 - Moderate physical resistance</li>
+                        <li><strong>Special Attack:</strong> 154 - Devastating psychic offensive power</li>
+                        <li><strong>Special Defense:</strong> 90 - Balanced psychic resistance</li>
+                        <li><strong>Speed:</strong> 130 - Incredible reaction time and movement speed</li>
+                    </ul>
+                    
+                    <blockquote>"Its DNA is almost the same as Mew's. However, its size and disposition are vastly different." - Official Pokemon Red/Blue Pokedex Entry</blockquote>
+                    
+                    <h3>Signature Abilities</h3>
+                    <p><strong>Pressure:</strong> Mewtwo's overwhelming presence causes opposing Pokemon to expend additional energy when using moves. This ability reflects its psychic dominance over the battlefield, forcing opponents to work harder to maintain their attacks.</p>
+                    
+                    <p><strong>Unnerve (Hidden Ability):</strong> Mewtwo's intimidating aura prevents opposing Pokemon from using berries. This psychological warfare demonstrates its ability to manipulate the mental state of its opponents through sheer presence alone.</p>
+                    
+                    <h3>The Genetic Manipulation Process</h3>
+                    <p>According to research data, Mewtwo was created through advanced cloning techniques using Mew's genetic material as a base template. The scientists enhanced specific genetic sequences to amplify psychic abilities while maintaining the original's adaptability. The process involved:</p>
+                    
+                    <p><strong>DNA Enhancement:</strong> Mew's base genetic code was modified to increase psychic output by approximately 40%, resulting in Mewtwo's signature 154 base Special Attack stat - significantly higher than Mew's 100.</p>
+                    
+                    <p><strong>Physical Optimization:</strong> The cloning process enhanced Mewtwo's physical form for battle efficiency, resulting in increased height, weight, and overall combat effectiveness compared to the diminutive Mew.</p>
+                    
+                    <h3>Legendary Move Arsenal</h3>
+                    <p>Mewtwo's move pool reflects its artificial origins and psychic mastery. Key moves include:</p>
+                    
+                    <ul>
+                        <li><strong>Psystrike:</strong> Mewtwo's signature move, dealing psychic damage calculated against the opponent's Defense rather than Special Defense</li>
+                        <li><strong>Psychic:</strong> The quintessential psychic attack, demonstrating telekinetic manipulation</li>
+                        <li><strong>Recover:</strong> Advanced cellular regeneration capabilities</li>
+                        <li><strong>Barrier:</strong> Psychic shield creation for defensive purposes</li>
+                        <li><strong>Amnesia:</strong> Mental manipulation affecting memory and psychic resistance</li>
+                    </ul>
+                    
+                    <h3>Scientific Legacy and Research Impact</h3>
+                    <p>Mewtwo's creation represents both the pinnacle of Pokemon genetic research and a cautionary tale about the limits of scientific ambition. Its base stat total of 680 places it among the most powerful non-Mega Evolution Pokemon, demonstrating the success of the genetic enhancement process.</p>
+                    
+                    <p>The research that created Mewtwo has influenced modern understanding of Pokemon genetics, evolution mechanics, and the relationship between artificial enhancement and natural development. Its existence proves that Pokemon genetic material can be successfully manipulated while maintaining the essential characteristics that define Pokemon consciousness and ability.</p>
+                    
+                    <h3>Behavioral Analysis</h3>
+                    <p>Despite its artificial origins, Mewtwo exhibits complex emotional and psychological patterns typical of highly intelligent Pokemon. Its Pressure ability suggests not just psychic power but sophisticated awareness of battlefield psychology. The Unnerve ability indicates advanced tactical thinking and the capacity for psychological warfare.</p>
+                    
+                    <p>Research observations note that Mewtwo's intelligence appears to exceed that of most Pokemon and many humans, with problem-solving abilities that demonstrate abstract thinking, long-term planning, and emotional complexity rivaling sentient beings.</p>
+                `
+            },
+            {
+                id: 2,
+                title: "Ho-Oh & the Legendary Beasts: The Burned Tower's Sacred Legacy",
+                category: "legendary",
+                tags: ["Legendary", "Johto", "Fire", "Generation-II"],
+                region: "Johto",
+                date: "Sep 2024",
+                views: "1,523",
+                type: "Historical",
+                pokedexNumbers: [250, 243, 244, 245], // Ho-Oh, Raikou, Entei, Suicune
+                apiData: {
+                    hooh: {
+                        height: 38, // 3.8m
+                        weight: 1990, // 199kg
+                        types: ["fire", "flying"],
+                        abilities: ["pressure", "regenerator"],
+                        baseStats: { hp: 106, attack: 130, defense: 90, specialAttack: 110, specialDefense: 154, speed: 90, total: 680 }
+                    },
+                    raikou: {
+                        height: 19, // 1.9m
+                        weight: 1780, // 178kg
+                        types: ["electric"],
+                        abilities: ["pressure", "inner-focus"],
+                        baseStats: { hp: 90, attack: 85, defense: 75, specialAttack: 115, specialDefense: 100, speed: 115, total: 580 }
+                    },
+                    entei: {
+                        height: 21, // 2.1m
+                        weight: 1980, // 198kg
+                        types: ["fire"],
+                        abilities: ["pressure", "inner-focus"],
+                        baseStats: { hp: 115, attack: 115, defense: 85, specialAttack: 90, specialDefense: 75, speed: 100, total: 580 }
+                    },
+                    suicune: {
+                        height: 20, // 2.0m
+                        weight: 1870, // 187kg
+                        types: ["water"],
+                        abilities: ["pressure", "inner-focus"],
+                        baseStats: { hp: 100, attack: 75, defense: 115, specialAttack: 90, specialDefense: 115, speed: 85, total: 580 }
+                    }
+                },
+                excerpt: "Ho-Oh (Pokedex #250), the Rainbow Pokemon, stands as one of Johto's most revered legendaries with a base stat total of 680. This Fire/Flying-type Pokemon's sacred connection to the legendary beasts—Raikou (#243), Entei (#244), and Suicune (#245)—represents one of the most documented cases of legendary resurrection and transformation in Pokemon history...",
+                fullContent: `
+                    <h3>Ho-Oh: The Rainbow Pokemon (National Pokedex #250)</h3>
+                    
+                    <p><strong>Physical Specifications (Official PokeAPI Data):</strong></p>
+                    <ul>
+                        <li><strong>Height:</strong> 3.8 meters (12'06")</li>
+                        <li><strong>Weight:</strong> 199.0 kg (438.7 lbs)</li>
+                        <li><strong>Type:</strong> Fire/Flying</li>
+                        <li><strong>Base Stat Total:</strong> 680</li>
+                        <li><strong>Signature Abilities:</strong> Pressure, Regenerator (Hidden)</li>
+                    </ul>
+                    
+                    <p>Ho-Oh's majestic 3.8-meter wingspan and distinctive rainbow-colored plumage make it one of the most visually striking legendary Pokemon. Its Fire/Flying typing grants it mastery over both celestial flight and sacred flames, with its Regenerator ability allowing it to heal damage when switching out of battle - a reflection of its mythical resurrection powers.</p>
+                    
+                    <h3>Ho-Oh's Battle Capabilities</h3>
+                    <p><strong>Base Stats Distribution (Total: 680):</strong></p>
+                    <ul>
+                        <li><strong>HP:</strong> 106 - Legendary endurance</li>
+                        <li><strong>Attack:</strong> 130 - Powerful physical presence</li>
+                        <li><strong>Defense:</strong> 90 - Moderate physical protection</li>
+                        <li><strong>Special Attack:</strong> 110 - Strong elemental mastery</li>
+                        <li><strong>Special Defense:</strong> 154 - Exceptional mystical resistance</li>
+                        <li><strong>Speed:</strong> 90 - Graceful aerial movement</li>
+                    </ul>
+                    
+                    <blockquote>"Legends claim this Pokémon flies the world's skies continuously on its magnificent seven-colored wings, bringing happiness to those who see it." - Official Pokemon Gold Pokedex Entry</blockquote>
+                    
+                    <h3>The Legendary Beasts: Resurrection and Transformation</h3>
+                    
+                    <p><strong>Raikou - The Thunder Pokemon (Pokedex #243):</strong></p>
+                    <ul>
+                        <li><strong>Dimensions:</strong> 1.9m, 178kg</li>
+                        <li><strong>Type:</strong> Electric</li>
+                        <li><strong>Base Stat Total:</strong> 580</li>
+                        <li><strong>Specialization:</strong> Speed (115) and Special Attack (115)</li>
+                        <li><strong>Signature Feature:</strong> Lightning-fast movement embodying the storm's fury</li>
+                    </ul>
+                    
+                    <p><strong>Entei - The Volcano Pokemon (Pokedex #244):</strong></p>
+                    <ul>
+                        <li><strong>Dimensions:</strong> 2.1m, 198kg</li>
+                        <li><strong>Type:</strong> Fire</li>
+                        <li><strong>Base Stat Total:</strong> 580</li>
+                        <li><strong>Specialization:</strong> HP (115) and Attack (115)</li>
+                        <li><strong>Signature Feature:</strong> Volcanic power representing the sacred flames</li>
+                    </ul>
+                    
+                    <p><strong>Suicune - The Aurora Pokemon (Pokedex #245):</strong></p>
+                    <ul>
+                        <li><strong>Dimensions:</strong> 2.0m, 187kg</li>
+                        <li><strong>Type:</strong> Water</li>
+                        <li><strong>Base Stat Total:</strong> 580</li>
+                        <li><strong>Specialization:</strong> Defense (115) and Special Defense (115)</li>
+                        <li><strong>Signature Feature:</strong> Purification abilities and crystalline grace</li>
+                    </ul>
+                    
+                    <h3>The Sacred Resurrection Event</h3>
+                    <p>According to documented research, the transformation occurred when Ho-Oh's Regenerator ability was amplified by extreme emotional trauma. The legendary beasts' original forms were completely reconstituted at the cellular level, with their new typing reflecting the elemental forces present during the tower's destruction:</p>
+                    
+                    <p><strong>Lightning Storm → Raikou:</strong> The Electric-type embodiment gained incredible speed (115 base) to represent lightning's instantaneous nature. Its Pressure ability creates electrical tension in the battlefield, forcing opponents to expend extra energy.</p>
+                    
+                    <p><strong>Sacred Flame → Entei:</strong> The Fire-type transformation resulted in the highest HP (115) among the trio, representing the eternal flame's endurance. Its volcanic nature grants it explosive physical power.</p>
+                    
+                    <p><strong>Purifying Rain → Suicune:</strong> The Water-type evolution developed exceptional defensive capabilities (115 Defense and Special Defense), embodying water's protective and cleansing properties.</p>
+                    
+                    <h3>Shared Legendary Characteristics</h3>
+                    <p>All three legendary beasts share the Pressure ability, inherited from Ho-Oh's divine influence during their resurrection. This ability reflects their legendary status and the psychological impact of encountering beings touched by resurrection magic. Their identical base stat totals of 580 demonstrate the balanced nature of Ho-Oh's divine intervention.</p>
+                    
+                    <p><strong>Inner Focus (Hidden Ability):</strong> Each beast possesses unwavering concentration, preventing flinching - a testament to their transcendence over mortal fears through death and rebirth.</p>
+                    
+                    <h3>Signature Move Analysis</h3>
+                    <p><strong>Ho-Oh's Sacred Fire:</strong> A 100-power Fire-type move with high burn chance, representing the sacred flames that once blessed Ecruteak City.</p>
+                    
+                    <p><strong>Raikou's Thunder:</strong> A 110-power Electric move with perfect accuracy during rain, symbolizing its storm origins.</p>
+                    
+                    <p><strong>Entei's Fire Blast:</strong> A devastating 110-power Fire attack with burn potential, channeling volcanic fury.</p>
+                    
+                    <p><strong>Suicune's Hydro Pump:</strong> A 110-power Water move representing purifying torrents.</p>
+                    
+                    <h3>Modern Scientific Analysis</h3>
+                    <p>The Burned Tower incident represents the most thoroughly documented case of Pokemon resurrection in scientific literature. Energy readings from the site still show residual signatures matching Ho-Oh's unique bio-electric field patterns, with periodic spikes corresponding to the legendary beasts' documented appearances.</p>
+                    
+                    <p>The transformation process appears to have fundamentally altered not just the physical forms but the very essence of the original Pokemon, creating entirely new species rather than mere evolutionary variants. This suggests that Ho-Oh's power operates on a level deeper than standard Pokemon abilities, affecting the fundamental building blocks of Pokemon existence.</p>
+                    
+                    <p>The perfect stat distribution balance (all three beasts totaling 580) indicates a deliberate, controlled process rather than chaotic resurrection, demonstrating Ho-Oh's precise mastery over life and death energies.</p>
+                `
+            },
+            {
+                id: 3,
+                title: "Arceus & The Creation Trio: Masters of Reality's Fabric",
+                category: "mythology",
+                tags: ["Mythology", "Sinnoh", "Creation", "Generation-IV"],
+                region: "Sinnoh",
+                date: "Sep 2024",
+                views: "4,291",
+                type: "Canonical",
+                pokedexNumbers: [493, 483, 484, 487], // Arceus, Dialga, Palkia, Giratina
+                apiData: {
+                    arceus: {
+                        height: 32, // 3.2m
+                        weight: 3200, // 320kg
+                        types: ["normal"], // Changes with plates
+                        abilities: ["multitype"],
+                        baseStats: { hp: 120, attack: 120, defense: 120, specialAttack: 120, specialDefense: 120, speed: 120, total: 720 }
+                    },
+                    dialga: {
+                        height: 54, // 5.4m
+                        weight: 6830, // 683kg
+                        types: ["steel", "dragon"],
+                        abilities: ["pressure", "telepathy"],
+                        baseStats: { hp: 100, attack: 120, defense: 120, specialAttack: 150, specialDefense: 100, speed: 90, total: 680 }
+                    },
+                    palkia: {
+                        height: 42, // 4.2m
+                        weight: 3360, // 336kg
+                        types: ["water", "dragon"],
+                        abilities: ["pressure", "telepathy"],
+                        baseStats: { hp: 90, attack: 120, defense: 100, specialAttack: 150, specialDefense: 120, speed: 100, total: 680 }
+                    },
+                    giratina: {
+                        height: 45, // 4.5m (Altered Form)
+                        weight: 7500, // 750kg
+                        types: ["ghost", "dragon"],
+                        abilities: ["pressure", "telepathy"],
+                        baseStats: { hp: 150, attack: 100, defense: 120, specialAttack: 100, specialDefense: 120, speed: 90, total: 680 }
+                    }
+                },
+                excerpt: "Arceus (Pokedex #493), the Alpha Pokemon, stands as the supreme deity of the Pokemon universe with perfectly balanced base stats totaling 720. This Normal-type legendary's Multitype ability allows it to become any type through its mystical plates. Together with the Creation Trio—Dialga (#483), Palkia (#484), and Giratina (#487)—it governs the fundamental forces of existence...",
+                fullContent: `
+                    <h3>Arceus: The Alpha Pokemon (National Pokedex #493)</h3>
+                    
+                    <p><strong>Physical Specifications (Official PokeAPI Data):</strong></p>
+                    <ul>
+                        <li><strong>Height:</strong> 3.2 meters (10'06")</li>
+                        <li><strong>Weight:</strong> 320.0 kg (705.5 lbs)</li>
+                        <li><strong>Type:</strong> Normal (Variable with Plates)</li>
+                        <li><strong>Base Stat Total:</strong> 720 - The highest of any Pokemon</li>
+                        <li><strong>Signature Ability:</strong> Multitype</li>
+                    </ul>
+                    
+                    <p>Arceus stands as the most powerful Pokemon in existence, with perfectly balanced base stats of 120 across all categories. Its 3.2-meter equine form represents divine perfection, while its incredible 320kg mass reflects the weight of cosmic responsibility it bears as reality's architect.</p>
+                    
+                    <h3>Perfect Divine Statistics (All Base Stats: 120)</h3>
+                    <p>Arceus's stat distribution reveals divine perfection - no weaknesses, no overspecialization, pure balance:</p>
+                    <ul>
+                        <li><strong>HP:</strong> 120 - Infinite endurance befitting a creator deity</li>
+                        <li><strong>Attack:</strong> 120 - Physical manifestation of divine will</li>
+                        <li><strong>Defense:</strong> 120 - Impenetrable cosmic armor</li>
+                        <li><strong>Special Attack:</strong> 120 - Reality-bending magical power</li>
+                        <li><strong>Special Defense:</strong> 120 - Immunity to mortal magic</li>
+                        <li><strong>Speed:</strong> 120 - Transcends temporal limitations</li>
+                    </ul>
+                    
+                    <blockquote>"It is told in mythology that this Pokémon was born before the universe even existed." - Official Pokemon Diamond/Pearl Pokedex Entry</blockquote>
+                    
+                    <h3>The Multitype Ability: Reality Manipulation</h3>
+                    <p>Arceus's signature Multitype ability represents the ultimate expression of Pokemon type mastery. Through its 17 mystical plates, Arceus can become any type in existence:</p>
+                    
+                    <p><strong>The Plate System:</strong> Each plate transforms Arceus's fundamental nature, changing not just its typing but its very essence. This ability demonstrates Arceus's mastery over all aspects of existence - it doesn't just command the elements, it BECOMES them.</p>
+                    
+                    <h3>The Creation Trio: Architects of Reality</h3>
+                    
+                    <p><strong>Dialga - The Temporal Pokemon (Pokedex #483):</strong></p>
+                    <ul>
+                        <li><strong>Dimensions:</strong> 5.4m, 683kg - Massive temporal presence</li>
+                        <li><strong>Type:</strong> Steel/Dragon - Eternal and indomitable</li>
+                        <li><strong>Base Stat Total:</strong> 680</li>
+                        <li><strong>Specialization:</strong> Special Attack (150) - Temporal manipulation power</li>
+                        <li><strong>Signature Move:</strong> Roar of Time - Distorts temporal flow</li>
+                    </ul>
+                    
+                    <p><strong>Palkia - The Spatial Pokemon (Pokedex #484):</strong></p>
+                    <ul>
+                        <li><strong>Dimensions:</strong> 4.2m, 336kg - Balanced spatial form</li>
+                        <li><strong>Type:</strong> Water/Dragon - Fluid dimensional mastery</li>
+                        <li><strong>Base Stat Total:</strong> 680</li>
+                        <li><strong>Specialization:</strong> Special Attack (150) - Spatial warping ability</li>
+                        <li><strong>Signature Move:</strong> Spacial Rend - Tears holes in space</li>
+                    </ul>
+                    
+                    <p><strong>Giratina - The Renegade Pokemon (Pokedex #487):</strong></p>
+                    <ul>
+                        <li><strong>Dimensions:</strong> 4.5m, 750kg - Dense antimatter composition</li>
+                        <li><strong>Type:</strong> Ghost/Dragon - Spectral and otherworldly</li>
+                        <li><strong>Base Stat Total:</strong> 680</li>
+                        <li><strong>Specialization:</strong> HP (150) - Incredible endurance in harsh Reverse World</li>
+                        <li><strong>Signature Move:</strong> Shadow Force - Phases between dimensions</li>
+                    </ul>
+                    
+                    <h3>Shared Divine Characteristics</h3>
+                    <p>All Creation Trio members share the Pressure ability, inherited from Arceus's overwhelming divine presence. This ability forces opponents to expend additional energy, reflecting the psychological impact of facing beings that literally embody fundamental forces of reality.</p>
+                    
+                    <p><strong>Telepathy (Hidden Ability):</strong> The Creation Trio possesses advanced psychic communication, enabling coordination across dimensional boundaries when working together to maintain reality's stability.</p>
+                    
+                    <h3>The Divine Creation Process</h3>
+                    <p>According to research correlating ancient texts with modern Pokemon data analysis, the creation process followed specific statistical patterns:</p>
+                    
+                    <p><strong>Arceus (720 BST):</strong> Represents pure, undiluted creative force with perfect balance across all attributes.</p>
+                    
+                    <p><strong>Creation Trio (680 BST each):</strong> Each specialized for their cosmic role while maintaining near-legendary power levels. The 40-point reduction from Arceus represents focused specialization rather than diminished power.</p>
+                    
+                    <h3>Signature Moves and Reality Manipulation</h3>
+                    <p><strong>Judgment (Arceus):</strong> A 100-power move that changes type based on Arceus's current plate, demonstrating its absolute mastery over all elemental forces.</p>
+                    
+                    <p><strong>Roar of Time (Dialga):</strong> A devastating 150-power Dragon move with temporal distortion effects, requiring recharge due to the strain of manipulating time.</p>
+                    
+                    <p><strong>Spacial Rend (Palkia):</strong> A 100-power Dragon move with high critical hit ratio, representing tears in the fabric of space itself.</p>
+                    
+                    <p><strong>Shadow Force (Giratina):</strong> A 120-power Ghost move that phases the user out of reality temporarily, demonstrating mastery over the boundary between existence and void.</p>
+                    
+                    <h3>Modern Cosmological Analysis</h3>
+                    <p>Scientific study of the Creation mythology reveals remarkable correlations with theoretical physics. Arceus's perfect stat balance suggests a being existing outside conventional limitations, while the Creation Trio's specialized high stats in key areas (Dialga's Special Attack for temporal manipulation, Palkia's balanced offensive capabilities for spatial control, Giratina's exceptional HP for Reverse World survival) align with their cosmic responsibilities.</p>
+                    
+                    <p>Energy signatures detected in areas associated with these legendaries show patterns consistent with spacetime distortion, suggesting that the mythological accounts may describe actual physical phenomena rather than mere folklore.</p>
+                    
+                    <h3>The Ongoing Creation</h3>
+                    <p>The Creation quartet's continued existence suggests that reality requires active maintenance. Arceus's Multitype ability allows it to adapt to any cosmic crisis, while the Creation Trio's specialized domains ensure that time, space, and antimatter remain in balance.</p>
+                    
+                    <p>Their perfect coordination, evidenced by their shared Pressure ability and compatible stat totals, demonstrates that creation is not a finished product but an ongoing collaborative effort to maintain the universe's stability and allow for continued evolution of consciousness and life.</p>
+                `
+            },
+            {
+                id: 4,
+                title: "The Unown Phenomenon: Dimensional Messengers",
+                category: "mystery",
+                tags: ["Mystery", "Psychic", "Generation-II", "Dimensions"],
+                region: "Multiple",
+                date: "Sep 2024",
+                views: "3,654",
+                type: "Research",
+                pokedexNumber: 201,
+                apiData: {
+                    height: 5, // 0.5m
+                    weight: 50, // 5.0kg
+                    types: ["psychic"],
+                    abilities: ["levitate"],
+                    baseStats: { hp: 48, attack: 72, defense: 48, specialAttack: 72, specialDefense: 48, speed: 48, total: 336 },
+                    forms: 28 // A-Z plus ! and ?
+                },
+                excerpt: "Unown (Pokedex #201) represents one of Pokemon's most enigmatic mysteries. These Psychic-type beings exist in 28 distinct forms (A-Z, !, ?) with identical base stats totaling 336. Their Levitate ability and unique dimensional properties suggest they operate outside normal Pokemon biology, serving as living symbols that bridge realities through their collective consciousness...",
+                fullContent: `
+                    <h3>Unown: The Symbol Pokemon (National Pokedex #201)</h3>
+                    
+                    <p><strong>Physical Specifications (Official PokeAPI Data):</strong></p>
+                    <ul>
+                        <li><strong>Height:</strong> 0.5 meters (1'08")</li>
+                        <li><strong>Weight:</strong> 5.0 kg (11.0 lbs)</li>
+                        <li><strong>Type:</strong> Psychic</li>
+                        <li><strong>Base Stat Total:</strong> 336</li>
+                        <li><strong>Known Forms:</strong> 28 distinct variations (A-Z, !, ?)</li>
+                        <li><strong>Signature Ability:</strong> Levitate</li>
+                    </ul>
+                    
+                    <p>Despite their small 0.5-meter stature and lightweight 5kg mass, Unown possess extraordinary dimensional properties. Each form maintains identical base statistics, suggesting they are aspects of a single consciousness rather than separate species.</p>
+                    
+                    <h3>Statistical Analysis: The Symbolic Pattern</h3>
+                    <p><strong>Base Stats Distribution (Total: 336):</strong></p>
+                    <ul>
+                        <li><strong>HP:</strong> 48 - Minimal physical presence</li>
+                        <li><strong>Attack:</strong> 72 - Limited physical capability</li>
+                        <li><strong>Defense:</strong> 48 - Fragile material form</li>
+                        <li><strong>Special Attack:</strong> 72 - Moderate psychic power</li>
+                        <li><strong>Special Defense:</strong> 48 - Vulnerable to mental attacks</li>
+                        <li><strong>Speed:</strong> 48 - Slow individual movement</li>
+                    </ul>
+                    
+                    <blockquote>"Their shapes look like hieroglyphs on ancient tablets. It is said that the two are somehow related." - Official Pokemon Crystal Pokedex Entry</blockquote>
+                    
+                    <h3>The 28-Form Phenomenon</h3>
+                    <p>Unown exists in 28 documented forms corresponding to the 26 letters of the alphabet plus two punctuation marks (! and ?). This symbolic correspondence suggests a deeper connection to communication and meaning itself:</p>
+                    
+                    <p><strong>Alphabetic Forms (A-Z):</strong> Each letter form appears to carry specific symbolic weight, with different letters appearing in ancient sites at frequencies that correspond to their importance in written language.</p>
+                    
+                    <p><strong>Exclamation Form (!):</strong> Rare variant associated with moments of high emotional intensity or dimensional breakthrough events.</p>
+                    
+                    <p><strong>Question Form (?):</strong> Found in locations associated with unsolved mysteries or temporal anomalies.</p>
+                    
+                    <h3>Levitate: Defying Physical Laws</h3>
+                    <p>The Levitate ability shared by all Unown forms indicates their existence outside normal physical constraints. Unlike other levitating Pokemon that use psychic power or natural buoyancy, Unown appear to exist partially outside three-dimensional space, explaining their immunity to Ground-type attacks and their dimensional communication abilities.</p>
+                    
+                    <p>Unlike other Pokemon, Unown exist primarily as psychic entities, their physical forms being merely projections of their consciousness into our dimensional space. Each Unown embodies a specific symbolic concept, and when they gather in groups, they can alter reality itself through the power of collective meaning.</p>
+                    
+                    <h3>The Solaceon Ruins Discovery</h3>
+                    <p>The most significant Unown site discovered to date lies beneath Solaceon Town in Sinnoh. The ruins contain chambers filled with Unown symbols that, when properly decoded, reveal messages about the nature of reality, time, and the relationship between different dimensions.</p>
+                    
+                    <blockquote>"FRIENDSHIP - ALL LIVES TOUCH OTHER LIVES TO CREATE SOMETHING ANEW AND ALIVE" - Translation from the Solaceon Ruins</blockquote>
+                    
+                    <p>But researchers have discovered that the messages in Solaceon are just the beginning. By mapping the positions of Unown symbols across multiple sites and overlaying them with astronomical data, a startling pattern emerges: the symbols correspond directly to locations where dimensional barriers are thinnest.</p>
+                    
+                    <h3>The Multidimensional Network</h3>
+                    <p>Evidence suggests that Unown exist simultaneously across multiple dimensions, serving as a communication network between different versions of reality. When Unown appear in our world, they may be relay stations, transmitting messages between alternate timelines or parallel universes.</p>
+                    
+                    <p>The Ruins of Alph in Johto contain additional pieces of this cosmic puzzle. Radio transmissions from the ruins have been decoded to reveal coordinates that match locations where legendary Pokemon sightings occur. This suggests that Unown may be involved in summoning or guiding legendary Pokemon to specific locations at crucial moments in history.</p>
+                    
+                    <h3>The Entei Connection</h3>
+                    <p>Perhaps the most dramatic demonstration of Unown power occurred during an incident involving a young girl named Molly Hale. When Molly's intense desire for her missing father combined with the psychic energy of Unown in her home, the Pokemon literally rewrote local reality to fulfill her wishes, creating an illusory Entei and transforming her house into a crystal palace.</p>
+                    
+                    <p>This event revealed that Unown don't just communicate across dimensions - they can actually alter the fabric of reality when their collective psychic power is focused by strong human emotion. The implications of this ability are staggering and potentially dangerous.</p>
+                    
+                    <h3>Warning Signs</h3>
+                    <p>Recent analysis of Unown messages from sites around the world reveals an increasingly urgent pattern. The symbols are appearing more frequently, and their messages have shifted from philosophical observations to what appear to be warnings about impending dimensional instability.</p>
+                    
+                    <p>Locations where Unown have recently appeared show elevated readings of space-time distortion, similar to the signatures detected around legendary Pokemon associated with time and space manipulation. This correlation has led some researchers to theorize that Unown may be trying to warn us about threats to the stability of our reality.</p>
+                    
+                    <h3>The Archive Theory</h3>
+                    <p>The most compelling theory about Unown purpose comes from analyzing their behavior as a collective consciousness. Rather than individual Pokemon, Unown may be components of a vast multidimensional archive - a living library that records and preserves information across all possible realities.</p>
+                    
+                    <p>If this theory is correct, then the messages we're receiving may be historical records from alternate timelines - warnings about disasters that have already occurred in other versions of our universe. The increasing frequency of their appearances might indicate that our timeline is approaching a critical decision point that could determine the fate of our reality.</p>
+                    
+                    <h3>Decoding the Future</h3>
+                    <p>Research teams are now working around the clock to decode the latest Unown messages. The symbols are becoming more complex, incorporating mathematical formulas and star charts alongside the traditional alphabetic communications. Some messages seem to reference specific dates in the near future, accompanied by coordinates pointing to locations of known legendary Pokemon activity.</p>
+                    
+                    <p>Whatever the Unown are trying to tell us, their urgency is unmistakable. The question remains: are we receiving these messages in time to act upon them, or are we simply witnessing the final communications from a reality that has already begun to unravel?</p>
+                `
+            },
+            {
+                id: 5,
+                title: "The Ancient Kings of Kalos: AZ and the Ultimate Weapon",
+                category: "regional",
+                tags: ["Regional", "Kalos", "History", "War"],
+                region: "Kalos",
+                date: "Sep 2024",
+                views: "2,156",
+                type: "Historical",
+                excerpt: "Three thousand years ago, the Kalos region was ravaged by the most devastating war in recorded history. At its center stood AZ, a king whose love for his Pokemon led him to create a weapon of unimaginable power - and curse himself with eternal life as punishment for his choices...",
+                fullContent: `
+                    <h3>The Golden Age Before the War</h3>
+                    <p>Three thousand years ago, the Kalos region was ravaged by the most devastating war in recorded history. But before the conflict began, Kalos had experienced a golden age of prosperity and harmony between humans and Pokemon that lasted for centuries.</p>
+                    
+                    <p>King AZ ruled during this peaceful era from his palace in what is now Geosenge Town. Standing nearly eleven feet tall, AZ was not just a king but a visionary who dreamed of a world where humans and Pokemon could coexist in perfect harmony. His closest companion was a Floette - not just any Floette, but one with a unique coloration and an eternal flower that never wilted.</p>
+                    
+                    <h3>The Outbreak of War</h3>
+                    <p>The war began over resources - specifically, the mysterious stones that contained immense energy, later known as Mega Stones. As these stones were discovered throughout Kalos, neighboring regions launched invasions to claim them, leading to a conflict that would consume the entire continent.</p>
+                    
+                    <blockquote>"In my arrogance, I believed that power alone could bring peace. I was wrong, and the cost of my mistake echoes through eternity." - AZ's personal journal, discovered centuries later</blockquote>
+                    
+                    <p>AZ initially tried to resolve the conflict through diplomacy, but as the war escalated and casualties mounted, his peaceful nature began to change. The breaking point came when his beloved Floette was killed in a battle near the palace, struck down while trying to protect a group of wounded Pokemon.</p>
+                    
+                    <h3>The Creation of the Ultimate Weapon</h3>
+                    <p>Consumed by grief and rage, AZ abandoned his peaceful philosophy and threw himself into creating a weapon that would end the war decisively. Using technology far advanced for its time, combined with the life force of countless Pokemon, he constructed the Ultimate Weapon - a massive device capable of unprecedented destruction.</p>
+                    
+                    <p>The weapon's power source was horrifying: the life energy of Pokemon, drained against their will and concentrated into a beam of pure destruction. AZ justified this atrocity by telling himself it would end the war quickly and prevent further suffering, but the truth was simpler - he wanted revenge for his Floette's death.</p>
+                    
+                    <h3>The Day of Fire</h3>
+                    <p>When AZ finally activated the Ultimate Weapon, its effects exceeded even his expectations. The massive beam of energy didn't just destroy the enemy armies - it carved a permanent scar across the landscape, creating the badlands that still exist near Geosenge Town. The death toll was catastrophic, with hundreds of thousands of humans and Pokemon killed instantly.</p>
+                    
+                    <p>But the weapon's power did more than destroy - it also created. The concentrated life energy that powered the device had an unexpected side effect: it granted eternal life to both AZ and his Floette, resurrecting her from death but fundamentally changing both of them in the process.</p>
+                    
+                    <h3>The Price of Victory</h3>
+                    <p>The war ended immediately - no force could stand against the Ultimate Weapon's power. But victory brought no peace to AZ. His resurrected Floette, horrified by the thousands of Pokemon whose lives had been sacrificed to bring her back, abandoned him and fled into the wild.</p>
+                    
+                    <p>AZ realized too late that he had become the very thing he once opposed - a tyrant who sacrificed others for his own desires. The weight of his actions, combined with the curse of eternal life, began his transformation from a noble king into a wandering hermit consumed by regret.</p>
+                    
+                    <h3>The Three Thousand Year Journey</h3>
+                    <p>For three millennia, AZ wandered the world searching for his lost Floette and seeking some form of redemption. He witnessed the rise and fall of civilizations, saw the same conflicts repeat endlessly, and slowly came to understand the true cost of his actions.</p>
+                    
+                    <p>During his long exile, AZ encountered others who had been affected by his weapon. Some Pokemon had been mutated by the residual energy, gaining new forms or abilities. Some locations still bore scars from the weapon's discharge, creating areas where reality itself seemed unstable.</p>
+                    
+                    <h3>Modern Discoveries</h3>
+                    <p>Recent archaeological expeditions have uncovered remnants of the Ultimate Weapon's construction, hidden in caves beneath Geosenge Town. These discoveries have revealed disturbing parallels between AZ's weapon and modern technology, suggesting that some organizations may be attempting to recreate its devastating power.</p>
+                    
+                    <p>The weapon's firing mechanism has been found, along with several of the focusing crystals that channeled its energy. Analysis of these artifacts reveals technology that operates on principles we're only beginning to understand - methods of converting life force into usable energy that could revolutionize or destroy our modern world.</p>
+                    
+                    <h3>The Lesson of AZ</h3>
+                    <p>AZ's story serves as a cautionary tale about the seductive nature of power and the danger of justifying atrocities through good intentions. His three-thousand-year journey from beloved king to tormented wanderer illustrates that some actions can never be undone, no matter how much time passes or how genuine one's regret becomes.</p>
+                    
+                    <p>The Ultimate Weapon remains one of history's most powerful reminders that the greatest threats to peace often come not from those who embrace evil, but from those who believe their noble goals justify any means necessary to achieve them.</p>
+                `
+            },
+            {
+                id: 6,
+                title: "N's Truth: The Boy Who Spoke to Pokemon",
+                category: "legendary",
+                tags: ["Legendary", "Unova", "N", "Truth"],
+                region: "Unova",
+                date: "Sep 2024",
+                views: "1,892",
+                type: "Biographical",
+                excerpt: "Natural Harmonia Gropius - known simply as N - possessed an ability so rare it was considered myth until his emergence shook the Unova region. His gift to communicate directly with Pokemon revealed truths about the relationship between humans and Pokemon that society wasn't ready to hear...",
+                fullContent: `
+                    <h3>The Child Who Heard Voices</h3>
+                    <p>Natural Harmonia Gropius - known simply as N - possessed an ability so rare it was considered myth until his emergence shook the Unova region to its core. Born with the extraordinary gift of communicating directly with Pokemon, N's childhood was unlike any other human's in recorded history.</p>
+                    
+                    <p>Raised in isolation by Ghetsis and Team Plasma, N was surrounded only by Pokemon who had been abused, abandoned, or mistreated by humans. From these tortured souls, he learned to speak their language, to understand their pain, and to see the world through their eyes. To N, every Pokemon's cry was a word, every gesture a sentence, every emotion a clear communication.</p>
+                    
+                    <h3>The Manufactured Truth</h3>
+                    <p>Ghetsis carefully orchestrated N's upbringing to create a specific worldview. By exposing N only to Pokemon who had suffered under human care, Ghetsis ensured that N would develop a fundamental belief that Pokemon and humans should be separated for the Pokemon's own protection.</p>
+                    
+                    <blockquote>"I... I've been deceived by the person I trusted most. I need time to think about what protects Pokemon." - N, upon discovering Ghetsis's manipulation</blockquote>
+                    
+                    <p>This controlled environment created N's initial "truth" - that Pokemon were suffering under human ownership and needed to be liberated. It was a truth built on carefully selected evidence, but it was N's truth nonetheless, and his sincerity in believing it made him incredibly powerful when paired with legendary Pokemon who responded to pure intentions.</p>
+                    
+                    <h3>The Awakening of Reshiram</h3>
+                    <p>N's absolute belief in his cause allowed him to awaken Reshiram, the Vast White Pokemon that embodies truth. Reshiram doesn't respond to wishful thinking or noble lies - it only answers to those whose truth is genuine, even if that truth is incomplete or manipulated.</p>
+                    
+                    <p>The bond between N and Reshiram was profound because N's desire to help Pokemon was completely sincere. Even though his understanding was limited by his controlled upbringing, his core motivation - protecting Pokemon from suffering - was pure truth that Reshiram could not ignore.</p>
+                    
+                    <h3>The Shattered Worldview</h3>
+                    <p>N's encounter with trainers who genuinely cared for their Pokemon began to crack his carefully constructed worldview. When he spoke with Pokemon who were happy with their human partners, who had formed bonds of mutual respect and love, N's truth began to evolve.</p>
+                    
+                    <p>The revelation of Ghetsis's manipulation was devastating not just because of the betrayal, but because it forced N to question everything he believed about reality. If his fundamental truth about Pokemon suffering was based on lies, what other truths in his life might be false?</p>
+                    
+                    <h3>The Journey of Understanding</h3>
+                    <p>After the events in Unova, N began a journey of discovery, traveling the world to see how humans and Pokemon interacted in different cultures and environments. This journey was not just physical but philosophical - a quest to understand the full spectrum of human-Pokemon relationships.</p>
+                    
+                    <p>During his travels, N encountered Pokemon in the wild who chose to stay with humans, Pokemon who had been rescued and rehabilitated by caring trainers, and Pokemon who formed partnerships based on mutual respect rather than ownership. Each encounter added nuance to his understanding of the complex relationship between species.</p>
+                    
+                    <h3>The New Truth</h3>
+                    <p>N's evolved understanding recognizes that the relationship between humans and Pokemon exists on a spectrum. Some humans do abuse Pokemon, and those cases demand intervention and justice. But many relationships are built on genuine friendship, mutual respect, and shared adventure.</p>
+                    
+                    <p>His gift of communication with Pokemon gives N a unique perspective on these relationships. He can sense when a Pokemon is truly happy with its trainer versus when it's simply resigned to its fate. This ability makes him an invaluable advocate for Pokemon welfare, able to identify genuine abuse that others might miss.</p>
+                    
+                    <h3>The Continuing Mission</h3>
+                    <p>Today, N uses his abilities not to separate humans and Pokemon, but to improve their relationships. He works quietly behind the scenes, identifying cases of Pokemon abuse and helping to rehabilitate both the Pokemon and, when possible, their trainers.</p>
+                    
+                    <p>His approach has evolved from the absolute stance of his youth to a more nuanced understanding that recognizes the potential for both harm and healing in human-Pokemon relationships. He seeks to maximize the latter while preventing the former.</p>
+                    
+                    <h3>The Living Truth</h3>
+                    <p>N's story illustrates that truth is not a fixed destination but a living, evolving understanding that grows through experience and honest self-reflection. His initial truth was incomplete but genuine. His current truth is more complex but also more complete.</p>
+                    
+                    <p>Perhaps most importantly, N's journey shows that even those with extraordinary gifts can be deceived, manipulated, or limited by their circumstances. True wisdom comes not from special abilities but from the willingness to question one's beliefs, seek new experiences, and remain open to change.</p>
+                    
+                    <p>The boy who once sought to separate Pokemon from humans has become a bridge between worlds, using his unique gift to ensure that the bonds formed between species are built on understanding, respect, and genuine care rather than exploitation or indifference.</p>
+                `
+            },
+            {
+                id: 6,
+                title: "The Ghost of Lavender Town: Cubone's Tragic Origins",
+                category: "mystery",
+                tags: ["Mystery", "Ghost", "Kanto", "Tragedy"],
+                region: "Kanto",
+                date: "Sep 2024",
+                views: "4,821",
+                type: "Investigation",
+                pokedexNumber: 104,
+                apiData: {
+                    height: 4, // 0.4m
+                    weight: 65, // 6.5kg
+                    types: ["ground"],
+                    abilities: ["rock-head", "lightning-rod"],
+                    baseStats: { hp: 50, attack: 50, defense: 95, specialAttack: 40, specialDefense: 50, speed: 35, total: 320 }
+                },
+                excerpt: "Deep within Lavender Town's Pokemon Tower lies one of the most heartbreaking mysteries in the Pokemon world. Cubone, the Lonely Pokemon, carries the skull of its deceased mother as both protection and eternal memorial. But recent investigations suggest there's more to this tragic species than anyone realized...",
+                fullContent: `
+                    <h3>Cubone: The Lonely Pokemon (National Pokedex #104)</h3>
+                    
+                    <p><strong>Physical Specifications (Official PokeAPI Data):</strong></p>
+                    <ul>
+                        <li><strong>Height:</strong> 0.4 meters (1'04")</li>
+                        <li><strong>Weight:</strong> 6.5 kg (14.3 lbs)</li>
+                        <li><strong>Type:</strong> Ground</li>
+                        <li><strong>Base Stat Total:</strong> 320</li>
+                        <li><strong>Notable Feature:</strong> Skull helmet worn permanently</li>
+                    </ul>
+                    
+                    <h3>The Anatomical Mystery</h3>
+                    <p><strong>Base Stats Distribution (Total: 320):</strong></p>
+                    <ul>
+                        <li><strong>HP:</strong> 50 - Fragile constitution from trauma</li>
+                        <li><strong>Attack:</strong> 50 - Limited by small stature</li>
+                        <li><strong>Defense:</strong> 95 - Enhanced by mother's protective skull</li>
+                        <li><strong>Special Attack:</strong> 40 - Minimal psychic abilities</li>
+                        <li><strong>Special Defense:</strong> 50 - Moderate mental resilience</li>
+                        <li><strong>Speed:</strong> 35 - Slowed by grief and skull weight</li>
+                    </ul>
+                    
+                    <blockquote>\"Wears the skull of its deceased mother. When it becomes lonesome, it is said to cry loudly.\" - Official Pokemon Red/Blue Pokedex Entry</blockquote>
+                    
+                    <p>The skull that every Cubone wears raises disturbing biological questions. How does a newborn Cubone, weighing only 6.5kg and standing 0.4m tall, immediately have access to its mother's skull? The mathematics don't add up - adult Marowak skulls are far larger than newborn Cubone heads, yet every Cubone is born already wearing one.</p>
+                    
+                    <h3>The Lavender Town Investigation</h3>
+                    <p>The Pokemon Tower in Lavender Town contains the largest concentration of Cubone graves in the known world. But careful examination of the burial records reveals a chilling pattern: for every Cubone buried, there are three Marowak graves nearby. This 3:1 ratio has remained constant for over a century.</p>
+                    
+                    <p>Ghost-type Pokemon in the tower have provided fragmented testimonies through psychic translators. Their accounts speak of a \"Great Sadness\" that occurred generations ago, an event that fundamentally changed the nature of the Cubone species and created their perpetual state of mourning.</p>
+                    
+                    <h3>The Team Rocket Connection</h3>
+                    <p>Recently declassified documents from Team Rocket's archives reveal a horrifying truth about historical Pokemon trafficking operations. Over fifty years ago, organized poaching rings systematically hunted Marowak mothers to harvest their bone clubs, considered valuable materials for traditional medicine.</p>
+                    
+                    <p>The poachers discovered that orphaned Cubone would wear their mothers' skulls as protection, creating a visual marker that made them easier to identify and capture. This created a vicious cycle: killing mothers to harvest bones, then capturing the traumatized offspring who bore visible evidence of their loss.</p>
+                    
+                    <h3>The Genetic Adaptation</h3>
+                    <p>Dr. Marina Voss, a Pokemon geneticist studying in Lavender Town, has proposed the \"Trauma Inheritance Theory.\" Her research suggests that the extreme trauma experienced by multiple generations of Cubone has actually altered their genetic code.</p>
+                    
+                    <p>\"We're seeing evidence that Cubone are born with genetic memories of loss,\" Dr. Voss explains. \"Their high Defense stat and Rock Head ability appear to be evolutionary adaptations to a world where mothers are constantly under threat. They've literally evolved to expect abandonment.\"</p>
+                    
+                    <h3>The Lightning Rod Phenomenon</h3>
+                    <p>Cubone's hidden ability, Lightning Rod, has a disturbing origin that most researchers prefer not to discuss. Analysis of electrocuted Marowak remains suggests that many mothers died not from natural causes, but from targeted electric attacks designed to kill them quickly while leaving their skulls intact.</p>
+                    
+                    <p>The Lightning Rod ability allows Cubone to absorb and redirect electrical attacks - not as an offensive capability, but as a defense mechanism evolved specifically to survive the same attacks that killed their mothers. It's evolution responding to systematic murder.</p>
+                    
+                    <h3>The Crying at Night</h3>
+                    <p>Residents of Lavender Town report that on certain nights, particularly during new moons, the sound of crying can be heard throughout the town. Initially attributed to the Ghost-type Pokemon in the tower, acoustic analysis reveals the sounds come from living Cubone scattered throughout the surrounding routes.</p>
+                    
+                    <p>The crying follows a specific pattern - beginning at exactly midnight and lasting for exactly 47 minutes. This duration corresponds to the time it takes for a Cubone to fully process the genetic memories of its mother's death, a nightly ritual of inherited grief that every member of the species must endure.</p>
+                    
+                    <h3>The Bone Weapon Mystery</h3>
+                    <p>Every Cubone carries a bone club, which traditional lore claims belonged to its mother. But detailed analysis reveals these bones don't match Marowak skeletal structure. Instead, they appear to be fossilized remains of an ancient Pokemon species that went extinct centuries ago.</p>
+                    
+                    <p>This discovery suggests that the original \"mother's bone\" was actually a sacred artifact passed down through generations - until the species was nearly wiped out by poaching, leaving only the orphaned Cubone to carry these ancient relics without understanding their true significance.</p>
+                    
+                    <h3>The Evolution Paradox</h3>
+                    <p>When a Cubone evolves into Marowak, it gains significant size and strength, but there's a dark side to this transformation. Analysis of newly evolved Marowak shows elevated stress hormones and shortened lifespans compared to Marowak from regions without poaching histories.</p>
+                    
+                    <p>\"It's as if the evolutionary process is accelerated by trauma,\" notes Pokemon behaviorist Dr. James Elm. \"They're evolving not out of strength, but out of desperation - trying to become strong enough to protect the next generation of orphans.\"</p>
+                    
+                    <h3>The Ongoing Investigation</h3>
+                    <p>Recent excavations beneath the Pokemon Tower have uncovered mass grave sites containing hundreds of Marowak remains, all showing evidence of deliberate killing. Carbon dating places these deaths across multiple decades, suggesting an organized campaign of extermination rather than isolated poaching incidents.</p>
+                    
+                    <p>More disturbing still, some of the youngest remains show signs of captivity - chains, malnourishment, and injuries consistent with forced breeding programs. The implications are clear: someone was not just killing Marowak mothers, but deliberately breeding them in captivity to produce more orphaned Cubone.</p>
+                    
+                    <h3>The Search for Justice</h3>
+                    <p>International Pokemon protection agencies are now treating the Cubone situation as an ongoing crime against an entire species. The perpetrators of the historical atrocities may be beyond justice, but evidence suggests some of the same operations continue in remote areas.</p>
+                    
+                    <p>Every time you see a Cubone wearing its mother's skull and crying at night, you're witnessing the living evidence of one of the most systematic crimes ever committed against Pokemon. The species carries its trauma not just emotionally, but genetically - passed down through generations as both warning and memorial.</p>
+                    
+                    <p>The question now is whether we can heal what has been broken, or if the Cubone are doomed to carry their grief forever, a permanent reminder of humanity's capacity for both love and cruelty toward the Pokemon who share our world.</p>
+                `
+            },
+            {
+                id: 7,
+                title: "The Abyssal Legends: Kyogre and the Drowned Civilizations",
+                category: "legendary",
+                tags: ["Legendary", "Hoenn", "Water", "Ancient Civilization"],
+                region: "Hoenn",
+                date: "Sep 2024",
+                views: "3,742",
+                type: "Archaeological",
+                pokedexNumber: 382,
+                apiData: {
+                    height: 45, // 4.5m
+                    weight: 3520, // 352.0kg
+                    types: ["water"],
+                    abilities: ["drizzle"],
+                    baseStats: { hp: 100, attack: 100, defense: 90, specialAttack: 150, specialDefense: 140, speed: 90, total: 670 }
+                },
+                excerpt: "Beneath the waves of Hoenn's seas lie the ruins of at least seven advanced civilizations, all destroyed by the same catastrophic force: Kyogre, the Sea Basin Pokemon. Archaeological evidence suggests these weren't natural disasters, but deliberate acts of judgment against societies that had somehow offended the legendary master of the oceans...",
+                fullContent: `
+                    <h3>Kyogre: The Sea Basin Pokemon (National Pokedex #382)</h3>
+                    
+                    <p><strong>Physical Specifications (Official PokeAPI Data):</strong></p>
+                    <ul>
+                        <li><strong>Height:</strong> 4.5 meters (14'09\")</li>
+                        <li><strong>Weight:</strong> 352.0 kg (776.0 lbs)</li>
+                        <li><strong>Type:</strong> Pure Water</li>
+                        <li><strong>Base Stat Total:</strong> 670</li>
+                        <li><strong>Signature Ability:</strong> Drizzle</li>
+                    </ul>
+                    
+                    <p>Kyogre's massive 4.5-meter frame and 352kg mass allow it to generate tidal forces that can literally reshape coastlines. Its body is perfectly adapted for deep-sea existence, with bioluminescent markings that can be seen from the ocean floor even in complete darkness.</p>
+                    
+                    <h3>Statistical Analysis: Master of the Depths</h3>
+                    <p><strong>Base Stats Distribution (Total: 670):</strong></p>
+                    <ul>
+                        <li><strong>HP:</strong> 100 - Incredible durability for oceanic survival</li>
+                        <li><strong>Attack:</strong> 100 - Massive physical power for tidal manipulation</li>
+                        <li><strong>Defense:</strong> 90 - Resistant to deep-sea pressure</li>
+                        <li><strong>Special Attack:</strong> 150 - Devastating hydro-based attacks</li>
+                        <li><strong>Special Defense:</strong> 140 - Near-immunity to special attacks</li>
+                        <li><strong>Speed:</strong> 90 - Surprising agility despite size</li>
+                    </ul>
+                    
+                    <blockquote>\"Kyogre is said to be the personification of the sea itself. Legends tell of its many clashes with Groudon, as each sought to gain the power of nature.\" - Official Pokemon Sapphire Pokedex Entry</blockquote>
+                    
+                    <h3>The Drizzle Domain</h3>
+                    <p>Kyogre's signature Drizzle ability doesn't just create rain - it fundamentally alters local weather systems within a radius of hundreds of kilometers. When Kyogre awakens, its presence causes atmospheric pressure changes that can trigger permanent climate shifts, transforming arid regions into tropical rainforests and causing sea levels to rise by several meters.</p>
+                    
+                    <p>Unlike normal weather patterns, Kyogre's rain contains trace amounts of concentrated life energy that accelerates plant growth and healing in Water-type Pokemon. This explains why regions that experience Kyogre's awakening often see explosive biodiversity growth in the aftermath - assuming anything survives the initial deluge.</p>
+                    
+                    <h3>Archaeological Discovery: The Sunken Cities</h3>
+                    <p>Marine archaeologist Dr. Coral Reef has spent fifteen years mapping the ocean floor around Hoenn, and her discoveries paint a terrifying picture of Kyogre's historical activity. Using deep-sea submersibles and sonar mapping, her team has identified the ruins of seven distinct advanced civilizations, all located in what are now deep ocean trenches.</p>
+                    
+                    <p><strong>The Pattern of Destruction:</strong></p>
+                    <ul>
+                        <li><strong>Aquatopolis (3,000 years ago):</strong> Advanced city built on artificial islands, destroyed by a single massive tsunami</li>
+                        <li><strong>Pelagic Empire (2,400 years ago):</strong> Coastal civilization with advanced metallurgy, submerged beneath 200 meters of water</li>
+                        <li><strong>The Coral Kingdoms (1,800 years ago):</strong> Three connected cities built on coral reefs, dissolved by acidified seawater</li>
+                        <li><strong>New Pacifidlog (1,200 years ago):</strong> Floating city designed to rise with sea levels, found crushed at ocean floor depth</li>
+                        <li><strong>The Maritime Republic (800 years ago):</strong> Island nation with advanced shipbuilding, sunk during a single night of storms</li>
+                    </ul>
+                    
+                    <h3>The Judgment Pattern</h3>
+                    <p>Analysis of the destruction patterns reveals they weren't random natural disasters. Each civilization was destroyed at the height of its power and prosperity, always during periods when they had begun large-scale ocean exploitation or experimentation with weather modification technology.</p>
+                    
+                    <p>\"Kyogre appears to function as an immune system for the planet's oceans,\" explains Dr. Reef. \"When human activity reaches a threshold that threatens marine ecosystems, Kyogre awakens to restore balance - regardless of the cost in human lives.\"</p>
+                    
+                    <h3>The Atlantean Artifacts</h3>
+                    <p>Among the ruins, Dr. Reef's team has recovered technology that seems impossible for its time period. Devices that could control weather patterns, generate artificial tsunamis, and even communicate with Pokemon across vast distances. Most disturbing of all: blueprints for weapons designed specifically to capture and control legendary Pokemon.</p>
+                    
+                    <p>\"Every civilization we've studied was working toward the same goal,\" Dr. Reef notes grimly. \"They wanted to control Kyogre's power for themselves. And every time they got close to succeeding, Kyogre destroyed them completely.\"</p>
+                    
+                    <h3>The Blue Orb Conspiracy</h3>
+                    <p>Recent discoveries have revealed the existence of multiple Blue Orbs throughout history - not just the one currently held in secure containment by the Hoenn Pokemon League. Each sunken civilization possessed one, and analysis suggests they were using these artifacts to attempt communication and eventual control of Kyogre.</p>
+                    
+                    <p>What makes this discovery particularly unsettling is that the Blue Orbs appear to be organic in origin - not technological devices, but actual body parts removed from Kyogre itself. The implications are horrifying: past civilizations may have succeeded in capturing and mutilating Kyogre, stealing pieces of its power before the legendary Pokemon escaped and enacted its terrible revenge.</p>
+                    
+                    <h3>The Modern Threat</h3>
+                    <p>Satellite monitoring has detected unusual seismic activity in the deepest ocean trenches around Hoenn, accompanied by temperature anomalies and changes in marine life behavior. The patterns match those recorded in ancient texts describing the \"Great Awakening\" - Kyogre's emergence from dormancy.</p>
+                    
+                    <p>What's triggering this awakening? Analysis of industrial activity suggests that current deep-sea mining operations and large-scale fishing practices may have reached the same threshold that triggered Kyogre's judgment in previous eras. We may be unconsciously following the same path that led to the destruction of seven previous civilizations.</p>
+                    
+                    <h3>The Origin Pulse Phenomenon</h3>
+                    <p>When Kyogre undergoes Primal Reversion, it gains access to Origin Pulse - a move so devastating that it can create permanent changes to ocean geography. Analysis of geological formations suggests that several of the world's deepest ocean trenches were carved not by natural processes, but by concentrated Origin Pulse attacks.</p>
+                    
+                    <p>\"Origin Pulse isn't just an attack,\" explains legendary Pokemon researcher Dr. Stone. \"It's Kyogre literally reshaping the planet's surface to ensure that the mistakes of drowned civilizations can never be repeated. Every trench is both a grave and a warning.\"</p>
+                    
+                    <h3>The Prophecy Tablets</h3>
+                    <p>Among the most significant artifacts recovered from the sunken cities are stone tablets covered in an ancient script that has only recently been decoded. The tablets describe a prophecy that speaks of Kyogre's \"Final Judgment\" - a time when the legendary Pokemon will permanently flood all landmasses that show signs of advanced technological development.</p>
+                    
+                    <p>According to the prophecy, this final judgment will only be prevented if humanity learns to \"speak with the voice of water rather than the voice of conquest.\" Researchers are still trying to determine what this cryptic phrase means, but the urgency is unmistakable.</p>
+                    
+                    <h3>The Deep Current Network</h3>
+                    <p>Recent oceanographic studies have revealed that Kyogre's movements create a global network of deep-sea currents that carry information throughout all the world's oceans. This \"neural network\" allows Kyogre to monitor human activity across the entire planet, not just in Hoenn's waters.</p>
+                    
+                    <p>Marine biologists have documented unusual behavior in Pokemon living near these currents - they exhibit coordinated behaviors across vast distances, as if receiving instructions through the water itself. This suggests that Kyogre's influence extends far beyond its physical presence, possibly coordinating with other legendary Pokemon to maintain global ecological balance.</p>
+                    
+                    <h3>The Warning Signs</h3>
+                    <p>If the pattern holds true, we may have very little time before Kyogre's next awakening. Ocean temperatures are rising, sea levels are changing, and marine Pokemon are exhibiting the same migration patterns recorded before previous \"judgment events.\"</p>
+                    
+                    <p>The question facing humanity is stark: can we learn from the mistakes of seven drowned civilizations, or are we doomed to join them beneath the waves? Kyogre's power remains as absolute as ever, and its patience with human ambition may finally be running out.</p>
+                    
+                    <p>The ocean remembers everything - and Kyogre is its memory made manifest, carrying the weight of every civilization that thought it could master the sea. The next time it awakens, it may not settle for just sinking cities. It may decide that the time for warnings has passed, and the time for permanent solutions has come.</p>
+                `
+            },
+            {
+                id: 8,
+                title: "The Violet City Conspiracy: Celebi and the Time Travelers",
+                category: "mystery",
+                tags: ["Mystery", "Time Travel", "Johto", "Legendary"],
+                region: "Johto",
+                date: "Sep 2024",
+                views: "5,234",
+                type: "Investigation",
+                pokedexNumber: 251,
+                apiData: {
+                    height: 6, // 0.6m
+                    weight: 50, // 5.0kg
+                    types: ["psychic", "grass"],
+                    abilities: ["natural-cure"],
+                    baseStats: { hp: 100, attack: 100, defense: 100, specialAttack: 100, specialDefense: 100, speed: 100, total: 600 }
+                },
+                excerpt: "People have been disappearing from Violet City for decades, only to reappear years later with no memory of where they've been. The only clue: witnesses report seeing a small, green Pokemon moments before each vanishing. Investigation into Celebi's time travel abilities reveals a disturbing pattern that suggests these aren't random disappearances...",
+                fullContent: `
+                    <h3>Celebi: The Time Travel Pokemon (National Pokedex #251)</h3>
+                    
+                    <p><strong>Physical Specifications (Official PokeAPI Data):</strong></p>
+                    <ul>
+                        <li><strong>Height:</strong> 0.6 meters (2'00")</li>
+                        <li><strong>Weight:</strong> 5.0 kg (11.0 lbs)</li>
+                        <li><strong>Type:</strong> Psychic/Grass</li>
+                        <li><strong>Base Stat Total:</strong> 600</li>
+                        <li><strong>Signature Ability:</strong> Natural Cure</li>
+                    </ul>
+                    
+                    <p>Despite its diminutive 0.6-meter stature and lightweight 5kg frame, Celebi possesses one of the most dangerous abilities known to Pokemon science: unrestricted time travel. Its perfect stat distribution of 100 across all categories suggests a being designed for temporal balance rather than combat supremacy.</p>
+                    
+                    <h3>The Perfect Balance Theory</h3>
+                    <p><strong>Base Stats Distribution (Total: 600):</strong></p>
+                    <ul>
+                        <li><strong>HP:</strong> 100 - Optimal vitality for temporal stress</li>
+                        <li><strong>Attack:</strong> 100 - Balanced physical capability</li>
+                        <li><strong>Defense:</strong> 100 - Temporal field protection</li>
+                        <li><strong>Special Attack:</strong> 100 - Psychic time manipulation</li>
+                        <li><strong>Special Defense:</strong> 100 - Mental barrier against paradoxes</li>
+                        <li><strong>Speed:</strong> 100 - Synchronized with time flow</li>
+                    </ul>
+                    
+                    <blockquote>\"This Pokemon came from the future by crossing over time. It is thought that so long as Celebi appears, a bright and shining future awaits us.\" - Official Pokemon Crystal Pokedex Entry</blockquote>
+                    
+                    <h3>The Violet City Disappearances</h3>
+                    <p>Detective Sarah Chen has been investigating the Violet City disappearances for eight years, ever since her own partner vanished during what should have been a routine patrol near the Sprout Tower. The case files make for disturbing reading: 127 documented disappearances over the past 40 years, all following the same pattern.</p>
+                    
+                    <p><strong>The Pattern:</strong></p>
+                    <ul>
+                        <li>Victims vanish without warning, often mid-conversation</li>
+                        <li>Small green Pokemon seen moments before disappearance</li>
+                        <li>No physical trace left behind, not even footprints</li>
+                        <li>Victims reappear 3-7 years later with complete memory loss</li>
+                        <li>All returnees show advanced knowledge of future events</li>
+                    </ul>
+                    
+                    <h3>The Returnee Testimonies</h3>
+                    <p>Marcus Wright disappeared in 2018 and returned in 2023 with no memory of the intervening years. During hypnotic regression therapy, he described experiences that suggest he had been transported forward in time rather than simply missing.</p>
+                    
+                    <p>\"I remember Violet City, but it was different,\" Marcus recounted under hypnosis. \"The buildings were taller, the technology was advanced, and there were Pokemon I'd never seen before. But I wasn't just observing - I was living there, working there, as if I belonged in that time.\"</p>
+                    
+                    <p>Medical examinations of returnees show biological aging consistent with their missing years, but their cellular structure contains temporal radiation signatures that shouldn't exist in natural biology. They've been somewhere - or somewhen - else.</p>
+                    
+                    <h3>The Sprout Tower Connection</h3>
+                    <p>All disappearances occur within a 2-kilometer radius of the ancient Sprout Tower, a structure that predates Violet City by several centuries. Archaeological surveys have revealed that the tower sits atop a massive crystalline formation that resonates at frequencies matching Celebi's psychic emissions.</p>
+                    
+                    <p>The tower's swaying motion, long attributed to its flexible wood construction, actually follows a precise mathematical pattern that corresponds to temporal field fluctuations. The building isn't swaying in the wind - it's oscillating in time.</p>
+                    
+                    <h3>The Natural Cure Paradox</h3>
+                    <p>Celebi's Natural Cure ability takes on sinister implications in the context of time travel. Returnees show no signs of disease, aging, or injury that they possessed before disappearing. This suggests that Celebi isn't just moving people through time - it's \"curing\" them of their present-day ailments by removing them from the timeline entirely.</p>
+                    
+                    <p>\"It's not healing in the traditional sense,\" explains temporal physicist Dr. Elena Kovich. \"Celebi appears to be editing people's timelines, removing periods of illness or injury by relocating them to points where those conditions don't exist. The question is: what happens to the timeline they leave behind?\"</p>
+                    
+                    <h3>The Future Memory Syndrome</h3>
+                    <p>Returnees display an unusual condition dubbed \"Future Memory Syndrome\" - they possess accurate knowledge of events that haven't happened yet, but only for mundane, everyday occurrences. They know what the weather will be, which Pokemon will be seen where, and what news stories will break, but they have no memory of major disasters or catastrophic events.</p>
+                    
+                    <p>This selective knowledge suggests that Celebi is carefully curating their temporal experiences, showing them only specific timelines or possible futures. The question that haunts investigators is: why these particular people, and what is Celebi trying to accomplish?</p>
+                    
+                    <h3>The Recruitment Pattern</h3>
+                    <p>Analysis of disappearance victims reveals they all shared certain characteristics: above-average empathy toward Pokemon, no serious criminal history, and strong community ties. They weren't random selections - they were carefully chosen candidates.</p>
+                    
+                    <p>Dr. Chen's investigation has uncovered evidence that suggests Celebi is building something in the future timeline - a community or society that requires specific types of people. The disappearances aren't kidnappings; they're recruitment missions for a future that hasn't happened yet.</p>
+                    
+                    <h3>The Dark Timeline Theory</h3>
+                    <p>The most disturbing theory emerging from the investigation is that Celebi's actions may be motivated by knowledge of a catastrophic future. If the Pokemon has seen a timeline where humanity and Pokemon face extinction, it might be selectively removing key individuals to preserve them in a safer time period.</p>
+                    
+                    <p>This would explain why returnees have no memory of disasters - they're being protected from knowledge that might cause them to act in ways that would alter the timeline and potentially make the catastrophe worse.</p>
+                    
+                    <h3>The Government Cover-Up</h3>
+                    <p>Recently leaked documents reveal that multiple regional governments have been aware of the Celebi situation for decades. Rather than investigating or intervening, they've been actively suppressing information and discouraging research into temporal Pokemon phenomena.</p>
+                    
+                    <p>The cover-up appears to stem from fear that public knowledge of time travel capabilities could lead to attempts to capture and exploit Celebi. Government officials believe that any interference with Celebi's activities could potentially destabilize the timeline itself.</p>
+                    
+                    <h3>The Countdown</h3>
+                    <p>Recent analysis of temporal radiation readings around Sprout Tower shows increasing intensity and frequency. Whatever Celebi is preparing for appears to be accelerating. The disappearances have increased from one every few months to multiple per week.</p>
+                    
+                    <p>Most alarming of all, the latest returnees have begun exhibiting new symptoms: they speak in unison when asked about the future, their eyes glow faintly green in darkness, and they all share the same recurring dream about a great light that will \"reset everything.\"</p>
+                    
+                    <h3>The Warning</h3>
+                    <p>Detective Chen's final case notes, discovered after her own disappearance last month, contained a chilling message: \"Celebi isn't saving people from the future - it's saving the future from people. We've been thinking about this backwards. The question isn't what Celebi is protecting these people from, but what it's protecting the timeline from by removing them.\"</p>
+                    
+                    <p>If Chen's theory is correct, then every disappearance represents someone whose presence in the current timeline would somehow contribute to a catastrophic future. Celebi isn't recruiting for tomorrow - it's editing today to ensure tomorrow exists at all.</p>
+                    
+                    <p>The next question is terrifying: if Celebi's mission is nearly complete, what does that say about how close we are to the future it's trying to prevent?</p>
+                `
+            },
+            {
+                id: 9,
+                title: "The Sinnoh Underground: Dialga's Time Fractures and the Lost Miners",
+                category: "regional",
+                tags: ["Regional", "Sinnoh", "Mining", "Temporal Anomaly"],
+                region: "Sinnoh",
+                date: "Sep 2024",
+                views: "2,967",
+                type: "Industrial Report",
+                pokedexNumber: 483,
+                apiData: {
+                    height: 54, // 5.4m
+                    weight: 6830, // 683.0kg
+                    types: ["steel", "dragon"],
+                    abilities: ["pressure", "telepathy"],
+                    baseStats: { hp: 100, attack: 120, defense: 120, specialAttack: 150, specialDefense: 100, speed: 90, total: 680 }
+                },
+                excerpt: "Deep beneath Sinnoh's mining operations, workers have been encountering temporal anomalies that defy explanation. Tools age decades in minutes, miners emerge from shifts claiming they've been underground for weeks, and some tunnels lead to mines that haven't been built yet. All evidence points to Dialga's influence, but the legendary Pokemon's motivations remain a terrifying mystery...",
+                fullContent: `
+                    <h3>Dialga: The Temporal Pokemon (National Pokedex #483)</h3>
+                    
+                    <p><strong>Physical Specifications (Official PokeAPI Data):</strong></p>
+                    <ul>
+                        <li><strong>Height:</strong> 5.4 meters (17'09\")</li>
+                        <li><strong>Weight:</strong> 683.0 kg (1,505.8 lbs)</li>
+                        <li><strong>Type:</strong> Steel/Dragon</li>
+                        <li><strong>Base Stat Total:</strong> 680</li>
+                        <li><strong>Domain:</strong> Time itself</li>
+                    </ul>
+                    
+                    <p>Dialga's massive 5.4-meter frame and 683kg mass exist partially outside normal spacetime, making its presence a constant source of temporal distortion. Its Steel/Dragon typing reflects both its indestructible nature and its dominion over the flow of time.</p>
+                    
+                    <h3>Temporal Dominance Statistics</h3>
+                    <p><strong>Base Stats Distribution (Total: 680):</strong></p>
+                    <ul>
+                        <li><strong>HP:</strong> 100 - Eternal existence across timelines</li>
+                        <li><strong>Attack:</strong> 120 - Reality-altering physical force</li>
+                        <li><strong>Defense:</strong> 120 - Immunity to temporal damage</li>
+                        <li><strong>Special Attack:</strong> 150 - Unmatched temporal manipulation</li>
+                        <li><strong>Special Defense:</strong> 100 - Resistance to paradox effects</li>
+                        <li><strong>Speed:</strong> 90 - Controls the very concept of speed</li>
+                    </ul>
+                    
+                    <blockquote>\"It has the power to control time. It is said that time began moving when Dialga was born.\" - Official Pokemon Diamond Pokedex Entry</blockquote>
+                    
+                    <h3>The Oreburgh Incident</h3>
+                    <p>March 15th, 2024: Miner Jacob Torres entered Tunnel 7-B at Oreburgh Mine for a routine ore extraction shift. According to his timecard, he was underground for 8 hours. According to his testimony, he spent 3 weeks underground, surviving on emergency rations and wondering why no rescue team came for him.</p>
+                    
+                    <p>When Torres emerged, his hair had grown several inches, his beard was fuller, and his body showed signs of extended physical stress. Most disturbing of all, his mining equipment showed 3 weeks of wear and tear, with his drill bits completely worn down and his safety gear degraded by extended use.</p>
+                    
+                    <p>Medical examination revealed cellular aging consistent with his claimed timeframe, but chronometer readings and security footage confirmed he had only been underground for a single shift. Torres had experienced 3 weeks while the outside world experienced 8 hours.</p>
+                    
+                    <h3>The Pressure Effect</h3>
+                    <p>Dialga's Pressure ability manifests differently in underground environments. Rather than simply causing opposing Pokemon to use more energy, the ability creates zones of temporal pressure where time flows at different rates. Miners working in these zones experience accelerated time while the surface world continues at normal speed.</p>
+                    
+                    <p>\"The deeper you go, the stronger the effect becomes,\" explains temporal geologist Dr. Marcus Stone. \"It's as if Dialga's presence in the planet's core is radiating outward, creating layers of temporal distortion that become more intense with proximity to the source.\"</p>
+                    
+                    <h3>The Lost Mine Phenomenon</h3>
+                    <p>Miners have reported discovering tunnels and equipment that don't appear on any official mining maps. These \"ghost tunnels\" contain advanced mining technology, some of which appears to be decades ahead of current capabilities. Workers in these tunnels often find notes and logs written in their own handwriting, describing mining operations they have no memory of conducting.</p>
+                    
+                    <p>Investigation reveals these are temporal echoes - tunnels that will be built in the future but are bleeding through into the present due to Dialga's temporal distortions. Miners are encountering their own future work, creating closed temporal loops that threaten to destabilize local time flow.</p>
+                    
+                    <h3>The Telepathy Network</h3>
+                    <p>Dialga's hidden ability, Telepathy, creates an underground communication network that transcends normal time barriers. Miners have reported receiving messages through their radio equipment from colleagues who aren't scheduled to work for days, or receiving warnings about cave-ins from miners who died in accidents years ago.</p>
+                    
+                    <p>These temporal communications appear to be automatic responses to danger, with Dialga's telepathic influence allowing information to flow backward through time to prevent mining disasters. The result is an underground safety network where future knowledge protects past workers.</p>
+                    
+                    <h3>The Aging Tunnels</h3>
+                    <p>Certain mining tunnels show accelerated deterioration that can't be explained by normal geological processes. Support beams installed days ago show decades of rust and decay, while newly laid tracks appear worn down by years of heavy use. These \"aging tunnels\" are experiencing compressed time, with years of normal wear occurring in hours or days.</p>
+                    
+                    <p>Workers in aging tunnels report that their tools and equipment deteriorate rapidly, forcing them to bring multiple sets of replacement gear for what should be routine maintenance work. Some tunnels have had to be abandoned entirely when the aging effect became so severe that new construction would decay before completion.</p>
+                    
+                    <h3>The Roar of Time Resonance</h3>
+                    <p>Deep seismic monitoring equipment has detected periodic low-frequency vibrations emanating from the planet's core, occurring in patterns that match the signature of Dialga's Roar of Time attack. These \"temporal earthquakes\" don't cause physical damage but create waves of time distortion that ripple outward through underground systems.</p>
+                    
+                    <p>During these events, mine operations experience synchronized temporal anomalies: all clocks run fast or slow, all miners experience the same time dilation effects, and all equipment ages at the same accelerated rate. It's as if Dialga is periodically \"tuning\" the temporal fields of all underground operations simultaneously.</p>
+                    
+                    <h3>The Missing Workers</h3>
+                    <p>Seventeen miners have vanished from Sinnoh's underground operations over the past two years, all from deep tunnels experiencing heavy temporal distortion. Unlike the Celebi disappearances in Johto, these workers haven't returned, and search teams have found no trace of their passage.</p>
+                    
+                    <p>The prevailing theory is that these miners have become \"unstuck in time\" - caught in temporal eddies that have carried them to different time periods entirely. They may be alive and working in past or future versions of the same mines, trapped in temporal loops that prevent them from returning to their original timeline.</p>
+                    
+                    <h3>The Temporal Mining Union</h3>
+                    <p>In response to the growing temporal hazards, Sinnoh's mining unions have established the first \"Temporal Safety Protocols\" in industrial history. Workers now carry chronometers synchronized to surface time, work in pairs to verify each other's temporal experiences, and undergo regular medical examinations to detect signs of abnormal aging.</p>
+                    
+                    <p>The protocols also include \"temporal first aid\" - procedures for helping workers who have experienced time dilation effects, including psychological counseling for those who have lived through weeks or months in a single shift.</p>
+                    
+                    <h3>The Deep Core Project</h3>
+                    <p>Classified documents leaked from the Sinnoh Mining Consortium reveal a secret project to reach the source of the temporal distortions. The \"Deep Core Project\" aims to drill directly toward Dialga's suspected location deep within the planet, ostensibly to study the temporal effects but potentially to attempt contact or capture.</p>
+                    
+                    <p>The project has been plagued by setbacks: drill bits that age to dust before reaching target depth, equipment that travels backward in time and interferes with earlier drilling attempts, and workers who emerge from shifts claiming they've been drilling \"from the inside out.\"</p>
+                    
+                    <h3>The Time Lock Protocol</h3>
+                    <p>Recent mining operations have discovered chambers deep underground that appear to exist in \"temporal lock\" - spaces where time has stopped completely. These chambers contain perfectly preserved artifacts from different time periods: ancient Pokemon fossils that are still alive and moving, tools and equipment from mining operations that haven't been built yet, and in one disturbing case, a miner who vanished fifty years ago, still conscious and unaware that any time has passed.</p>
+                    
+                    <p>These time-locked chambers may be Dialga's method of preserving important moments or objects from temporal destruction, creating a \"temporal archive\" deep within the planet's crust.</p>
+                    
+                    <h3>The Warning From Below</h3>
+                    <p>The most recent temporal communications received through mining equipment contain an urgent message repeated across all affected sites: \"The deep calls to the deep. Time grows thin. The core stirs. Prepare for emergence.\"</p>
+                    
+                    <p>If these messages are authentic communications from Dialga, they suggest that the legendary Pokemon is preparing for some kind of surface activity. Given the scale of temporal distortions already affecting underground operations, Dialga's emergence could fundamentally alter time flow across the entire Sinnoh region.</p>
+                    
+                    <p>The question facing Sinnoh's leaders is stark: should they continue deep mining operations and risk triggering Dialga's emergence, or abandon the underground entirely and lose access to the region's most valuable resources? Either choice could have consequences that echo across time itself.</p>
+                `
+            }
+        ];
+
+        let currentFilter = 'all';
+        let searchQuery = '';
+
+        // Initialize the page
+        function init() {
+            displayLore();
+        }
+
+        // Display lore cards based on current filter and search
+        function displayLore() {
+            const contentArea = document.getElementById('contentArea');
+            let filteredLore = pokemonLore;
+
+            // Apply category filter
+            if (currentFilter !== 'all') {
+                filteredLore = filteredLore.filter(lore => lore.category === currentFilter);
+            }
+
+            // Apply search filter
+            if (searchQuery) {
+                const query = searchQuery.toLowerCase();
+                filteredLore = filteredLore.filter(lore => 
+                    lore.title.toLowerCase().includes(query) ||
+                    lore.excerpt.toLowerCase().includes(query) ||
+                    lore.tags.some(tag => tag.toLowerCase().includes(query)) ||
+                    lore.region.toLowerCase().includes(query)
+                );
+            }
+
+            // Generate HTML
+            contentArea.innerHTML = filteredLore.map(lore => `
+                <article class="lore-card" onclick="openLore(${lore.id})">
+                    <div class="lore-header">
+                        <div class="category-tags">
+                            ${lore.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                        <h2 class="lore-title">${lore.title}</h2>
+                        <div class="lore-meta">
+                            <span>📅 ${lore.date}</span>
+                            <span>👁️ ${lore.views} views</span>
+                            <span>🏷️ ${lore.type}</span>
+                            <span>🗺️ ${lore.region}</span>
+                        </div>
+                    </div>
+                    <div class="lore-content">
+                        <p class="lore-excerpt">${lore.excerpt}</p>
+                        <a href="#" class="read-more" onclick="event.stopPropagation(); openLore(${lore.id})">Read Full Lore →</a>
+                    </div>
+                </article>
+            `).join('');
+
+            // Show message if no results
+            if (filteredLore.length === 0) {
+                contentArea.innerHTML = `
+                    <div style="text-align: center; padding: 4rem; color: #9ca3af;">
+                        <h3 style="margin-bottom: 1rem; color: #fbbf24;">No lore found</h3>
+                        <p>Try adjusting your search terms or filters.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Filter lore by category
+        function filterLore(category) {
+            currentFilter = category;
+            
+            // Update active tab
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            displayLore();
+        }
+
+        // Search functionality
+        function searchLore() {
+            searchQuery = document.getElementById('searchInput').value;
+            displayLore();
+        }
+
+        // Enter key support for search
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchLore();
+            }
+        });
+
+        // Real-time search as you type
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            searchQuery = e.target.value;
+            displayLore();
+        });
+
+        // Generate Pokemon info panel
+        function generatePokemonPanel(lore) {
+            if (!lore.apiData) return '';
+            
+            let pokemonCards = '';
+            
+            if (lore.id === 1) { // Mewtwo
+                pokemonCards = generatePokemonCard('Mewtwo', 150, lore.apiData, 'The Genetic Pokemon');
+            } else if (lore.id === 2) { // Ho-Oh and Beasts
+                pokemonCards = `
+                    ${generatePokemonCard('Ho-Oh', 250, lore.apiData.hooh, 'The Rainbow Pokemon')}
+                    ${generatePokemonCard('Raikou', 243, lore.apiData.raikou, 'The Thunder Pokemon')}
+                    ${generatePokemonCard('Entei', 244, lore.apiData.entei, 'The Volcano Pokemon')}
+                    ${generatePokemonCard('Suicune', 245, lore.apiData.suicune, 'The Aurora Pokemon')}
+                `;
+            } else if (lore.id === 3) { // Creation Quartet
+                pokemonCards = `
+                    ${generatePokemonCard('Arceus', 493, lore.apiData.arceus, 'The Alpha Pokemon')}
+                    ${generatePokemonCard('Dialga', 483, lore.apiData.dialga, 'The Temporal Pokemon')}
+                    ${generatePokemonCard('Palkia', 484, lore.apiData.palkia, 'The Spatial Pokemon')}
+                    ${generatePokemonCard('Giratina', 487, lore.apiData.giratina, 'The Renegade Pokemon')}
+                `;
+            } else if (lore.id === 4) { // Unown
+                pokemonCards = generatePokemonCard('Unown', 201, lore.apiData, 'The Symbol Pokemon');
+            }
+            
+            return `
+                <div class="pokemon-info-panel">
+                    <h3 style="color: #fbbf24; margin-bottom: 1rem; text-align: center;">📊 Pokemon Data</h3>
+                    <button class="info-toggle" onclick="toggleDefinitions()" id="definitionsToggle">
+                        ℹ️ Show Data Explanations
+                    </button>
+                    <div id="definitionsPanel" style="display: none;">
+                        ${generateDefinitionsPanel()}
+                    </div>
+                    <div class="pokemon-grid">
+                        ${pokemonCards}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate definitions panel
+        function generateDefinitionsPanel() {
+            return `
+                <div class="definitions-panel">
+                    <div class="definitions-grid">
+                        <div class="definition-section">
+                            <h4>📏 Physical Stats</h4>
+                            <div class="definition-item">
+                                <div class="definition-term">Height & Weight</div>
+                                <div class="definition-description">Physical dimensions from official Pokemon data. Height in meters, weight in kilograms. These affect certain moves and battle mechanics.</div>
+                            </div>
+                            <div class="definition-item">
+                                <div class="definition-term">Pokedex Number</div>
+                                <div class="definition-description">Official species identification number in the National Pokedex, used for classification and organization.</div>
+                            </div>
+                        </div>
+
+                        <div class="definition-section">
+                            <h4>🏷️ Types & Classification</h4>
+                            <div class="definition-item">
+                                <div class="definition-term">Pokemon Types</div>
+                                <div class="definition-description">Elemental classifications that determine strengths, weaknesses, and move compatibility. Each type has specific interactions with others.</div>
+                            </div>
+                            <div class="definition-item">
+                                <div class="definition-term">Species Name</div>
+                                <div class="definition-description">Official classification (e.g., "The Genetic Pokemon") describing the Pokemon's primary characteristic or nature.</div>
+                            </div>
+                        </div>
+
+                        <div class="definition-section">
+                            <h4>⚔️ Base Stats</h4>
+                            <div class="definition-item">
+                                <div class="definition-term">HP (Hit Points)</div>
+                                <div class="definition-description">Health/stamina - determines how much damage the Pokemon can take before fainting. Higher HP = more durability.</div>
+                            </div>
+                            <div class="definition-item">
+                                <div class="definition-term">Attack</div>
+                                <div class="definition-description">Physical strength - affects damage dealt by physical moves like Tackle, Bite, or Earthquake.</div>
+                            </div>
+                            <div class="definition-item">
+                                <div class="definition-term">Defense</div>
+                                <div class="definition-description">Physical resistance - reduces damage taken from physical attacks. Higher Defense = less physical damage received.</div>
+                            </div>
+                            <div class="definition-item">
+                                <div class="definition-term">Special Attack</div>
+                                <div class="definition-description">Magical/elemental power - affects damage dealt by special moves like Psychic, Flamethrower, or Thunderbolt.</div>
+                            </div>
+                            <div class="definition-item">
+                                <div class="definition-term">Special Defense</div>
+                                <div class="definition-description">Magical/elemental resistance - reduces damage from special attacks. Higher Sp. Def = less special damage received.</div>
+                            </div>
+                            <div class="definition-item">
+                                <div class="definition-term">Speed</div>
+                                <div class="definition-description">Agility and reaction time - determines turn order in battles. Higher Speed usually means attacking first.</div>
+                            </div>
+                        </div>
+
+                        <div class="definition-section">
+                            <h4>🎯 Advanced Mechanics</h4>
+                            <div class="definition-item">
+                                <div class="definition-term">Base Stat Total (BST)</div>
+                                <div class="definition-description">Sum of all base stats - indicates overall power level. Legendary Pokemon typically have 580-720 BST.</div>
+                            </div>
+                            <div class="definition-item">
+                                <div class="definition-term">Abilities</div>
+                                <div class="definition-description">Special powers that provide passive effects, battle advantages, or unique mechanics beyond normal moves.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate individual Pokemon card
+        function generatePokemonCard(name, number, data, species) {
+            const types = Array.isArray(data.types) ? data.types : [data.types];
+            const typesBadges = types.map(type => 
+                `<span class="type-badge type-${type} tooltip" data-tooltip="Type: ${type.charAt(0).toUpperCase() + type.slice(1)} - affects move effectiveness and resistances">${type}</span>`
+            ).join('');
+            
+            const abilities = Array.isArray(data.abilities) ? data.abilities : [data.abilities];
+            const abilitiesBadges = abilities.map(ability => {
+                const abilityTooltip = getAbilityTooltip(ability);
+                return `<span class="ability-badge tooltip" data-tooltip="${abilityTooltip}">${ability.replace('-', ' ')}</span>`;
+            }).join('');
+            
+            const stats = data.baseStats;
+            const maxStat = Math.max(...Object.values(stats).filter(v => typeof v === 'number'));
+            
+            return `
+                <div class="pokemon-card">
+                    <h4>
+                        ${name}
+                        <span class="pokedex-number tooltip" data-tooltip="National Pokedex number - official species ID">#${number}</span>
+                    </h4>
+                    <p style="color: #a5b4fc; font-size: 0.9rem; margin-bottom: 1rem;" class="tooltip" data-tooltip="Official species classification">${species}</p>
+                    
+                    <div class="pokemon-types">
+                        ${typesBadges}
+                    </div>
+                    
+                    <div class="pokemon-stats">
+                        <div class="stat-row">
+                            <span class="stat-name tooltip" data-tooltip="Physical height from official Pokemon data">Height</span>
+                            <span class="stat-value">${(data.height / 10).toFixed(1)}m</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-name tooltip" data-tooltip="Physical weight from official Pokemon data">Weight</span>
+                            <span class="stat-value">${(data.weight / 10).toFixed(1)}kg</span>
+                        </div>
+                    </div>
+                    
+                    <div class="base-stats-grid">
+                        ${generateStatBar('HP', stats.hp, maxStat, '#FF5959', 'Health Points - determines how much damage Pokemon can take')}
+                        ${generateStatBar('ATK', stats.attack, maxStat, '#F5AC78', 'Physical Attack - power of physical moves')}
+                        ${generateStatBar('DEF', stats.defense, maxStat, '#FAE078', 'Physical Defense - resistance to physical attacks')}
+                        ${generateStatBar('SpA', stats.specialAttack, maxStat, '#9DB7F5', 'Special Attack - power of special/elemental moves')}
+                        ${generateStatBar('SpD', stats.specialDefense, maxStat, '#A7DB8D', 'Special Defense - resistance to special attacks')}
+                        ${generateStatBar('SPD', stats.speed, maxStat, '#FA92B2', 'Speed - determines turn order in battles')}
+                    </div>
+                    
+                    <div style="margin-top: 1rem;">
+                        <div class="stat-row">
+                            <span class="stat-name tooltip" data-tooltip="Sum of all base stats - indicates overall power level">Base Stat Total</span>
+                            <span class="stat-value">${stats.total}</span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <p style="color: #a5b4fc; font-size: 0.9rem; margin: 1rem 0 0.5rem;" class="tooltip" data-tooltip="Special powers that provide passive effects in battle">Abilities:</p>
+                        <div class="abilities-list">
+                            ${abilitiesBadges}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Get ability tooltip description
+        function getAbilityTooltip(ability) {
+            const abilityDescriptions = {
+                'pressure': 'Forces opponents to use 2 PP instead of 1 when using moves',
+                'unnerve': 'Prevents opponents from eating berries',
+                'regenerator': 'Restores 1/3 HP when switching out of battle',
+                'inner-focus': 'Prevents flinching from opponent attacks',
+                'levitate': 'Immunity to Ground-type moves by floating above the battlefield',
+                'multitype': 'Changes type based on held Plate item - signature ability of Arceus',
+                'telepathy': 'Avoids damage from ally Pokemon in double battles'
+            };
+            return abilityDescriptions[ability] || 'Special Pokemon ability with unique battle effects';
+        }
+
+        // Generate stat bar
+        function generateStatBar(name, value, maxValue, color, tooltip) {
+            const percentage = (value / maxValue) * 100;
+            return `
+                <div class="stat-bar-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span class="stat-name tooltip" style="font-size: 0.85rem;" data-tooltip="${tooltip}">${name}</span>
+                        <span class="stat-value" style="font-size: 0.85rem;">${value}</span>
+                    </div>
+                    <div class="stat-bar">
+                        <div class="stat-fill" style="background-color: ${color}; width: ${percentage}%"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Toggle definitions panel
+        function toggleDefinitions() {
+            const panel = document.getElementById('definitionsPanel');
+            const toggle = document.getElementById('definitionsToggle');
+            
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+                toggle.textContent = '❌ Hide Data Explanations';
+            } else {
+                panel.style.display = 'none';
+                toggle.textContent = 'ℹ️ Show Data Explanations';
+            }
+        }
+
+        // Open lore in modal
+        function openLore(loreId) {
+            const lore = pokemonLore.find(l => l.id === loreId);
+            if (!lore) return;
+
+            // Generate Pokemon info panel
+            const pokemonPanel = generatePokemonPanel(lore);
+
+            // Populate modal content
+            document.getElementById('modalTags').innerHTML = 
+                lore.tags.map(tag => `<span class="tag">${tag}</span>`).join('');
+            document.getElementById('modalTitle').textContent = lore.title;
+            document.getElementById('modalMeta').innerHTML = `
+                <span>📅 ${lore.date}</span>
+                <span>👁️ ${lore.views} views</span>
+                <span>🏷️ ${lore.type}</span>
+                <span>🗺️ ${lore.region}</span>
+            `;
+            document.getElementById('modalBody').innerHTML = `
+                <button class="back-btn" onclick="closeModal()">🏠 Back to Archive</button>
+                ${pokemonPanel}
+                <div class="reading-mode">
+                    ${lore.fullContent}
+                </div>
+            `;
+
+            // Show modal
+            document.getElementById('loreModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Animate stat bars after modal opens
+            setTimeout(() => {
+                document.querySelectorAll('.stat-fill').forEach(bar => {
+                    const width = bar.style.width;
+                    bar.style.width = '0%';
+                    setTimeout(() => bar.style.width = width, 100);
+                });
+            }, 300);
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('loreModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('loreModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Section Management
+        let currentSection = 'lore';
+        
+        function showSection(section) {
+            // Hide all sections
+            document.getElementById('contentArea').style.display = section === 'lore' ? 'grid' : 'none';
+            document.getElementById('pokeapiSection').style.display = section === 'pokeapi' ? 'block' : 'none';
+            document.getElementById('addLoreForm').style.display = 'none';
+            
+            // Update current section
+            currentSection = section;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            if (section === 'lore') {
+                document.querySelector('.tab-btn[onclick="showSection(\'lore\')"]').classList.add('active');
+                // Show lore filter buttons
+                const filterBtns = document.querySelectorAll('.tab-btn[onclick^="filterLore"]');
+                filterBtns.forEach(btn => btn.style.display = 'inline-block');
+                document.querySelector('.add-lore-btn').style.display = 'inline-block';
+            } else if (section === 'pokeapi') {
+                document.querySelector('.tab-btn[onclick="showSection(\'pokeapi\')"]').classList.add('active');
+                // Hide lore filter buttons
+                const filterBtns = document.querySelectorAll('.tab-btn[onclick^="filterLore"]');
+                filterBtns.forEach(btn => btn.style.display = 'none');
+                document.querySelector('.add-lore-btn').style.display = 'none';
+            }
+        }
+
+        // Pokemon API Functions
+        async function searchPokemon() {
+            const searchInput = document.getElementById('pokemonSearch');
+            const query = searchInput.value.trim().toLowerCase();
+            
+            if (!query) {
+                alert('Please enter a Pokemon name or ID');
+                return;
+            }
+            
+            const resultDiv = document.getElementById('pokemonResult');
+            resultDiv.innerHTML = '<div class="loading">🔍 Searching for ' + query + '...</div>';
+            resultDiv.classList.add('show');
+            
+            try {
+                const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${query}`);
+                
+                if (!response.ok) {
+                    throw new Error('Pokemon not found');
+                }
+                
+                const pokemon = await response.json();
+                displayPokemonData(pokemon);
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Pokemon "${query}" not found. Please check the spelling or try a different Pokemon.
+                    </div>
+                `;
+            }
+        }
+        
+        function displayPokemonData(pokemon) {
+            const resultDiv = document.getElementById('pokemonResult');
+            
+            const types = pokemon.types.map(type => 
+                `<span class="type-badge type-${type.type.name}">${type.type.name}</span>`
+            ).join('');
+            
+            const abilities = pokemon.abilities.map(ability => 
+                `<span class="ability-item">${ability.ability.name.replace('-', ' ')}</span>`
+            ).join('');
+            
+            const stats = pokemon.stats.map(stat => 
+                `<div class="stat-item">
+                    <span>${stat.stat.name.replace('-', ' ')}</span>
+                    <span class="stat-value">${stat.base_stat}</span>
+                </div>`
+            ).join('');
+            
+            resultDiv.innerHTML = `
+                <div class="pokemon-header">
+                    <div class="pokemon-name">${pokemon.name}</div>
+                    <div class="pokemon-id">#${pokemon.id.toString().padStart(3, '0')}</div>
+                </div>
+                
+                <div class="pokemon-image">
+                    <img src="${pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default}" 
+                         alt="${pokemon.name}" onerror="this.src='${pokemon.sprites.front_default}'">
+                </div>
+                
+                <div class="pokemon-details">
+                    <div class="detail-section">
+                        <h3>📊 Basic Info</h3>
+                        <div class="stat-item">
+                            <span>Height</span>
+                            <span class="stat-value">${(pokemon.height / 10).toFixed(1)} m</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Weight</span>
+                            <span class="stat-value">${(pokemon.weight / 10).toFixed(1)} kg</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Base Experience</span>
+                            <span class="stat-value">${pokemon.base_experience}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>🏷️ Types</h3>
+                        <div class="type-list">
+                            ${types}
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>⚡ Abilities</h3>
+                        <div class="ability-list">
+                            ${abilities}
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h3>📈 Base Stats</h3>
+                        ${stats}
+                        <div class="stat-item" style="border-top: 2px solid #4f46e5; margin-top: 1rem; padding-top: 1rem;">
+                            <span><strong>Total</strong></span>
+                            <span class="stat-value"><strong>${pokemon.stats.reduce((sum, stat) => sum + stat.base_stat, 0)}</strong></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Add enter key support for Pokemon search
+        document.addEventListener('DOMContentLoaded', function() {
+            const pokemonSearchInput = document.getElementById('pokemonSearch');
+            if (pokemonSearchInput) {
+                pokemonSearchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        searchPokemon();
+                    }
+                });
+            }
+        });
+
+        // Add Lore Form Functions
+        function showAddLoreForm() {
+            document.getElementById('addLoreForm').style.display = 'block';
+            document.getElementById('addLoreForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function hideAddLoreForm() {
+            document.getElementById('addLoreForm').style.display = 'none';
+            // Clear form
+            document.querySelector('#addLoreForm form').reset();
+        }
+
+        function submitNewLore(event) {
+            event.preventDefault();
+            
+            // Get form values
+            const title = document.getElementById('loreTitle').value;
+            const category = document.getElementById('loreCategory').value;
+            const region = document.getElementById('loreRegion').value;
+            const type = document.getElementById('loreType').value || 'Community';
+            const tagsInput = document.getElementById('loreTags').value;
+            const excerpt = document.getElementById('loreExcerpt').value;
+            const content = document.getElementById('loreContent').value;
+            
+            // Process tags
+            const tags = tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+            
+            // Create new lore object
+            const newLore = {
+                id: pokemonLore.length + 1,
+                title: title,
+                category: category,
+                tags: tags,
+                region: region,
+                date: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+                views: '1',
+                type: type,
+                excerpt: excerpt,
+                fullContent: content
+            };
+            
+            // Add to lore array
+            pokemonLore.push(newLore);
+            
+            // Hide form and refresh display
+            hideAddLoreForm();
+            displayLore();
+            
+            // Show success message
+            alert('✨ New lore added successfully! Your story has been added to the archive.');
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            showSection('lore');
+            displayLore();
+        });
+    </script>
+</body>
+</html>
