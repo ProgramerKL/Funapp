@@ -1020,7 +1020,7 @@
             pink: { name: 'Pink Cube', color: '#ff69b4', price: 400, emoji: '🩷' },
             cyan: { name: 'Cyan Cube', color: '#00ffff', price: 500, emoji: '🔷' },
             white: { name: 'White Cube', color: '#ffffff', price: 600, emoji: '⬜' },
-            rainbow: { name: 'Rainbow Cube', color: '#ff0080', price: 1000, emoji: '🌈' }
+            rainbow: { name: 'Rainbow Cube', color: '#ff0080', price: 1000, emoji: '📦' }
         };
         
         // Enhanced retro game state with improved mechanics
@@ -2321,19 +2321,63 @@
                             // Landing particles
                             createAdvancedParticles(player.x + player.size/2, player.y + player.size, '#ff00ff', 1);
                         } else {
-                            // Deadly side collision
-                            console.log('Player hit oscillator side - triggering explosion');
-                            createExplosion(player.x + player.size/2, player.y + player.size/2, player.color);
-                            gameOver();
-                            return;
+                            // Deadly side collision - but check for power-ups first!
+                            if (player.activePowerUps.invincibility.active) {
+                                // Invincibility - completely immune
+                                console.log('Invincibility absorbed oscillator collision!');
+                                createAdvancedParticles(player.x + player.size/2, player.y + player.size/2, '#gold', 4, 'explosion');
+                                playEnhancedSound(800, 0.15, 'sine', 0.1);
+                                continue; // Don't remove obstacle or die
+                            } else if (player.activePowerUps.ghostMode.active) {
+                                // Ghost mode - phase through oscillators
+                                console.log('Ghost mode - phasing through oscillator!');
+                                createAdvancedParticles(player.x + player.size/2, player.y + player.size/2, '#bbbbbb', 3, 'trail');
+                                continue; // Don't remove obstacle or die
+                            } else if (player.activePowerUps.shield.active) {
+                                // Shield protects from oscillator collision
+                                console.log('Shield absorbed oscillator collision!');
+                                deactivatePowerUp('shield');
+                                createAdvancedParticles(player.x + player.size/2, player.y + player.size/2, '#00ddff', 6, 'explosion');
+                                playEnhancedSound(600, 0.2, 'triangle', 0.15); // Shield break sound
+                                obstacles.splice(i, 1); // Remove the obstacle
+                                continue;
+                            } else {
+                                // Death collision for oscillator sides
+                                console.log('Player hit oscillator side - triggering explosion');
+                                createExplosion(player.x + player.size/2, player.y + player.size/2, player.color);
+                                gameOver();
+                                return;
+                            }
                         }
                     } else if (obstacles[i].type === 'flyingSpike') {
-                        // Flying spike collision - death in flying mode
+                        // Flying spike collision - death in flying mode, but check power-ups first!
                         if (player.isFlying) {
-                            console.log('Player hit flying spike - triggering explosion');
-                            createExplosion(player.x + player.size/2, player.y + player.size/2, '#ff00ff');
-                            gameOver();
-                            return;
+                            if (player.activePowerUps.invincibility.active) {
+                                // Invincibility - completely immune
+                                console.log('Invincibility absorbed flying spike collision!');
+                                createAdvancedParticles(player.x + player.size/2, player.y + player.size/2, '#gold', 4, 'explosion');
+                                playEnhancedSound(800, 0.15, 'sine', 0.1);
+                                continue; // Don't remove obstacle or die
+                            } else if (player.activePowerUps.ghostMode.active) {
+                                // Ghost mode - phase through flying spikes
+                                console.log('Ghost mode - phasing through flying spike!');
+                                createAdvancedParticles(player.x + player.size/2, player.y + player.size/2, '#bbbbbb', 3, 'trail');
+                                continue; // Don't remove obstacle or die
+                            } else if (player.activePowerUps.shield.active) {
+                                // Shield protects from flying spike collision
+                                console.log('Shield absorbed flying spike collision!');
+                                deactivatePowerUp('shield');
+                                createAdvancedParticles(player.x + player.size/2, player.y + player.size/2, '#00ddff', 6, 'explosion');
+                                playEnhancedSound(600, 0.2, 'triangle', 0.15); // Shield break sound
+                                obstacles.splice(i, 1); // Remove the obstacle
+                                continue;
+                            } else {
+                                // Death collision for flying spikes
+                                console.log('Player hit flying spike - triggering explosion');
+                                createExplosion(player.x + player.size/2, player.y + player.size/2, '#ff00ff');
+                                gameOver();
+                                return;
+                            }
                         }
                     } else {
                         // Death collision for spikes and other deadly obstacles
@@ -2618,28 +2662,23 @@
             // Player rendering - different for flying mode
             if (player.alive) {
                 if (player.isFlying) {
-                    // Flying rocket mode rendering
+                    // Flying mode rendering - show rocket emoji with avatar
                     ctx.save();
                     ctx.shadowColor = '#ff00ff';
                     ctx.shadowBlur = 10;
                     
-                    // Rocket body
-                    ctx.fillStyle = '#ff00ff';
-                    ctx.fillRect(player.x, player.y + 5, player.size, player.size - 10);
+                    // Show rocket emoji as the flying version
+                    ctx.font = `${player.size * 0.9}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillText('🚀', player.x + player.size/2, player.y + player.size/2);
                     
-                    // Rocket nose cone
-                    ctx.beginPath();
-                    ctx.moveTo(player.x + player.size/2, player.y);
-                    ctx.lineTo(player.x, player.y + 5);
-                    ctx.lineTo(player.x + player.size, player.y + 5);
-                    ctx.closePath();
-                    ctx.fill();
-                    
-                    // Rocket flames
-                    ctx.fillStyle = '#ff4400';
-                    const flameLength = Math.sin(frameCounter * 0.5) * 8 + 12;
-                    ctx.fillRect(player.x + 2, player.y + player.size - 5, 4, flameLength);
-                    ctx.fillRect(player.x + player.size - 6, player.y + player.size - 5, 4, flameLength);
+                    // Add flame trail effect
+                    ctx.font = `${player.size * 0.6}px Arial`;
+                    const flameOffset = Math.sin(frameCounter * 0.3) * 3;
+                    ctx.fillText('🔥', player.x + player.size/2 - 8, player.y + player.size + flameOffset);
+                    ctx.fillText('🔥', player.x + player.size/2 + 8, player.y + player.size + flameOffset + 2);
                     
                     ctx.restore();
                 } else {
@@ -2670,16 +2709,32 @@
                         ctx.shadowBlur = player.glowIntensity * 15;
                     }
                     
-                    ctx.fillStyle = avatars[gameState.selectedAvatar].color;
-                    ctx.fillRect(player.x, player.y, player.size, player.size);
-                    
-                    // Player details with animation
+                    // Render the avatar using its emoji representation (matching the shop)
                     ctx.shadowBlur = 0;
+                    ctx.font = `${player.size * 0.8}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
                     ctx.fillStyle = '#ffffff';
-                    const eyeOffset = Math.sin(player.spriteFrame) * 2;
-                    ctx.fillRect(player.x + 3 + eyeOffset, player.y + 3, 4, 4);
-                    ctx.fillRect(player.x + 11 + eyeOffset, player.y + 3, 4, 4);
-                    ctx.fillRect(player.x + 5, player.y + 12, 8, 3);
+                    
+                    // Use the same emoji as shown in the shop
+                    const avatarEmoji = avatars[gameState.selectedAvatar].emoji;
+                    
+                    // Special handling for rainbow cube - create animated rainbow effect
+                    if (gameState.selectedAvatar === 'rainbow') {
+                        // Create rainbow cube effect with multiple colored squares
+                        const time = Date.now() * 0.01;
+                        const colors = ['🟥', '🟧', '🟨', '🟩', '🟦', '🟪'];
+                        const colorIndex = Math.floor(time) % colors.length;
+                        ctx.fillText(colors[colorIndex], player.x + player.size/2, player.y + player.size/2);
+                        
+                        // Add sparkle effect around the rainbow cube
+                        ctx.font = `${player.size * 0.3}px Arial`;
+                        const sparkleOffset = Math.sin(time * 2) * 3;
+                        ctx.fillText('✨', player.x - 5, player.y + sparkleOffset);
+                        ctx.fillText('✨', player.x + player.size + 5, player.y + player.size - sparkleOffset);
+                    } else {
+                        ctx.fillText(avatarEmoji, player.x + player.size/2, player.y + player.size/2);
+                    }
                     
                     ctx.restore();
                 }
@@ -3316,8 +3371,15 @@
 
                 // Create avatar display
                 const emojiDiv = document.createElement('div');
-                emojiDiv.textContent = avatar.emoji;
-                emojiDiv.style.fontSize = '16px';
+                if (avatarKey === 'rainbow') {
+                    // Special display for rainbow cube - show colorful cube
+                    emojiDiv.innerHTML = '🟥🟧🟨<br>🟩🟦🟪';
+                    emojiDiv.style.fontSize = '8px';
+                    emojiDiv.style.lineHeight = '0.8';
+                } else {
+                    emojiDiv.textContent = avatar.emoji;
+                    emojiDiv.style.fontSize = '16px';
+                }
                 option.appendChild(emojiDiv);
 
                 // Add price display if not purchased
