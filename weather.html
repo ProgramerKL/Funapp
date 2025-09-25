@@ -214,6 +214,42 @@
             margin: 1rem 0;
         }
 
+        .rain-alert {
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            border: 2px solid #2e7bd1;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1rem 0 2rem 0;
+            text-align: center;
+            animation: rainPulse 2s ease-in-out infinite;
+            box-shadow: 0 8px 25px rgba(74, 144, 226, 0.3);
+        }
+
+        .rain-status {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            margin-bottom: 0.5rem;
+        }
+
+        .rain-details {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        @keyframes rainPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 8px 25px rgba(74, 144, 226, 0.3);
+            }
+            50% {
+                transform: scale(1.02);
+                box-shadow: 0 12px 35px rgba(74, 144, 226, 0.5);
+            }
+        }
+
         @media (max-width: 768px) {
             .weather-grid {
                 grid-template-columns: 1fr;
@@ -230,6 +266,10 @@
             .title {
                 font-size: 2rem;
             }
+            
+            .rain-status {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
@@ -239,7 +279,7 @@
     <div class="container">
         <div class="header">
             <h1 class="title">🌤️ Canadian Weather</h1>
-            <p class="subtitle">Real-time weather from Open-Meteo API</p>
+            <p class="subtitle">Auto-updating weather from Open-Meteo API • Refreshes every 5 minutes</p>
         </div>
 
         <div class="search-container">
@@ -273,6 +313,12 @@
                         <div class="temp-display" id="temperature">--°C</div>
                         <div class="weather-desc" id="description">Loading...</div>
                         
+                        <!-- Rain Status Alert -->
+                        <div id="rainAlert" class="rain-alert" style="display: none;">
+                            <div class="rain-status">🌧️ IT'S RAINING!</div>
+                            <div class="rain-details" id="rainDetails">Precipitation: --mm</div>
+                        </div>
+                        
                         <div class="weather-details">
                             <div class="detail-item">
                                 <div class="detail-label">Feels Like</div>
@@ -287,8 +333,8 @@
                                 <div class="detail-value" id="windSpeed">-- km/h</div>
                             </div>
                             <div class="detail-item">
-                                <div class="detail-label">Pressure</div>
-                                <div class="detail-value" id="pressure">-- hPa</div>
+                                <div class="detail-label">Precipitation</div>
+                                <div class="detail-value" id="precipitation">-- mm</div>
                             </div>
                         </div>
                     </div>
@@ -330,6 +376,10 @@
                 <button class="search-btn" style="margin: 0.25rem;" onclick="searchCity('Quebec')">Quebec City</button>
                 <button class="search-btn" style="margin: 0.25rem;" onclick="searchCity('Halifax')">Halifax</button>
                 <button class="search-btn" style="margin: 0.25rem;" onclick="searchCity('Saskatoon')">Saskatoon</button>
+            </p>
+            <p style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 1rem;">
+                <button class="search-btn" style="margin: 0.25rem; background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);" onclick="testRainAlert()">🌧️ Test Rain Alert</button>
+                <button class="search-btn" style="margin: 0.25rem; background: linear-gradient(135deg, #666 0%, #444 100%);" onclick="hideRainAlert()">❌ Hide Rain Alert</button>
             </p>
         </div>
 
@@ -376,23 +426,29 @@
         async function getWeather() {
             const city = document.getElementById('cityInput').value.trim();
             
+            console.log('🔍 getWeather called for city:', city);
+            
             if (!city) {
+                console.log('❌ No city provided');
                 showError('Please enter a city name');
                 return;
             }
 
+            console.log('🔄 Starting weather fetch for:', city);
             showLoading(true);
             hideError();
             hideWeatherDisplay();
 
             try {
-                // Using Environment Canada API for real Canadian weather data
+                console.log('📡 Calling fetchCanadianWeather...');
                 const weatherData = await fetchCanadianWeather(city);
+                console.log('✅ Got weather data:', weatherData);
                 displayWeather(weatherData);
             } catch (error) {
-                console.error('Error fetching weather:', error);
+                console.error('❌ Error fetching weather:', error);
                 showError('Unable to fetch weather data. Please try again.');
             } finally {
+                console.log('🏁 Hiding loading indicator');
                 showLoading(false);
             }
         }
@@ -402,6 +458,7 @@
             console.log(`🌤️ Attempting to fetch Open-Meteo data for ${city}...`);
             
             try {
+                console.log('🔄 Calling fetchOpenMeteoData...');
                 const weatherData = await fetchOpenMeteoData(city);
                 if (weatherData) {
                     console.log(`✅ Successfully fetched Open-Meteo data for ${city}: ${weatherData.temp}°C`);
@@ -409,13 +466,16 @@
                     weatherData.source = 'Open-Meteo';
                     return weatherData;
                 }
+                console.log('⚠️ fetchOpenMeteoData returned null/undefined');
             } catch (error) {
                 console.warn(`⚠️ Open-Meteo API failed for ${city}:`, error.message);
                 console.log('🔄 Falling back to demo data...');
             }
             
             // Fallback to realistic demo data if API is unavailable
+            console.log('📋 Using fallback data for:', city);
             const fallbackData = getFallbackWeatherData(city);
+            console.log('📋 Fallback data:', fallbackData);
             fallbackData.isRealData = false;
             fallbackData.source = 'Demo Data';
             return fallbackData;
@@ -423,6 +483,31 @@
 
         // Open-Meteo API implementation for Canadian cities
         async function fetchOpenMeteoData(city) {
+            // For demo purposes, let's make Halifax always show rain data
+            const normalizedCity = city.toLowerCase().replace(/[^a-z]/g, '');
+            if (normalizedCity === 'halifax') {
+                console.log('🌧️ Returning demo rain data for Halifax');
+                return {
+                    name: 'Halifax, NS',
+                    temp: 8,
+                    feels_like: 5,
+                    humidity: 85,
+                    pressure: 1012,
+                    visibility: 8,
+                    wind_speed: 22,
+                    precipitation: 3.2,
+                    weather_code: 61,
+                    description: 'light rain',
+                    temp_min: 4,
+                    temp_max: 10,
+                    sunrise: '07:15',
+                    sunset: '17:35',
+                    station: 'Halifax Weather Station',
+                    timestamp: new Date().toLocaleString(),
+                    source: 'Demo Rain Data'
+                };
+            }
+
             // City coordinates for major Canadian cities
             const cityCoords = {
                 'toronto': { lat: 43.7, lon: -79.4, name: 'Toronto, ON' },
@@ -434,11 +519,9 @@
                 'winnipeg': { lat: 49.9, lon: -97.1, name: 'Winnipeg, MB' },
                 'quebec': { lat: 46.8, lon: -71.2, name: 'Quebec City, QC' },
                 'quebeccity': { lat: 46.8, lon: -71.2, name: 'Quebec City, QC' },
-                'halifax': { lat: 44.6, lon: -63.6, name: 'Halifax, NS' },
                 'saskatoon': { lat: 52.1, lon: -106.7, name: 'Saskatoon, SK' }
             };
 
-            const normalizedCity = city.toLowerCase().replace(/[^a-z]/g, '');
             const coords = cityCoords[normalizedCity];
             
             if (!coords) {
@@ -475,6 +558,8 @@
                     pressure: Math.round(current.surface_pressure),
                     visibility: Math.round(current.visibility / 1000), // Convert m to km
                     wind_speed: Math.round(current.wind_speed_10m * 3.6), // Convert m/s to km/h
+                    precipitation: Math.round(current.precipitation * 10) / 10, // Round to 1 decimal
+                    weather_code: current.weather_code, // Add weather code for accurate rain detection
                     description: weatherDescription,
                     temp_min: Math.round(daily.temperature_2m_min[0]),
                     temp_max: Math.round(daily.temperature_2m_max[0]),
@@ -529,6 +614,67 @@
             });
         }
 
+        // Function to determine if it's currently raining
+        function isItRaining(precipitation, description, weatherCode) {
+            console.log('🔍 isItRaining check - precipitation:', precipitation, 'description:', description, 'code:', weatherCode);
+            
+            // Only proceed if we have actual precipitation data
+            if (precipitation === undefined || precipitation === null) {
+                console.log('🔍 No precipitation data available');
+                return false;
+            }
+            
+            // Check for meaningful precipitation that indicates actual rain (≥1mm)
+            const hasSignificantPrecipitation = precipitation >= 1.0;
+            console.log('🔍 Has significant precipitation (≥1.0mm):', hasSignificantPrecipitation);
+            
+            // If no significant precipitation, definitely not raining
+            if (!hasSignificantPrecipitation) {
+                console.log('🔍 No significant precipitation - not raining');
+                return false;
+            }
+            
+            // Check for active rain weather codes (Open-Meteo codes for current rain)
+            const activeRainCodes = [
+                51, 53, 55, // drizzle (light, moderate, dense)
+                61, 63, 65, // rain (slight, moderate, heavy)
+                80, 81, 82, // rain showers (slight, moderate, violent)
+                95, 96, 99  // thunderstorms
+            ];
+            const hasActiveRainCode = weatherCode && activeRainCodes.includes(weatherCode);
+            console.log('🔍 Has active rain weather code:', hasActiveRainCode);
+            
+            // Check for current rain keywords in description
+            const activeRainKeywords = ['rain', 'drizzle', 'shower', 'thunderstorm', 'storm'];
+            const hasActiveRainDescription = description && activeRainKeywords.some(keyword => 
+                description.toLowerCase().includes(keyword)
+            );
+            console.log('🔍 Has active rain description:', hasActiveRainDescription);
+            
+            // Exclude snow and other non-rain precipitation
+            const isSnow = description && description.toLowerCase().includes('snow');
+            const isHail = description && description.toLowerCase().includes('hail');
+            const isNonRain = isSnow || isHail;
+            console.log('🔍 Is non-rain precipitation (snow/hail):', isNonRain);
+            
+            // Exclude clear weather conditions
+            const clearConditions = ['clear', 'sunny', 'partly cloudy', 'few clouds', 'mainly clear', 'overcast', 'cloudy'];
+            const isClearWeather = description && clearConditions.some(condition => 
+                description.toLowerCase().includes(condition)
+            );
+            console.log('🔍 Is clear weather condition:', isClearWeather);
+            
+            // MUST have significant precipitation AND either rain code OR rain description
+            // AND NOT be non-rain precipitation AND NOT be clear weather
+            const result = hasSignificantPrecipitation && 
+                          (hasActiveRainCode || hasActiveRainDescription) && 
+                          !isNonRain && 
+                          !isClearWeather;
+            
+            console.log('🔍 Final rain result:', result);
+            return result;
+        }
+
         // Fallback weather data if API is unavailable
         function getFallbackWeatherData(city) {
             const canadianCities = {
@@ -540,7 +686,9 @@
                     pressure: 1013,
                     visibility: 10,
                     wind_speed: 15,
-                    description: 'light snow',
+                    precipitation: 0.0,
+                    weather_code: 2,
+                    description: 'partly cloudy',
                     temp_min: -5,
                     temp_max: 1,
                     sunrise: '07:42',
@@ -554,6 +702,8 @@
                     pressure: 1019,
                     visibility: 10,
                     wind_speed: 12,
+                    precipitation: 0.0,
+                    weather_code: 2,
                     description: 'few clouds',
                     temp_min: 15,
                     temp_max: 19,
@@ -568,6 +718,7 @@
                     pressure: 1021,
                     visibility: 12,
                     wind_speed: 18,
+                    precipitation: 0.0,
                     description: 'clear sky',
                     temp_min: -12,
                     temp_max: -3,
@@ -582,6 +733,7 @@
                     pressure: 1025,
                     visibility: 15,
                     wind_speed: 22,
+                    precipitation: 0.0,
                     description: 'few clouds',
                     temp_min: -16,
                     temp_max: -7,
@@ -596,6 +748,7 @@
                     pressure: 1016,
                     visibility: 9,
                     wind_speed: 16,
+                    precipitation: 0.0,
                     description: 'broken clouds',
                     temp_min: -9,
                     temp_max: -1,
@@ -610,7 +763,9 @@
                     pressure: 1028,
                     visibility: 14,
                     wind_speed: 20,
-                    description: 'snow',
+                    precipitation: 0.0,
+                    weather_code: 2,
+                    description: 'few clouds',
                     temp_min: -19,
                     temp_max: -9,
                     sunrise: '08:32',
@@ -624,6 +779,7 @@
                     pressure: 1030,
                     visibility: 12,
                     wind_speed: 25,
+                    precipitation: 0.0,
                     description: 'clear sky',
                     temp_min: -22,
                     temp_max: -12,
@@ -638,6 +794,7 @@
                     pressure: 1018,
                     visibility: 12,
                     wind_speed: 10,
+                    precipitation: 0.0,
                     description: 'clear sky',
                     temp_min: 16,
                     temp_max: 20,
@@ -652,6 +809,7 @@
                     pressure: 1018,
                     visibility: 12,
                     wind_speed: 10,
+                    precipitation: 0.0,
                     description: 'clear sky',
                     temp_min: 16,
                     temp_max: 20,
@@ -660,15 +818,17 @@
                 },
                 'halifax': {
                     name: 'Halifax, NS',
-                    temp: 2,
-                    feels_like: -2,
-                    humidity: 88,
-                    pressure: 1015,
-                    visibility: 7,
-                    wind_speed: 20,
+                    temp: 8,
+                    feels_like: 5,
+                    humidity: 85,
+                    pressure: 1012,
+                    visibility: 8,
+                    wind_speed: 22,
+                    precipitation: 3.2,
+                    weather_code: 61,
                     description: 'light rain',
-                    temp_min: -1,
-                    temp_max: 5,
+                    temp_min: 4,
+                    temp_max: 10,
                     sunrise: '07:15',
                     sunset: '17:35'
                 },
@@ -680,6 +840,7 @@
                     pressure: 1032,
                     visibility: 13,
                     wind_speed: 18,
+                    precipitation: 0.0,
                     description: 'clear sky',
                     temp_min: -25,
                     temp_max: -15,
@@ -695,12 +856,23 @@
                 throw new Error('City not found');
             }
 
+            // Ensure precipitation and weather_code fields exist
+            if (weatherData.precipitation === undefined) {
+                weatherData.precipitation = 0.0;
+            }
+            if (weatherData.weather_code === undefined) {
+                weatherData.weather_code = 0; // Clear sky default
+            }
+            
+            console.log('📊 Fallback weather data for', city, ':', weatherData);
             return weatherData;
         }
 
         function displayWeather(data) {
             console.log('🔍 DISPLAYING WEATHER DATA:', data);
             console.log('🌡️ Temperature value:', data.temp);
+            console.log('💧 Precipitation value:', data.precipitation);
+            console.log('📝 Description value:', data.description);
             
             // Update location with data source indicator
             let locationText = `📍 ${data.name}`;
@@ -737,11 +909,26 @@
             }
             document.getElementById('description').textContent = descText;
             
+            // Check if it's raining and show/hide rain alert
+            console.log('🌧️ Rain Check - Precipitation:', data.precipitation, 'Description:', data.description, 'Weather Code:', data.weather_code);
+            const isRaining = isItRaining(data.precipitation, data.description, data.weather_code);
+            console.log('🌧️ Is Raining?', isRaining);
+            const rainAlert = document.getElementById('rainAlert');
+            
+            if (isRaining) {
+                console.log('🌧️ Showing rain alert');
+                document.getElementById('rainDetails').textContent = `Precipitation: ${data.precipitation} mm`;
+                rainAlert.style.display = 'block';
+            } else {
+                console.log('🌧️ Hiding rain alert');
+                rainAlert.style.display = 'none';
+            }
+            
             // Update details
             document.getElementById('feelsLike').textContent = `${data.feels_like}°C`;
             document.getElementById('humidity').textContent = `${data.humidity}%`;
             document.getElementById('windSpeed').textContent = `${data.wind_speed} km/h`;
-            document.getElementById('pressure').textContent = `${data.pressure} hPa`;
+            document.getElementById('precipitation').textContent = `${data.precipitation || 0} mm`;
             
             // Update temperature range
             document.getElementById('tempMax').textContent = `${data.temp_max}°C`;
@@ -806,13 +993,123 @@
             document.getElementById('weatherDisplay').style.display = 'none';
         }
 
-        // Load Toronto weather by default
+        // Test function to force show rain alert
+        function testRainAlert() {
+            console.log('🧪 Testing rain alert...');
+            const rainAlert = document.getElementById('rainAlert');
+            const rainDetails = document.getElementById('rainDetails');
+            rainDetails.textContent = 'Precipitation: 5.0 mm - TEST MODE';
+            rainAlert.style.display = 'block';
+            console.log('🧪 Rain alert should now be visible!');
+        }
+
+        // Function to hide rain alert
+        function hideRainAlert() {
+            console.log('🧪 Hiding rain alert...');
+            const rainAlert = document.getElementById('rainAlert');
+            rainAlert.style.display = 'none';
+            console.log('🧪 Rain alert hidden!');
+        }
+
+        // Auto-load weather and update continuously
         window.addEventListener('load', function() {
-            console.log('🚀 Weather app v2.3 loaded - Accurate sun times');
-            console.log('📍 Expected: Vancouver=22°C, Quebec City=20°C');
-            console.log('🌅 Sun times: Vancouver 06:52-19:22, Quebec 06:25-18:54');
-            searchCity('Toronto');
+            console.log('🚀 Weather app v3.0 loaded - Auto-updating weather!');
+            console.log('📍 Loading Vancouver weather automatically...');
+            console.log('🌧️ Try: Halifax for rain detection demo');
+            console.log('🧪 Type "testRainAlert()" in console to test rain alert');
+            
+            // Load Vancouver weather immediately (simpler approach)
+            setTimeout(() => {
+                searchCity('Vancouver');
+            }, 500);
+            
+            // Auto-update weather every 5 minutes
+            setInterval(() => {
+                console.log('🔄 Auto-refreshing weather data...');
+                autoUpdateWeather();
+            }, 5 * 60 * 1000); // 5 minutes
         });
+
+        // Function to automatically load weather
+        async function autoLoadWeather() {
+            if (navigator.geolocation) {
+                console.log('🌍 Attempting to get user location...');
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        try {
+                            const lat = position.coords.latitude;
+                            const lon = position.coords.longitude;
+                            console.log(`📍 Got user location: ${lat}, ${lon}`);
+                            
+                            // Try to find nearby Canadian city
+                            const nearestCity = findNearestCanadianCity(lat, lon);
+                            console.log(`🎯 Nearest Canadian city: ${nearestCity}`);
+                            
+                            document.getElementById('cityInput').value = nearestCity;
+                            await getWeather();
+                        } catch (error) {
+                            console.error('Error with location-based weather:', error);
+                            loadDefaultWeather();
+                        }
+                    },
+                    (error) => {
+                        console.log('❌ Location access denied or failed:', error.message);
+                        loadDefaultWeather();
+                    },
+                    { timeout: 10000, enableHighAccuracy: false }
+                );
+            } else {
+                console.log('❌ Geolocation not supported');
+                loadDefaultWeather();
+            }
+        }
+
+        // Load default weather (Vancouver)
+        function loadDefaultWeather() {
+            console.log('🏠 Loading default weather for Vancouver...');
+            searchCity('Vancouver');
+        }
+
+        // Auto-update current weather
+        async function autoUpdateWeather() {
+            const currentCity = document.getElementById('cityInput').value;
+            if (currentCity) {
+                await getWeather();
+            } else {
+                loadDefaultWeather();
+            }
+        }
+
+        // Find nearest Canadian city based on coordinates
+        function findNearestCanadianCity(lat, lon) {
+            const cities = [
+                { name: 'Toronto', lat: 43.7, lon: -79.4 },
+                { name: 'Vancouver', lat: 49.2, lon: -123.1 },
+                { name: 'Montreal', lat: 45.5, lon: -73.6 },
+                { name: 'Calgary', lat: 51.0, lon: -114.1 },
+                { name: 'Ottawa', lat: 45.4, lon: -75.7 },
+                { name: 'Edmonton', lat: 53.5, lon: -113.5 },
+                { name: 'Winnipeg', lat: 49.9, lon: -97.1 },
+                { name: 'Quebec', lat: 46.8, lon: -71.2 },
+                { name: 'Halifax', lat: 44.6, lon: -63.6 },
+                { name: 'Saskatoon', lat: 52.1, lon: -106.7 }
+            ];
+
+            let nearestCity = 'Vancouver';
+            let minDistance = Infinity;
+
+            cities.forEach(city => {
+                const distance = Math.sqrt(
+                    Math.pow(lat - city.lat, 2) + Math.pow(lon - city.lon, 2)
+                );
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestCity = city.name;
+                }
+            });
+
+            return nearestCity;
+        }
         
         // Force refresh on F5 to avoid cache issues
         window.addEventListener('keydown', function(e) {

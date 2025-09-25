@@ -551,17 +551,30 @@
                     x: 150,
                     y: this.height / 2,
                     velocity: 0,
+                    horizontalVelocity: 0,
                     radius: 18,
-                    rotation: 0
+                    rotation: 0,
+                    mass: 1,
+                    wingFlapTime: 0,
+                    isFlapping: false,
+                    lastFlapTime: 0,
+                    energy: 100,
+                    windResistance: 0.992  // Less wind resistance to maintain forward momentum
                 };
                 
-                // EXTREME base difficulty settings (scaled for larger canvas)
+                // Balanced realistic physics settings
                 this.baseDifficulty = {
-                    gravity: 0.4,
-                    flapPower: -8,
-                    pipeSpeed: 3.2,
-                    pipeGap: 200,
-                    pipeSpacing: 350  // Increased further for more comfortable spacing
+                    gravity: 0.42,  // Moderate gravity
+                    flapPower: -6.8,  // Slightly reduced flap strength for lower jumps
+                    pipeSpeed: 2.2,  // More manageable speed
+                    pipeGap: 280,   // Comfortable gap between pipes
+                    pipeSpacing: 320,  // Better spacing
+                    airResistance: 0.014,  // Moderate air resistance
+                    windEffect: 0,  // Wind effect (can be positive or negative)
+                    thermalCurrent: 0,  // Thermal updrafts for realism
+                    turbulence: 0.1,  // Air turbulence factor
+                    liftCoefficient: 1.3,  // Moderate wing lift efficiency
+                    dragCoefficient: 0.75   // Moderate air drag coefficient
                 };
                 
                 // Current difficulty (starts at base but EXPLODES)
@@ -797,10 +810,11 @@
                         e.preventDefault();
                         this.flap();
                     }
-                    if (e.code === 'Escape' && this.gameState !== 'start') {
-                        e.preventDefault();
-                        this.returnToMenu();
-                    }
+                    // Removed Escape key functionality - screen won't close
+                    // if (e.code === 'Escape' && this.gameState !== 'start') {
+                    //     e.preventDefault();
+                    //     this.returnToMenu();
+                    // }
                 });
                 
                 this.canvas.addEventListener('click', () => {
@@ -810,61 +824,216 @@
             
             flap() {
                 if (this.gameState === 'playing') {
-                    // Flap power stays same for fairness, but gravity fights back harder
-                    this.bird.velocity = this.difficulty.flapPower;
-                    this.bird.rotation = -20;
+                    const currentTime = Date.now();
+                    const timeSinceLastFlap = currentTime - this.bird.lastFlapTime;
+                    
+                    // Balanced flap mechanics
+                    if (timeSinceLastFlap > 140) { // Moderate flap rate
+                        // Energy affects flap power (tired bird flaps weaker)
+                        const energyFactor = Math.max(0.75, this.bird.energy / 100); // Minimum 75% power
+                        const flapStrength = this.difficulty.flapPower * this.difficulty.liftCoefficient * energyFactor;
+                        
+                        // Moderate momentum-based flapping
+                        let momentumBonus = 0;
+                        if (this.bird.velocity > 0) {
+                            // Modest flap boost when falling
+                            momentumBonus = Math.max(0, this.bird.velocity * 0.1);
+                        } else {
+                            // Small extra lift when already climbing
+                            momentumBonus = -Math.abs(this.bird.velocity) * 0.03;
+                        }
+                        
+                        this.bird.velocity = flapStrength - momentumBonus;
+                        
+                        // Wing flap animation and state
+                        this.bird.isFlapping = true;
+                        this.bird.wingFlapTime = currentTime;
+                        this.bird.lastFlapTime = currentTime;
+                        this.bird.rotation = -17; // Moderate upward angle
+                        
+                        // Moderate energy consumption
+                        this.bird.energy = Math.max(25, this.bird.energy - 1.8);
+                        
+                        // Add forward momentum from wing movement (affects screen speed)
+                        this.bird.horizontalVelocity += 0.3;
+                        
+                        // Reset flapping state after animation
+                        setTimeout(() => {
+                            this.bird.isFlapping = false;
+                        }, 200);
+                    }
                 }
             }
             
             update() {
                 if (this.gameState !== 'playing') return;
                 
-                // Update bird with EXTREME physics
-                this.bird.velocity += this.difficulty.gravity;
+                // Enhanced realistic physics implementation
+                const currentTime = Date.now();
                 
-                // Terminal velocity increases BRUTALLY with level
-                const terminalVelocity = 8 + (this.level * 0.8);
-                this.bird.velocity = Math.min(this.bird.velocity, terminalVelocity);
+                // Apply gravity with mass consideration
+                const gravityForce = this.difficulty.gravity * this.bird.mass;
+                this.bird.velocity += gravityForce;
                 
-                // Chaos mode effects - controlled chaos without upward launches
-                if (this.chaosMode) {
-                    // Only add downward or small horizontal velocity adjustments
-                    const chaosEffect = Math.random() * 0.3; // 0 to 0.3 downward only
-                    this.bird.velocity += chaosEffect;
-                    // Random screen shake effect (horizontal only)
-                    if (Math.random() < 0.1) {
-                        this.bird.x += (Math.random() - 0.5) * 2;
+                // Apply balanced air resistance
+                const airDensity = 0.9; // More realistic air density
+                const speed = Math.abs(this.bird.velocity);
+                const dragForce = 0.5 * airDensity * this.difficulty.dragCoefficient * speed * speed * 0.01; // Moderate drag force
+                
+                if (this.bird.velocity > 0) {
+                    this.bird.velocity -= dragForce;
+                } else {
+                    // Less drag going up with moderate lift
+                    this.bird.velocity += dragForce * 0.6; // Moderate resistance going up
+                    // Add modest wing-generated lift when climbing
+                    const liftForce = speed * this.difficulty.liftCoefficient * 0.015;
+                    this.bird.velocity -= liftForce;
+                }
+                
+                // Environmental wind effects with realistic patterns
+                const windTime = currentTime * 0.0008;
+                const windStrength = Math.sin(windTime) * Math.cos(windTime * 0.7) * this.difficulty.turbulence;
+                this.bird.velocity += windStrength;
+                
+                // Add forward wind to help maintain screen movement
+                const forwardWind = Math.sin(windTime * 1.3) * 0.05;
+                this.bird.horizontalVelocity += windStrength * 0.3 + forwardWind;
+                
+                // Moderate thermal currents (warm air updrafts)
+                const thermalFrequency = this.level > 5 ? 0.005 : 0.003; // Moderate frequency
+                if (Math.random() < thermalFrequency) {
+                    const thermalX = Math.random() * this.width;
+                    const thermalStrength = 0.3 + Math.random() * 0.4; // Moderate strength
+                    if (Math.abs(this.bird.x - thermalX) < 70) { // Moderate thermal zones
+                        this.bird.velocity -= thermalStrength;
+                        // Visual effect for thermal detection
+                        this.showThermalEffect(thermalX);
                     }
                 }
                 
-                // NIGHTMARE MODE effects - extreme but controlled
-                if (this.nightmareMode) {
-                    // Extreme downward chaos only
-                    const nightmareEffect = Math.random() * 0.6; // 0 to 0.6 downward only
-                    this.bird.velocity += nightmareEffect;
-                    // More frequent position chaos (horizontal only)
-                    if (Math.random() < 0.15) {
-                        this.bird.x += (Math.random() - 0.5) * 4;
+                // Turbulence effects at higher levels
+                if (this.level > 7) {
+                    const turbulenceEffect = (Math.random() - 0.5) * this.difficulty.turbulence;
+                    this.bird.velocity += turbulenceEffect;
+                }
+                
+                // Moderate energy recovery
+                if (currentTime - this.bird.lastFlapTime > 700) { // Moderate recovery time
+                    this.bird.energy = Math.min(100, this.bird.energy + 0.6); // Moderate energy gain
+                }
+                
+                // Small bonus energy recovery in thermals
+                if (this.thermalEffects && this.thermalEffects.length > 0) {
+                    this.thermalEffects.forEach(thermal => {
+                        if (Math.abs(this.bird.x - thermal.x) < 60) {
+                            this.bird.energy = Math.min(100, this.bird.energy + 0.2);
+                        }
+                    });
+                }
+                
+                // Horizontal wind resistance
+                this.bird.horizontalVelocity *= this.bird.windResistance;
+                
+                // Update horizontal position with wind
+                this.bird.x += this.bird.horizontalVelocity;
+                
+                // Keep bird within screen bounds horizontally
+                if (this.bird.x < 50) {
+                    this.bird.x = 50;
+                    this.bird.horizontalVelocity = 0;
+                }
+                if (this.bird.x > this.width - 50) {
+                    this.bird.x = this.width - 50;
+                    this.bird.horizontalVelocity = 0;
+                }
+                
+                // Realistic terminal velocity with bird mass
+                const terminalVelocity = 7 + (this.bird.mass * 2);
+                this.bird.velocity = Math.min(this.bird.velocity, terminalVelocity);
+                
+                // More realistic challenging effects at higher levels
+                if (this.chaosMode) {
+                    // Add subtle turbulence instead of chaos
+                    const turbulence = Math.sin(Date.now() * 0.01) * 0.1;
+                    this.bird.velocity += turbulence;
+                    
+                    // Occasional gusts of wind
+                    if (Math.random() < 0.05) {
+                        this.difficulty.windEffect = (Math.random() - 0.5) * 0.3;
                     }
-                    // Controlled gravity fluctuations (only increases)
-                    if (Math.random() < 0.1) {
-                        this.difficulty.gravity += Math.random() * 0.1;
+                }
+                
+                // Advanced weather effects for nightmare mode
+                if (this.nightmareMode) {
+                    // Stronger wind currents
+                    const strongWind = Math.sin(Date.now() * 0.005) * 0.2;
+                    this.bird.velocity += strongWind;
+                    
+                    // More frequent thermal currents
+                    this.difficulty.thermalCurrent = 0.15;
+                    
+                    // Variable gravity zones
+                    if (Math.random() < 0.02) {
+                        const gravityZone = Math.random() * this.width;
+                        if (Math.abs(this.bird.x - gravityZone) < 80) {
+                            this.bird.velocity += 0.2; // Localized gravity wells
+                        }
                     }
                 }
                 
                 this.bird.y += this.bird.velocity;
                 
-                // More dramatic rotation
-                this.bird.rotation = Math.max(-35, Math.min(70, this.bird.velocity * 4));
+                // Enhanced realistic bird rotation and animation
+                const targetRotation = Math.max(-30, Math.min(60, this.bird.velocity * 4));
+                this.bird.rotation += (targetRotation - this.bird.rotation) * 0.15; // Smooth rotation transition
                 
-                // Generate pipes with extreme spacing
+                // Dynamic wing animation based on flapping state
+                if (this.bird.isFlapping) {
+                    const flapProgress = (currentTime - this.bird.wingFlapTime) / 200;
+                    this.bird.wingAngle = Math.sin(flapProgress * Math.PI) * 45;
+                } else {
+                    // Gentle gliding wing position
+                    const glideTime = currentTime * 0.003;
+                    this.bird.wingAngle = Math.sin(glideTime) * 8;
+                }
+                
+                // Generate pipes with spacing
                 if (this.pipes.length === 0 || this.pipes[this.pipes.length - 1].x < this.width - this.difficulty.pipeSpacing) {
                     this.generatePipe();
                 }
                 
-                // Update pipes at EXTREME speed
+                // Calculate dynamic speed based on bird's forward momentum
+                const baseSpeed = this.difficulty.pipeSpeed;
+                const birdForwardMomentum = Math.abs(this.bird.horizontalVelocity) + 1; // Add base momentum
+                const energyFactor = this.bird.energy / 100; // Tired bird flies slower
+                const dynamicSpeed = baseSpeed * birdForwardMomentum * energyFactor;
+                
+                // Update pipes with speed that follows bird's movement
                 this.pipes.forEach(pipe => {
-                    pipe.x -= this.difficulty.pipeSpeed;
+                    pipe.x -= Math.max(0.5, Math.min(6, dynamicSpeed)); // Keep within reasonable bounds
+                    
+                    // Add subtle swaying animation for realism
+                    pipe.swayOffset += 0.02;
+                    pipe.sway = Math.sin(pipe.swayOffset) * 5;
+                    
+                    // Moving pipes (rare challenge)
+                    if (pipe.type === 'moving') {
+                        const moveSpeed = Math.sin(Date.now() * 0.003 + pipe.swayOffset) * 0.8;
+                        pipe.topHeight += moveSpeed;
+                        pipe.bottomY += moveSpeed;
+                        
+                        // Keep moving pipes within bounds
+                        const minY = 50;
+                        const maxY = this.height - this.difficulty.pipeGap - 50;
+                        if (pipe.topHeight < minY) {
+                            pipe.topHeight = minY;
+                            pipe.bottomY = minY + this.difficulty.pipeGap;
+                        }
+                        if (pipe.bottomY > this.height - 50) {
+                            pipe.bottomY = this.height - 50;
+                            pipe.topHeight = pipe.bottomY - this.difficulty.pipeGap;
+                        }
+                    }
                 });
                 
                 // Remove pipes and update score
@@ -884,20 +1053,43 @@
                 this.checkCollisions();
             }
             
-            generatePipe() {
-                // BRUTAL gap positioning - extremely dangerous
-                const minGapY = 20 + (this.level * 2); // Gets closer to edges with level
-                const maxGapY = this.height - this.difficulty.pipeGap - (20 + this.level * 2);
-                let gapY = minGapY + Math.random() * (maxGapY - minGapY);
-                
-                // Chaos mode: unpredictable gap positioning
-                if (this.chaosMode) {
-                    gapY += (Math.random() - 0.5) * 30;
+            showThermalEffect(thermalX) {
+                // Add visual thermal effect
+                if (!this.thermalEffects) {
+                    this.thermalEffects = [];
                 }
                 
-                // Nightmare mode: EXTREME positioning chaos
+                this.thermalEffects.push({
+                    x: thermalX,
+                    y: this.height,
+                    life: 1.0,
+                    startTime: Date.now()
+                });
+                
+                // Clean up old effects
+                this.thermalEffects = this.thermalEffects.filter(effect => effect.life > 0);
+            }
+            
+            generatePipe() {
+                // More realistic pipe generation with environmental factors
+                const minGapY = 50;
+                const maxGapY = this.height - this.difficulty.pipeGap - 50;
+                let gapY = minGapY + Math.random() * (maxGapY - minGapY);
+                
+                // Add natural variance to pipe heights
+                const variance = Math.sin(this.pipes.length * 0.5) * 30;
+                gapY += variance;
+                
+                // Chaos mode: weather-influenced positioning
+                if (this.chaosMode) {
+                    const weatherEffect = Math.sin(Date.now() * 0.002) * 20;
+                    gapY += weatherEffect;
+                }
+                
+                // Nightmare mode: Storm-influenced positioning
                 if (this.nightmareMode) {
-                    gapY += (Math.random() - 0.5) * 60;
+                    const stormEffect = Math.sin(Date.now() * 0.003) * 40;
+                    gapY += stormEffect;
                 }
                 
                 gapY = Math.max(minGapY, Math.min(maxGapY, gapY));
@@ -906,28 +1098,44 @@
                     x: this.width,
                     topHeight: gapY,
                     bottomY: gapY + this.difficulty.pipeGap,
-                    scored: false
+                    scored: false,
+                    swayOffset: Math.random() * Math.PI * 2, // For pipe swaying animation
+                    type: Math.random() < 0.1 ? 'moving' : 'static' // 10% chance for moving pipes
                 });
             }
             
             checkCollisions() {
-                // BRUTAL collision detection at higher levels
-                const collisionTolerance = Math.max(-1, 2 - (this.level * 0.3));
+                // Realistic collision detection with bird shape consideration
+                const birdRadius = this.bird.radius;
+                const birdLeft = this.bird.x - birdRadius * 0.8; // Bird is not perfectly round
+                const birdRight = this.bird.x + birdRadius * 0.6; // Beak extends further
+                const birdTop = this.bird.y - birdRadius * 0.7;
+                const birdBottom = this.bird.y + birdRadius * 0.8;
                 
-                // Ground and ceiling
-                if (this.bird.y - this.bird.radius + collisionTolerance < 0 || 
-                    this.bird.y + this.bird.radius - collisionTolerance > this.height) {
+                // Ground and ceiling with realistic margins
+                if (birdTop < 5 || birdBottom > this.height - 5) {
                     this.gameOver();
                     return;
                 }
                 
-                // Pipes with tighter hitboxes
+                // Enhanced pipe collision with realistic bird shape
                 this.pipes.forEach(pipe => {
-                    if (this.bird.x + this.bird.radius - collisionTolerance > pipe.x && 
-                        this.bird.x - this.bird.radius + collisionTolerance < pipe.x + this.pipeWidth) {
-                        if (this.bird.y - this.bird.radius + collisionTolerance < pipe.topHeight || 
-                            this.bird.y + this.bird.radius - collisionTolerance > pipe.bottomY) {
-                            this.gameOver();
+                    const pipeLeft = pipe.x;
+                    const pipeRight = pipe.x + this.pipeWidth;
+                    
+                    // Check if bird is horizontally aligned with pipe
+                    if (birdRight > pipeLeft && birdLeft < pipeRight) {
+                        // Check vertical collision with more precise detection
+                        if (birdTop < pipe.topHeight || birdBottom > pipe.bottomY) {
+                            // Add slight collision forgiveness for very close calls
+                            const topDistance = pipe.topHeight - birdTop;
+                            const bottomDistance = birdBottom - pipe.bottomY;
+                            
+                            // Allow very minor overlaps (realistic bird flexibility)
+                            if (topDistance > 3 || bottomDistance > 3) {
+                                this.gameOver();
+                                return;
+                            }
                         }
                     }
                 });
@@ -987,10 +1195,59 @@
                 // Draw simple particle effects
                 this.updateAndDrawSimpleParticles();
                 
+                // Draw thermal effects if any
+                this.drawThermalEffects();
+                
                 // Draw original enhanced bird
                 this.drawExtremeBird();
             }
             
+            drawThermalEffects() {
+                if (!this.thermalEffects || this.thermalEffects.length === 0) return;
+                
+                const currentTime = Date.now();
+                
+                this.thermalEffects = this.thermalEffects.filter(effect => {
+                    const age = (currentTime - effect.startTime) / 1000; // Convert to seconds
+                    effect.life = Math.max(0, 1 - age / 3); // 3 second lifetime
+                    
+                    if (effect.life > 0) {
+                        // Draw thermal updraft visualization
+                        const alpha = effect.life * 0.3;
+                        const height = (1 - effect.life) * this.height;
+                        
+                        // Create thermal gradient
+                        const thermalGradient = this.ctx.createLinearGradient(
+                            effect.x, this.height, effect.x, this.height - height
+                        );
+                        thermalGradient.addColorStop(0, `rgba(255, 200, 100, ${alpha})`);
+                        thermalGradient.addColorStop(0.5, `rgba(255, 220, 150, ${alpha * 0.6})`);
+                        thermalGradient.addColorStop(1, `rgba(255, 240, 200, ${alpha * 0.3})`);
+                        
+                        this.ctx.fillStyle = thermalGradient;
+                        this.ctx.beginPath();
+                        const width = 30 + (1 - effect.life) * 20;
+                        this.ctx.ellipse(effect.x, this.height - height/2, width, height/2, 0, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        
+                        // Add swirling particles in thermal
+                        for (let i = 0; i < 3; i++) {
+                            const swirl = (currentTime * 0.003 + i) % (Math.PI * 2);
+                            const radius = 15 + i * 8;
+                            const particleX = effect.x + Math.cos(swirl) * radius;
+                            const particleY = this.height - height * (0.3 + i * 0.2);
+                            
+                            this.ctx.fillStyle = `rgba(255, 215, 120, ${alpha * 0.8})`;
+                            this.ctx.beginPath();
+                            this.ctx.arc(particleX, particleY, 2, 0, Math.PI * 2);
+                            this.ctx.fill();
+                        }
+                        
+                        return true;
+                    }
+                    return false;
+                });
+            }
             
             drawAnimatedParticles() {
                 const particleTime = Date.now() * 0.001;
@@ -1816,68 +2073,87 @@
                 this.ctx.translate(this.bird.x, this.bird.y);
                 this.ctx.rotate(this.bird.rotation * Math.PI / 180);
                 
-                // Bird gets more intense coloring with level
-                const birdIntensity = Math.min(1, this.level / 10);
-                const birdHue = 45 - (this.level * 2); // Golden to red
+                // Realistic bird coloring based on energy and state
+                const energyFactor = this.bird.energy / 100;
+                const birdHue = 35 + (energyFactor * 15); // Tired birds look duller
+                const saturation = 70 + (energyFactor * 30);
                 
-                // Bird shadow for depth
-                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                // Bird shadow for depth (stronger when flying lower)
+                const shadowOpacity = 0.2 + (this.bird.y / this.height) * 0.3;
+                this.ctx.fillStyle = `rgba(0, 0, 0, ${shadowOpacity})`;
                 this.ctx.beginPath();
                 this.ctx.arc(2, 2, this.bird.radius, 0, Math.PI * 2);
                 this.ctx.fill();
                 
-                // Bird body with gradient and dynamic coloring
-                const bodyGradient = this.ctx.createRadialGradient(-3, -3, 2, 0, 0, this.bird.radius);
-                bodyGradient.addColorStop(0, `hsl(${birdHue}, 100%, ${80 - birdIntensity * 15}%)`);
-                bodyGradient.addColorStop(0.7, `hsl(${birdHue}, 100%, ${65 - birdIntensity * 20}%)`);
-                bodyGradient.addColorStop(1, `hsl(${birdHue - 10}, 90%, ${50 - birdIntensity * 15}%)`);
+                // Enhanced bird body with realistic shading
+                const bodyGradient = this.ctx.createRadialGradient(-4, -4, 3, 0, 0, this.bird.radius);
+                bodyGradient.addColorStop(0, `hsl(${birdHue + 10}, ${saturation}%, 85%)`);
+                bodyGradient.addColorStop(0.4, `hsl(${birdHue}, ${saturation}%, 70%)`);
+                bodyGradient.addColorStop(0.8, `hsl(${birdHue - 5}, ${saturation - 10}%, 55%)`);
+                bodyGradient.addColorStop(1, `hsl(${birdHue - 10}, ${saturation - 20}%, 40%)`);
                 this.ctx.fillStyle = bodyGradient;
                 this.ctx.beginPath();
                 this.ctx.arc(0, 0, this.bird.radius, 0, Math.PI * 2);
                 this.ctx.fill();
                 
-                // Intense outline at higher levels
-                this.ctx.strokeStyle = `hsl(${Math.max(0, birdHue - 30)}, 100%, 50%)`;
-                this.ctx.lineWidth = 2 + (this.level * 0.2);
-                this.ctx.stroke();
-                
-                // Enhanced wing with better animation and multiple layers
-                const wingOffset = Math.sin(Date.now() * 0.015) * 3;
-                const wingTilt = Math.cos(Date.now() * 0.02) * 0.2;
-                
-                // Wing shadow
-                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-                this.ctx.beginPath();
-                this.ctx.ellipse(-1, 1 + wingOffset, 8, 5, wingTilt, 0, Math.PI * 2);
-                this.ctx.fill();
-                
-                // Main wing
-                const wingGradient = this.ctx.createLinearGradient(-8, -3, -2, 3);
-                wingGradient.addColorStop(0, `hsl(${birdHue - 10}, 95%, 75%)`);
-                wingGradient.addColorStop(0.3, `hsl(${birdHue - 15}, 90%, 65%)`);
-                wingGradient.addColorStop(0.7, `hsl(${birdHue - 20}, 85%, 55%)`);
-                wingGradient.addColorStop(1, `hsl(${birdHue - 25}, 80%, 45%)`);
-                this.ctx.fillStyle = wingGradient;
-                this.ctx.beginPath();
-                this.ctx.ellipse(-2, -1 + wingOffset, 8, 5, wingTilt, 0, Math.PI * 2);
-                this.ctx.fill();
-                
-                // Wing outline
-                this.ctx.strokeStyle = `hsl(${birdHue - 30}, 70%, 35%)`;
+                // Subtle body outline
+                this.ctx.strokeStyle = `hsl(${birdHue - 15}, ${saturation}%, 35%)`;
                 this.ctx.lineWidth = 1.5;
                 this.ctx.stroke();
                 
-                // Wing feather details
-                this.ctx.strokeStyle = `hsl(${birdHue - 25}, 60%, 40%)`;
-                this.ctx.lineWidth = 1;
+                // Realistic wing animation based on flapping state
+                let wingAngle = this.bird.wingAngle || 0;
+                let wingScale = 1;
+                
+                if (this.bird.isFlapping) {
+                    // Dramatic wing movement during flap
+                    wingScale = 1.2 + Math.sin(wingAngle * Math.PI / 180) * 0.3;
+                    wingAngle = wingAngle * 1.5; // More pronounced movement
+                } else {
+                    // Gentle gliding wing position
+                    wingScale = 1 + Math.sin(wingAngle * Math.PI / 180) * 0.1;
+                }
+                
+                // Dynamic wing positioning and scaling
+                this.ctx.save();
+                this.ctx.scale(wingScale, 1);
+                this.ctx.rotate((wingAngle * Math.PI) / 180);
+                
+                // Wing shadow
+                this.ctx.fillStyle = `rgba(0, 0, 0, ${0.2 * wingScale})`;
                 this.ctx.beginPath();
-                this.ctx.moveTo(-7, -2 + wingOffset);
-                this.ctx.lineTo(-4, 1 + wingOffset);
-                this.ctx.moveTo(-6, -1 + wingOffset);
-                this.ctx.lineTo(-3, 2 + wingOffset);
-                this.ctx.moveTo(-5, 0 + wingOffset);
-                this.ctx.lineTo(-2, 2.5 + wingOffset);
+                this.ctx.ellipse(-1, 1, 8, 5, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Main wing with realistic gradient
+                const wingGradient = this.ctx.createLinearGradient(-8, -3, -2, 3);
+                wingGradient.addColorStop(0, `hsl(${birdHue - 5}, ${saturation}%, 80%)`);
+                wingGradient.addColorStop(0.3, `hsl(${birdHue - 10}, ${saturation - 5}%, 70%)`);
+                wingGradient.addColorStop(0.7, `hsl(${birdHue - 15}, ${saturation - 10}%, 60%)`);
+                wingGradient.addColorStop(1, `hsl(${birdHue - 20}, ${saturation - 15}%, 45%)`);
+                this.ctx.fillStyle = wingGradient;
+                this.ctx.beginPath();
+                this.ctx.ellipse(-2, -1, 8, 5, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Wing outline
+                this.ctx.strokeStyle = `hsl(${birdHue - 25}, ${saturation}%, 35%)`;
+                this.ctx.lineWidth = 1.2;
                 this.ctx.stroke();
+                
+                // Detailed wing feathers
+                this.ctx.strokeStyle = `hsl(${birdHue - 20}, ${saturation - 10}%, 40%)`;
+                this.ctx.lineWidth = 0.8;
+                this.ctx.beginPath();
+                for (let i = 0; i < 4; i++) {
+                    const featherX = -7 + i * 1.5;
+                    const featherY = -2 + i * 0.8;
+                    this.ctx.moveTo(featherX, featherY);
+                    this.ctx.lineTo(featherX + 2.5, featherY + 3);
+                }
+                this.ctx.stroke();
+                
+                this.ctx.restore(); // Restore wing transformations
                 
                 // Enhanced beak with gradient
                 const beakGradient = this.ctx.createLinearGradient(this.bird.radius - 1, -2, this.bird.radius + 8, 2);
