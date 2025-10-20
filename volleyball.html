@@ -349,18 +349,23 @@
                 repeating-linear-gradient(0deg, white, white 1px, transparent 1px, transparent 8px);
         }
 
-        /* Ball */
+        /* Ball - Realistic Volleyball Design */
         #ball {
             position: absolute;
             width: 40px;
             height: 40px;
-            background: radial-gradient(circle at 30% 30%, #fff, #FFE4B5, #FF6347);
+            background: #FAFAFA; /* Base white color */
             border-radius: 50%;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            box-shadow:
+                0 5px 15px rgba(0, 0, 0, 0.4),
+                inset -3px -3px 8px rgba(0, 0, 0, 0.1),
+                inset 3px 3px 8px rgba(255, 255, 255, 0.8);
             z-index: 10;
             transition: all 0.05s linear;
+            overflow: hidden;
         }
 
+        /* Volleyball panel patterns */
         #ball::before {
             content: '';
             position: absolute;
@@ -368,8 +373,44 @@
             height: 100%;
             border-radius: 50%;
             background:
-                linear-gradient(90deg, transparent 48%, rgba(0,0,0,0.1) 50%, transparent 52%),
-                linear-gradient(0deg, transparent 48%, rgba(0,0,0,0.1) 50%, transparent 52%);
+                /* Yellow panels */
+                conic-gradient(from 0deg at 50% 50%,
+                    transparent 0deg,
+                    transparent 30deg,
+                    #FFD700 30deg,
+                    #FFC700 75deg,
+                    transparent 75deg,
+                    transparent 105deg,
+                    #FFD700 105deg,
+                    #FFC700 150deg,
+                    transparent 150deg,
+                    transparent 180deg,
+                    #4A9EFF 180deg,
+                    #3A8EEF 225deg,
+                    transparent 225deg,
+                    transparent 255deg,
+                    #4A9EFF 255deg,
+                    #3A8EEF 300deg,
+                    transparent 300deg,
+                    transparent 360deg
+                );
+            opacity: 0.9;
+        }
+
+        /* Volleyball seam lines */
+        #ball::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background:
+                /* Curved seam lines */
+                radial-gradient(ellipse 80% 100% at 25% 50%, transparent 48%, #888 49%, #888 51%, transparent 52%),
+                radial-gradient(ellipse 80% 100% at 75% 50%, transparent 48%, #888 49%, #888 51%, transparent 52%),
+                radial-gradient(ellipse 100% 80% at 50% 25%, transparent 48%, #888 49%, #888 51%, transparent 52%),
+                radial-gradient(ellipse 100% 80% at 50% 75%, transparent 48%, #888 49%, #888 51%, transparent 52%);
+            opacity: 0.4;
         }
 
         #ballShadow {
@@ -411,6 +452,19 @@
 
         .player.user .player-body {
             background: linear-gradient(135deg, #4169E1, #1E90FF);
+        }
+
+        /* Actual user-controlled player - special styling */
+        #userPlayer .player-body {
+            background: linear-gradient(135deg, #FFD700, #FFA500) !important;
+            border: 3px solid #fff;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+
+        #userPlayer .player-head {
+            background: #FFDAB9;
+            border: 3px solid #fff;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
         }
 
         .player.cpu .player-body {
@@ -682,6 +736,26 @@
             animation: slideDown 0.3s ease-out;
         }
 
+        /* Side labels */
+        .side-label {
+            position: absolute;
+            bottom: 55%;
+            font-size: 24px;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.7);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .side-label.left {
+            left: 15%;
+        }
+
+        .side-label.right {
+            right: 15%;
+        }
+
         @keyframes slideDown {
             from {
                 transform: translateX(-50%) translateY(-20px);
@@ -809,7 +883,7 @@
     </script>
 
     <div id="header">
-        <h1>🏐 Beach Volleyball Championship 🏐</h1>
+        <h1>🏐 Beach Volleyball - Infinite Play 🏐</h1>
         <div id="scoreboard">
             <div class="team-score player">
                 <div class="team-name">YOU</div>
@@ -886,6 +960,18 @@
                 <div class="player-shadow"></div>
             </div>
 
+            <div id="player4" class="player user">
+                <div class="player-head"></div>
+                <div class="player-body"></div>
+                <div class="player-shadow"></div>
+            </div>
+
+            <div id="cpu4Player" class="player cpu">
+                <div class="player-head"></div>
+                <div class="player-body"></div>
+                <div class="player-shadow"></div>
+            </div>
+
             <!-- Message -->
             <div id="message"></div>
 
@@ -893,6 +979,10 @@
             <div id="touchCounter">
                 Touches: <span id="touchDots"></span>
             </div>
+
+            <!-- Side Labels -->
+            <div class="side-label left">YOUR SIDE 🔵</div>
+            <div class="side-label right">OPPONENT 🔴</div>
         </div>
 
         <!-- Power Meter -->
@@ -945,6 +1035,39 @@
                 <option value="impossible">Impossible</option>
             </select>
         </div>
+
+        <div style="margin-top: 15px; border-top: 2px solid #FFD700; padding-top: 10px;">
+            <h4 style="color: #333; margin-bottom: 8px;">🏐 First Serve</h4>
+            <select id="firstServe" style="width: 100%; padding: 5px; border-radius: 5px; border: 2px solid #FFD700;">
+                <option value="player" selected>Your Team Serves First</option>
+                <option value="opponent">Opponent Serves First</option>
+            </select>
+        </div>
+
+        <div style="margin-top: 10px;">
+            <h4 style="color: #333; margin-bottom: 8px;">👤 Your Team Server</h4>
+            <select id="playerTeamServer" style="width: 100%; padding: 5px; border-radius: 5px; border: 2px solid #4169E1;">
+                <option value="user" selected>You Serve</option>
+                <option value="ai">AI Teammate Serves</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Game Mode Selection Modal -->
+    <div id="gameModeModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); display: flex; justify-content: center; align-items: center; z-index: 10000;">
+        <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);">
+            <h2 style="color: white; font-size: 36px; margin-bottom: 30px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">🏐 Choose Game Mode 🏐</h2>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <button onclick="startGame('tournament')" style="background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; border: none; padding: 20px 40px; font-size: 24px; font-weight: bold; border-radius: 15px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: transform 0.2s;">
+                    🏆 Tournament Mode
+                    <div style="font-size: 14px; margin-top: 5px; opacity: 0.8;">First to 25 points wins!</div>
+                </button>
+                <button onclick="startGame('infinite')" style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: #000; border: none; padding: 20px 40px; font-size: 24px; font-weight: bold; border-radius: 15px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: transform 0.2s;">
+                    ♾️ Infinite Mode
+                    <div style="font-size: 14px; margin-top: 5px; opacity: 0.8;">Play forever - no score limit!</div>
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Game Over Modal -->
@@ -965,9 +1088,11 @@
         const userPlayer = document.getElementById('userPlayer');
         const player2 = document.getElementById('player2');
         const player3 = document.getElementById('player3');
+        const player4 = document.getElementById('player4');
         const cpuPlayer = document.getElementById('cpuPlayer');
         const cpu2Player = document.getElementById('cpu2Player');
         const cpu3Player = document.getElementById('cpu3Player');
+        const cpu4Player = document.getElementById('cpu4Player');
         const powerMeter = document.getElementById('powerMeter');
         const powerBar = document.getElementById('powerBar');
 
@@ -982,35 +1107,88 @@
             teammateDifficulty: 'medium',
             opponentDifficulty: 'medium',
             touchCount: 0, // Number of touches on current side (max 3)
-            currentSide: null // 'player' or 'cpu' - tracks which side has possession
+            currentSide: null, // 'player' or 'cpu' - tracks which side has possession
+            playerTeamServer: 'user', // 'user' or 'ai' - who serves on player team
+            gameMode: null // 'tournament' or 'infinite'
         };
+
+        // Predict where ball will land using physics simulation
+        function predictBallLanding() {
+            // Simulate ball trajectory until it hits the ground
+            let simX = ballState.x;
+            let simY = ballState.y;
+            let simZ = ballState.z;
+            let simVx = ballState.vx;
+            let simVy = ballState.vy;
+            let simVz = ballState.vz;
+
+            const maxIterations = 200; // Prevent infinite loops
+            let iterations = 0;
+
+            // Simulate until ball hits ground
+            while (simY > 0 && iterations < maxIterations) {
+                // Apply velocity
+                simX += simVx;
+                simY += simVy;
+                simZ += simVz;
+
+                // Apply gravity
+                simVy -= ballState.gravity;
+
+                // Apply air drag
+                const speed = Math.sqrt(simVx * simVx + simVy * simVy + simVz * simVz);
+                const dragForce = ballState.airDrag * speed * speed;
+                if (speed > 0) {
+                    simVx *= (1 - dragForce / speed);
+                    simVy *= (1 - dragForce / speed);
+                    simVz *= (1 - dragForce / speed);
+                }
+
+                iterations++;
+            }
+
+            return {
+                x: simX,
+                z: simZ,
+                iterations: iterations,
+                willLand: iterations < maxIterations
+            };
+        }
 
         // Difficulty settings
         function getAISettings(difficulty, isOpponent = false) {
             const settings = {
                 easy: {
-                    speed: isOpponent ? 3 : 3,
-                    reactionDistance: 120,
-                    accuracy: 0.6,
-                    hitChance: 0.7
+                    speed: isOpponent ? 6 : 6,
+                    reactionDistance: 250,
+                    accuracy: 0.85,
+                    hitChance: 0.92,
+                    predictionFrames: 12,
+                    usePhysicsPrediction: false
                 },
                 medium: {
-                    speed: isOpponent ? 5 : 5,
-                    reactionDistance: 100,
-                    accuracy: 0.8,
-                    hitChance: 0.85
+                    speed: isOpponent ? 8 : 8,
+                    reactionDistance: 300,
+                    accuracy: 0.92,
+                    hitChance: 0.96,
+                    predictionFrames: 18,
+                    usePhysicsPrediction: true
                 },
                 hard: {
-                    speed: isOpponent ? 7 : 6,
-                    reactionDistance: 80,
-                    accuracy: 0.95,
-                    hitChance: 0.95
+                    speed: isOpponent ? 10 : 10,
+                    reactionDistance: 350,
+                    accuracy: 0.98,
+                    hitChance: 0.99,
+                    predictionFrames: 25,
+                    usePhysicsPrediction: true
                 },
                 impossible: {
-                    speed: 9,
-                    reactionDistance: 50,
+                    speed: 13,
+                    reactionDistance: 450,
                     accuracy: 1.0,
-                    hitChance: 1.0
+                    hitChance: 1.0,
+                    predictionFrames: 30,
+                    usePhysicsPrediction: true
                 }
             };
             return settings[difficulty] || settings.medium;
@@ -1040,7 +1218,7 @@
             y: 0, // height (jumping)
             z: 250, // depth position (300 = front, 200 = back)
             vx: 0,
-            speed: 8,
+            speed: 12, // Enhanced speed for user player
             jumping: false,
             jumpPower: 0,
             maxJumpPower: 25,
@@ -1049,7 +1227,8 @@
             stamina: 100, // Player stamina for jumps
             lastJumpTime: 0, // Cooldown for jumps
             jumpServing: false, // Is player performing jump serve?
-            jumpServePhase: 0 // 0=not serving, 1=jumping, 2=hitting
+            jumpServePhase: 0, // 0=not serving, 1=jumping, 2=hitting
+            isServingNow: false // Is currently serving (locked behind baseline)?
         };
 
         // Player 2 AI (teammate behind player 1)
@@ -1101,7 +1280,8 @@
             speed: 5,
             jumping: false,
             jumpPower: 0,
-            maxJumpPower: 20
+            maxJumpPower: 20,
+            isServingNow: false // Is currently serving (locked behind baseline)?
         };
 
         // CPU 3 state (opponent 3 - middle)
@@ -1111,6 +1291,32 @@
             z: 225,
             targetX: 775,
             targetZ: 225,
+            speed: 5,
+            jumping: false,
+            jumpPower: 0,
+            maxJumpPower: 20
+        };
+
+        // Player 4 AI (teammate - back-left position)
+        let player4State = {
+            x: 200,
+            y: 0,
+            z: 175, // further back
+            targetX: 200,
+            targetZ: 175,
+            speed: 5,
+            jumping: false,
+            jumpPower: 0,
+            maxJumpPower: 20
+        };
+
+        // CPU 4 state (opponent 4 - back-right position)
+        let cpu4State = {
+            x: 800,
+            y: 0,
+            z: 175,
+            targetX: 800,
+            targetZ: 175,
             speed: 5,
             jumping: false,
             jumpPower: 0,
@@ -1150,6 +1356,20 @@
             gameState.opponentDifficulty = e.target.value;
         });
 
+        // First serve change handler
+        document.getElementById('firstServe').addEventListener('change', (e) => {
+            gameState.serving = e.target.value;
+            resetBall();
+        });
+
+        // Player team server change handler
+        document.getElementById('playerTeamServer').addEventListener('change', (e) => {
+            gameState.playerTeamServer = e.target.value;
+            if (gameState.serving === 'player') {
+                resetBall();
+            }
+        });
+
         // Toggle controls panel
         function toggleControlsPanel() {
             const controls = document.getElementById('controls');
@@ -1175,13 +1395,48 @@
         }
 
         function resetBall() {
+            // Reset all serving flags
+            playerState.isServingNow = false;
+            player3State.isServingNow = false;
+
             if (gameState.serving === 'player') {
-                // Player serves from behind baseline (left side)
-                playerState.x = playerServeLineX;
-                playerState.z = 250;
-                ballState.x = playerState.x;
-                ballState.y = 80; // Height above ground for serve
-                ballState.z = playerState.z;
+                // Player team serves
+                if (gameState.playerTeamServer === 'user') {
+                    // User serves from behind baseline (left side)
+                    playerState.x = playerServeLineX;
+                    playerState.z = 250;
+                    playerState.isServingNow = true; // Lock user behind baseline
+                    ballState.x = playerState.x;
+                    ballState.y = 80; // Height above ground for serve
+                    ballState.z = playerState.z;
+                    console.log('🔵 PLAYER SERVE - Ball positioned at x:', ballState.x, 'netX:', netX, 'Ball is on LEFT side (player side)');
+                    showMessage('YOUR SERVE! (Go to baseline - press A)', 1500);
+                } else {
+                    // AI teammate (player3 - back player) serves from baseline
+                    // User player spawns at the net (front)
+                    playerState.x = netX - 120; // Spawn user at net
+                    playerState.z = 250;
+                    playerState.isServingNow = false; // User is free to move
+
+                    // AI server spawns at baseline
+                    player3State.x = playerServeLineX;
+                    player3State.z = 250;
+                    player3State.isServingNow = true; // Lock AI at baseline until serve
+
+                    ballState.x = player3State.x;
+                    ballState.y = 80;
+                    ballState.z = player3State.z;
+
+                    console.log('🔵 AI TEAMMATE SERVE - Ball at x:', ballState.x, 'User at net x:', playerState.x, 'AI server at baseline x:', player3State.x);
+                    showMessage('AI TEAMMATE SERVING...', 1500);
+
+                    // AI auto-serves after a delay
+                    setTimeout(() => {
+                        if (!gameState.ballInPlay && gameState.serving === 'player') {
+                            aiTeammateServe();
+                        }
+                    }, 1000);
+                }
             } else {
                 // CPU serves from behind baseline (right side)
                 cpuState.x = cpuServeLineX;
@@ -1189,6 +1444,8 @@
                 ballState.x = cpuState.x;
                 ballState.y = 80;
                 ballState.z = cpuState.z;
+                console.log('🔴 OPPONENT SERVE - Ball positioned at x:', ballState.x, 'netX:', netX, 'Ball is on RIGHT side (opponent side)');
+                showMessage('OPPONENT SERVE!', 1500);
             }
             ballState.vx = 0;
             ballState.vy = 0;
@@ -1203,7 +1460,6 @@
             gameState.currentSide = null;
 
             updateServing();
-            showMessage(gameState.serving === 'player' ? 'YOUR SERVE! (Go to baseline - press A)' : 'OPPONENT SERVE!', 1500);
         }
 
         function updateServing() {
@@ -1330,6 +1586,9 @@
             gameState.touchCount = 0;
             gameState.currentSide = 'player';
 
+            // Unlock player - they can now move forward
+            playerState.isServingNow = false;
+
             // Powerful jump serve - balanced power and control
             const power = 16;
             ballState.vx = power * 0.9; // Horizontal speed (14.4)
@@ -1359,6 +1618,9 @@
             gameState.touchCount = 0; // Serve doesn't count as a touch
             gameState.currentSide = 'player'; // Ball starts on player's side
 
+            // Unlock player - they can now move forward
+            playerState.isServingNow = false;
+
             // Serve: horizontal toward opponent with HIGH upward arc to clear net
             const speed = 12 + (power / 100) * 8; // Strong base speed
             ballState.vx = speed; // Move right toward opponent
@@ -1374,9 +1636,11 @@
             updatePlayer();
             updatePlayer2AI();
             updatePlayer3AI();
+            updatePlayer4AI();
             updateCPU();
             updateCPU2AI();
             updateCPU3AI();
+            updateCPU4AI();
             updateBall();
             checkCollisions();
             updatePositions();
@@ -1392,10 +1656,18 @@
 
         function updatePlayer() {
             // Move left/right (horizontal across screen)
-            // Allow movement beyond leftBoundary to reach serve line
-            if (keys['a'] && playerState.x > leftBoundary - 50) {
+            // If serving, restrict forward movement (can't go past baseline)
+            let minX = leftBoundary - 50;
+            let maxX = netX - 30;
+
+            if (playerState.isServingNow) {
+                // Locked behind baseline while serving
+                maxX = playerServeLineX + 5; // Can only move slightly past baseline
+            }
+
+            if (keys['a'] && playerState.x > minX) {
                 playerState.vx = -playerState.speed;
-            } else if (keys['d'] && playerState.x < netX - 30) {
+            } else if (keys['d'] && playerState.x < maxX) {
                 playerState.vx = playerState.speed;
             } else {
                 playerState.vx *= 0.8;
@@ -1446,19 +1718,43 @@
 
             // Teammate AI - stays toward back, better court coverage
             if (gameState.ballInPlay && ballState.x < netX - 50) {
-                // Ball on our side
+                // Ball on our side - predict where it will land
+                let predictedX, predictedZ;
+
+                if (aiSettings.usePhysicsPrediction && ballState.y > 10) {
+                    // Use physics-based prediction for accurate landing spot
+                    const landing = predictBallLanding();
+                    if (landing.willLand) {
+                        predictedX = landing.x;
+                        predictedZ = landing.z;
+                    } else {
+                        // Fallback to simple prediction
+                        predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                        predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                    }
+                } else {
+                    // Simple linear prediction
+                    predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                    predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                }
+
                 const distPlayerToBall = Math.sqrt(
                     Math.pow(ballState.x - playerState.x, 2) +
                     Math.pow(ballState.z - playerState.z, 2)
                 );
 
-                // Smart positioning: move to ball if player is far, otherwise maintain position
-                if (distPlayerToBall > aiSettings.reactionDistance && ballState.vy < 0) {
-                    // Ball is falling and player is far - go for it
-                    player2State.targetX = ballState.x - 30; // Anticipate ball movement
-                    player2State.targetZ = ballState.z;
+                const distP2ToBall = Math.sqrt(
+                    Math.pow(ballState.x - player2State.x, 2) +
+                    Math.pow(ballState.z - player2State.z, 2)
+                );
+
+                // Go for ball if user player is far AND ball is coming down
+                if (distPlayerToBall > aiSettings.reactionDistance * 0.5 && ballState.vy > -5) {
+                    // Ball is reachable - aggressively move to predicted position
+                    player2State.targetX = Math.max(leftBoundary, Math.min(netX - 30, predictedX));
+                    player2State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
                 } else {
-                    // Maintain back court position
+                    // Maintain back court position for coverage
                     player2State.targetX = netX - 180;
                     player2State.targetZ = 200;
                 }
@@ -1468,14 +1764,16 @@
                 player2State.targetZ = 200;
             }
 
-            // Move towards target with difficulty-based speed
+            // Move towards target with difficulty-based speed - faster diagonal movement
             const dx = player2State.targetX - player2State.x;
             const dz = player2State.targetZ - player2State.z;
-            if (Math.abs(dx) > 5) {
-                player2State.x += Math.sign(dx) * aiSettings.speed;
-            }
-            if (Math.abs(dz) > 5) {
-                player2State.z += Math.sign(dz) * aiSettings.speed * 0.8;
+            const distance = Math.sqrt(dx * dx + dz * dz);
+
+            if (distance > 5) {
+                const normalizedDx = dx / distance;
+                const normalizedDz = dz / distance;
+                player2State.x += normalizedDx * aiSettings.speed * 1.1;
+                player2State.z += normalizedDz * aiSettings.speed * 1.1;
             }
 
             // Jumping
@@ -1500,7 +1798,23 @@
 
             // Teammate AI - stays toward middle
             if (gameState.ballInPlay && ballState.x < netX - 50) {
-                // Ball on our side
+                // Ball on our side - predict trajectory with physics
+                let predictedX, predictedZ;
+
+                if (aiSettings.usePhysicsPrediction && ballState.y > 10) {
+                    const landing = predictBallLanding();
+                    if (landing.willLand) {
+                        predictedX = landing.x;
+                        predictedZ = landing.z;
+                    } else {
+                        predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                        predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                    }
+                } else {
+                    predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                    predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                }
+
                 const distPlayerToBall = Math.sqrt(
                     Math.pow(ballState.x - playerState.x, 2) +
                     Math.pow(ballState.z - playerState.z, 2)
@@ -1510,9 +1824,18 @@
                     Math.pow(ballState.z - player2State.z, 2)
                 );
 
-                if (distPlayerToBall > aiSettings.reactionDistance && distPlayer2ToBall > aiSettings.reactionDistance) {
-                    player3State.targetX = ballState.x;
-                    player3State.targetZ = ballState.z;
+                const distP3ToBall = Math.sqrt(
+                    Math.pow(ballState.x - player3State.x, 2) +
+                    Math.pow(ballState.z - player3State.z, 2)
+                );
+
+                // Go for ball if others are far and ball is descending
+                if (distPlayerToBall > aiSettings.reactionDistance * 0.4 &&
+                    distPlayer2ToBall > aiSettings.reactionDistance * 0.4 &&
+                    ballState.vy > -5) {
+                    // Aggressively go for predicted position
+                    player3State.targetX = Math.max(leftBoundary, Math.min(netX - 30, predictedX));
+                    player3State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
                 } else {
                     player3State.targetX = netX - 150;
                     player3State.targetZ = 225;
@@ -1522,14 +1845,19 @@
                 player3State.targetZ = 225;
             }
 
-            // Move towards target with difficulty-based speed
-            const dx = player3State.targetX - player3State.x;
-            const dz = player3State.targetZ - player3State.z;
-            if (Math.abs(dx) > 5) {
-                player3State.x += Math.sign(dx) * aiSettings.speed;
-            }
-            if (Math.abs(dz) > 5) {
-                player3State.z += Math.sign(dz) * aiSettings.speed * 0.8;
+            // Move towards target with difficulty-based speed - improved diagonal movement
+            // But if serving, stay locked behind baseline
+            if (!player3State.isServingNow) {
+                const dx = player3State.targetX - player3State.x;
+                const dz = player3State.targetZ - player3State.z;
+                const distance = Math.sqrt(dx * dx + dz * dz);
+
+                if (distance > 5) {
+                    const normalizedDx = dx / distance;
+                    const normalizedDz = dz / distance;
+                    player3State.x += normalizedDx * aiSettings.speed * 1.1;
+                    player3State.z += normalizedDz * aiSettings.speed * 1.1;
+                }
             }
 
             // Jumping
@@ -1545,8 +1873,90 @@
             }
 
             // Keep in bounds
-            player3State.x = Math.max(leftBoundary, Math.min(netX - 30, player3State.x));
+            if (player3State.isServingNow) {
+                // Locked behind baseline while serving
+                player3State.x = Math.max(leftBoundary, Math.min(playerServeLineX + 5, player3State.x));
+            } else {
+                player3State.x = Math.max(leftBoundary, Math.min(netX - 30, player3State.x));
+            }
             player3State.z = Math.max(backZ, Math.min(frontZ, player3State.z));
+        }
+
+        function updatePlayer4AI() {
+            const aiSettings = getAISettings(gameState.teammateDifficulty, false);
+
+            // Teammate AI - stays toward back-left
+            if (gameState.ballInPlay && ballState.x < netX - 50) {
+                // Ball on our side - predict trajectory using physics
+                let predictedX, predictedZ;
+
+                if (aiSettings.usePhysicsPrediction && ballState.y > 10) {
+                    const landing = predictBallLanding();
+                    if (landing.willLand) {
+                        predictedX = landing.x;
+                        predictedZ = landing.z;
+                    } else {
+                        predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                        predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                    }
+                } else {
+                    predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                    predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                }
+
+                const distPlayerToBall = Math.sqrt(
+                    Math.pow(ballState.x - playerState.x, 2) +
+                    Math.pow(ballState.z - playerState.z, 2)
+                );
+                const distPlayer2ToBall = Math.sqrt(
+                    Math.pow(ballState.x - player2State.x, 2) +
+                    Math.pow(ballState.z - player2State.z, 2)
+                );
+                const distPlayer3ToBall = Math.sqrt(
+                    Math.pow(ballState.x - player3State.x, 2) +
+                    Math.pow(ballState.z - player3State.z, 2)
+                );
+
+                if (distPlayerToBall > aiSettings.reactionDistance * 0.6 && distPlayer2ToBall > aiSettings.reactionDistance * 0.6 && distPlayer3ToBall > aiSettings.reactionDistance * 0.6) {
+                    // Aggressively go for predicted position
+                    player4State.targetX = Math.max(leftBoundary, Math.min(netX - 30, predictedX));
+                    player4State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
+                } else {
+                    player4State.targetX = netX - 200;
+                    player4State.targetZ = 175;
+                }
+            } else {
+                player4State.targetX = netX - 200;
+                player4State.targetZ = 175;
+            }
+
+            // Move towards target with normalized diagonal movement
+            const dx = player4State.targetX - player4State.x;
+            const dz = player4State.targetZ - player4State.z;
+            const distance = Math.sqrt(dx * dx + dz * dz);
+
+            if (distance > 5) {
+                const normalizedDx = dx / distance;
+                const normalizedDz = dz / distance;
+                player4State.x += normalizedDx * aiSettings.speed * 1.1;
+                player4State.z += normalizedDz * aiSettings.speed * 1.1;
+            }
+
+            // Jumping
+            if (player4State.jumping) {
+                player4State.y += player4State.jumpPower;
+                player4State.jumpPower -= 1.2;
+                if (player4State.y <= 0) {
+                    player4State.y = 0;
+                    player4State.jumping = false;
+                }
+            } else {
+                player4State.y = 0;
+            }
+
+            // Keep in bounds
+            player4State.x = Math.max(leftBoundary, Math.min(netX - 30, player4State.x));
+            player4State.z = Math.max(backZ, Math.min(frontZ, player4State.z));
         }
 
         function updateCPU() {
@@ -1554,18 +1964,25 @@
 
             // AI: Smart positioning and ball tracking
             if (gameState.ballInPlay && ballState.x > netX + 50) {
-                // Ball on CPU's side - predict where ball will land
-                if (ballState.vy < 0) {
-                    // Ball is falling - move to intercept
-                    const predictedX = ballState.x + ballState.vx * 10;
-                    const predictedZ = ballState.z + ballState.vz * 10;
-                    cpuState.targetX = Math.max(netX + 50, Math.min(rightBoundary, predictedX));
-                    cpuState.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
+                // Ball on CPU's side - use physics prediction
+                let predictedX, predictedZ;
+
+                if (aiSettings.usePhysicsPrediction && ballState.y > 10) {
+                    const landing = predictBallLanding();
+                    if (landing.willLand) {
+                        predictedX = landing.x;
+                        predictedZ = landing.z;
+                    } else {
+                        predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                        predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                    }
                 } else {
-                    // Ball rising - track current position
-                    cpuState.targetX = ballState.x;
-                    cpuState.targetZ = ballState.z;
+                    predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                    predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
                 }
+
+                cpuState.targetX = Math.max(netX + 30, Math.min(rightBoundary, predictedX));
+                cpuState.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
             } else if (gameState.serving === 'opponent') {
                 // Move to baseline for serving
                 cpuState.targetX = cpuServeLineX;
@@ -1576,14 +1993,16 @@
                 cpuState.targetZ = 250;
             }
 
-            // Move towards target with difficulty-based speed
+            // Move towards target with normalized diagonal movement
             const dx = cpuState.targetX - cpuState.x;
             const dz = cpuState.targetZ - cpuState.z;
-            if (Math.abs(dx) > 5) {
-                cpuState.x += Math.sign(dx) * aiSettings.speed;
-            }
-            if (Math.abs(dz) > 5) {
-                cpuState.z += Math.sign(dz) * aiSettings.speed * 0.8;
+            const distance = Math.sqrt(dx * dx + dz * dz);
+
+            if (distance > 5) {
+                const normalizedDx = dx / distance;
+                const normalizedDz = dz / distance;
+                cpuState.x += normalizedDx * aiSettings.speed * 1.1;
+                cpuState.z += normalizedDz * aiSettings.speed * 1.1;
             }
 
             // Jumping
@@ -1614,8 +2033,9 @@
                 }
             }
 
-            // CPU hit ball (only if they weren't the last hitter) - with accuracy check and net avoidance
-            if (gameState.ballInPlay && ballState.x > netX && gameState.lastHitter !== 'cpu') {
+            // CPU hit ball (only if they weren't the last hitter and ball is in air) - with accuracy check and net avoidance
+            if (gameState.ballInPlay && ballState.x > netX && ballState.y > 5 &&
+                gameState.lastHitter !== 'cpu' && gameState.lastHitter !== 'cpu2' && gameState.lastHitter !== 'cpu3' && gameState.lastHitter !== 'cpu4') {
                 const distToBall = Math.sqrt(
                     Math.pow(ballState.x - cpuState.x, 2) +
                     Math.pow(ballState.y - cpuState.y, 2) +
@@ -1641,14 +2061,33 @@
 
             // Second opponent AI - stays toward back
             if (gameState.ballInPlay && ballState.x > netX + 50) {
+                // Predict ball trajectory with physics
+                let predictedX, predictedZ;
+
+                if (aiSettings.usePhysicsPrediction && ballState.y > 10) {
+                    const landing = predictBallLanding();
+                    if (landing.willLand) {
+                        predictedX = landing.x;
+                        predictedZ = landing.z;
+                    } else {
+                        predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                        predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                    }
+                } else {
+                    predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                    predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                }
+
                 const distCPU1ToBall = Math.sqrt(
                     Math.pow(ballState.x - cpuState.x, 2) +
                     Math.pow(ballState.z - cpuState.z, 2)
                 );
 
-                if (distCPU1ToBall > aiSettings.reactionDistance) {
-                    cpu2State.targetX = ballState.x;
-                    cpu2State.targetZ = ballState.z;
+                // Go for ball if CPU1 is far and ball is descending
+                if (distCPU1ToBall > aiSettings.reactionDistance * 0.5 && ballState.vy > -5) {
+                    // Aggressively go for predicted position
+                    cpu2State.targetX = Math.max(netX + 30, Math.min(rightBoundary, predictedX));
+                    cpu2State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
                 } else {
                     cpu2State.targetX = netX + 180;
                     cpu2State.targetZ = 200;
@@ -1658,14 +2097,16 @@
                 cpu2State.targetZ = 200;
             }
 
-            // Move towards target with difficulty-based speed
+            // Move towards target with improved diagonal movement
             const dx = cpu2State.targetX - cpu2State.x;
             const dz = cpu2State.targetZ - cpu2State.z;
-            if (Math.abs(dx) > 5) {
-                cpu2State.x += Math.sign(dx) * aiSettings.speed;
-            }
-            if (Math.abs(dz) > 5) {
-                cpu2State.z += Math.sign(dz) * aiSettings.speed * 0.8;
+            const distance = Math.sqrt(dx * dx + dz * dz);
+
+            if (distance > 5) {
+                const normalizedDx = dx / distance;
+                const normalizedDz = dz / distance;
+                cpu2State.x += normalizedDx * aiSettings.speed * 1.1;
+                cpu2State.z += normalizedDz * aiSettings.speed * 1.1;
             }
 
             // Jumping
@@ -1684,8 +2125,8 @@
             cpu2State.x = Math.max(netX + 30, Math.min(rightBoundary, cpu2State.x));
             cpu2State.z = Math.max(backZ, Math.min(frontZ, cpu2State.z));
 
-            // CPU2 hit ball - with accuracy check and net avoidance
-            if (gameState.ballInPlay && ballState.x > netX) {
+            // CPU2 hit ball - with accuracy check and net avoidance (only if ball is in air)
+            if (gameState.ballInPlay && ballState.x > netX && ballState.y > 5) {
                 const distToBall = Math.sqrt(
                     Math.pow(ballState.x - cpu2State.x, 2) +
                     Math.pow(ballState.y - cpu2State.y, 2) +
@@ -1696,7 +2137,7 @@
                 const distFromNet = Math.abs(ballState.x - netX);
                 const safeToHit = distFromNet > 100 || ballState.y > 80;
 
-                if (distToBall < 70 && gameState.lastHitter !== 'cpu2' && Math.random() < aiSettings.hitChance && safeToHit) {
+                if (distToBall < 70 && gameState.lastHitter !== 'cpu' && gameState.lastHitter !== 'cpu2' && gameState.lastHitter !== 'cpu3' && gameState.lastHitter !== 'cpu4' && Math.random() < aiSettings.hitChance && safeToHit) {
                     if (ballState.y > 50 && !cpu2State.jumping) {
                         cpu2State.jumping = true;
                         cpu2State.jumpPower = cpu2State.maxJumpPower;
@@ -1711,6 +2152,23 @@
 
             // Third opponent AI - stays toward middle
             if (gameState.ballInPlay && ballState.x > netX + 50) {
+                // Predict ball trajectory with physics
+                let predictedX, predictedZ;
+
+                if (aiSettings.usePhysicsPrediction && ballState.y > 10) {
+                    const landing = predictBallLanding();
+                    if (landing.willLand) {
+                        predictedX = landing.x;
+                        predictedZ = landing.z;
+                    } else {
+                        predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                        predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                    }
+                } else {
+                    predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                    predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                }
+
                 const distCPU1ToBall = Math.sqrt(
                     Math.pow(ballState.x - cpuState.x, 2) +
                     Math.pow(ballState.z - cpuState.z, 2)
@@ -1720,9 +2178,13 @@
                     Math.pow(ballState.z - cpu2State.z, 2)
                 );
 
-                if (distCPU1ToBall > aiSettings.reactionDistance && distCPU2ToBall > aiSettings.reactionDistance) {
-                    cpu3State.targetX = ballState.x;
-                    cpu3State.targetZ = ballState.z;
+                // Go for ball if others are far and ball is descending
+                if (distCPU1ToBall > aiSettings.reactionDistance * 0.4 &&
+                    distCPU2ToBall > aiSettings.reactionDistance * 0.4 &&
+                    ballState.vy > -5) {
+                    // Aggressively go for predicted position
+                    cpu3State.targetX = Math.max(netX + 30, Math.min(rightBoundary, predictedX));
+                    cpu3State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
                 } else {
                     cpu3State.targetX = netX + 150;
                     cpu3State.targetZ = 225;
@@ -1732,14 +2194,16 @@
                 cpu3State.targetZ = 225;
             }
 
-            // Move towards target with difficulty-based speed
+            // Move towards target with improved diagonal movement
             const dx = cpu3State.targetX - cpu3State.x;
             const dz = cpu3State.targetZ - cpu3State.z;
-            if (Math.abs(dx) > 5) {
-                cpu3State.x += Math.sign(dx) * aiSettings.speed;
-            }
-            if (Math.abs(dz) > 5) {
-                cpu3State.z += Math.sign(dz) * aiSettings.speed * 0.8;
+            const distance = Math.sqrt(dx * dx + dz * dz);
+
+            if (distance > 5) {
+                const normalizedDx = dx / distance;
+                const normalizedDz = dz / distance;
+                cpu3State.x += normalizedDx * aiSettings.speed * 1.1;
+                cpu3State.z += normalizedDz * aiSettings.speed * 1.1;
             }
 
             // Jumping
@@ -1758,8 +2222,8 @@
             cpu3State.x = Math.max(netX + 30, Math.min(rightBoundary, cpu3State.x));
             cpu3State.z = Math.max(backZ, Math.min(frontZ, cpu3State.z));
 
-            // CPU3 hit ball - with accuracy check and net avoidance
-            if (gameState.ballInPlay && ballState.x > netX) {
+            // CPU3 hit ball - with accuracy check and net avoidance (only if ball is in air)
+            if (gameState.ballInPlay && ballState.x > netX && ballState.y > 5) {
                 const distToBall = Math.sqrt(
                     Math.pow(ballState.x - cpu3State.x, 2) +
                     Math.pow(ballState.y - cpu3State.y, 2) +
@@ -1770,13 +2234,169 @@
                 const distFromNet = Math.abs(ballState.x - netX);
                 const safeToHit = distFromNet > 100 || ballState.y > 80;
 
-                if (distToBall < 70 && gameState.lastHitter !== 'cpu3' && Math.random() < aiSettings.hitChance && safeToHit) {
+                if (distToBall < 70 && gameState.lastHitter !== 'cpu' && gameState.lastHitter !== 'cpu2' && gameState.lastHitter !== 'cpu3' && gameState.lastHitter !== 'cpu4' && Math.random() < aiSettings.hitChance && safeToHit) {
                     if (ballState.y > 50 && !cpu3State.jumping) {
                         cpu3State.jumping = true;
                         cpu3State.jumpPower = cpu3State.maxJumpPower;
                     }
                     hitBall('cpu3');
                 }
+            }
+        }
+
+        function updateCPU4AI() {
+            const aiSettings = getAISettings(gameState.opponentDifficulty, true);
+
+            // Fourth opponent AI - stays toward back-right
+            if (gameState.ballInPlay && ballState.x > netX + 50) {
+                // Predict ball trajectory using physics
+                let predictedX, predictedZ;
+
+                if (aiSettings.usePhysicsPrediction && ballState.y > 10) {
+                    const landing = predictBallLanding();
+                    if (landing.willLand) {
+                        predictedX = landing.x;
+                        predictedZ = landing.z;
+                    } else {
+                        predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                        predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                    }
+                } else {
+                    predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                    predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                }
+
+                const distCPU1ToBall = Math.sqrt(
+                    Math.pow(ballState.x - cpuState.x, 2) +
+                    Math.pow(ballState.z - cpuState.z, 2)
+                );
+                const distCPU2ToBall = Math.sqrt(
+                    Math.pow(ballState.x - cpu2State.x, 2) +
+                    Math.pow(ballState.z - cpu2State.z, 2)
+                );
+                const distCPU3ToBall = Math.sqrt(
+                    Math.pow(ballState.x - cpu3State.x, 2) +
+                    Math.pow(ballState.z - cpu3State.z, 2)
+                );
+
+                if (distCPU1ToBall > aiSettings.reactionDistance * 0.6 && distCPU2ToBall > aiSettings.reactionDistance * 0.6 && distCPU3ToBall > aiSettings.reactionDistance * 0.6) {
+                    // Aggressively go for predicted position
+                    cpu4State.targetX = Math.max(netX + 30, Math.min(rightBoundary, predictedX));
+                    cpu4State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
+                } else {
+                    cpu4State.targetX = netX + 200;
+                    cpu4State.targetZ = 175;
+                }
+            } else {
+                cpu4State.targetX = netX + 200;
+                cpu4State.targetZ = 175;
+            }
+
+            // Move towards target with normalized diagonal movement
+            const dx = cpu4State.targetX - cpu4State.x;
+            const dz = cpu4State.targetZ - cpu4State.z;
+            const distance = Math.sqrt(dx * dx + dz * dz);
+
+            if (distance > 5) {
+                const normalizedDx = dx / distance;
+                const normalizedDz = dz / distance;
+                cpu4State.x += normalizedDx * aiSettings.speed * 1.1;
+                cpu4State.z += normalizedDz * aiSettings.speed * 1.1;
+            }
+
+            // Jumping
+            if (cpu4State.jumping) {
+                cpu4State.y += cpu4State.jumpPower;
+                cpu4State.jumpPower -= 1.2;
+                if (cpu4State.y <= 0) {
+                    cpu4State.y = 0;
+                    cpu4State.jumping = false;
+                }
+            } else {
+                cpu4State.y = 0;
+            }
+
+            // Keep in bounds
+            cpu4State.x = Math.max(netX + 30, Math.min(rightBoundary, cpu4State.x));
+            cpu4State.z = Math.max(backZ, Math.min(frontZ, cpu4State.z));
+
+            // CPU4 hit ball - with accuracy check and net avoidance (only if ball is in air)
+            if (gameState.ballInPlay && ballState.x > netX && ballState.y > 5) {
+                const distToBall = Math.sqrt(
+                    Math.pow(ballState.x - cpu4State.x, 2) +
+                    Math.pow(ballState.y - cpu4State.y, 2) +
+                    Math.pow(ballState.z - cpu4State.z, 2)
+                );
+
+                // Check if ball is not too close to net (avoid hitting into net)
+                const distFromNet = Math.abs(ballState.x - netX);
+                const safeToHit = distFromNet > 100 || ballState.y > 80;
+
+                if (distToBall < 70 && gameState.lastHitter !== 'cpu' && gameState.lastHitter !== 'cpu2' && gameState.lastHitter !== 'cpu3' && gameState.lastHitter !== 'cpu4' && Math.random() < aiSettings.hitChance && safeToHit) {
+                    if (ballState.y > 50 && !cpu4State.jumping) {
+                        cpu4State.jumping = true;
+                        cpu4State.jumpPower = cpu4State.maxJumpPower;
+                    }
+                    hitBall('cpu4');
+                }
+            }
+        }
+
+        function aiTeammateServe() {
+            gameState.ballInPlay = true;
+            gameState.lastHitBy = 'player';
+            ballState.x = player3State.x;
+            ballState.y = 80;
+            ballState.z = player3State.z;
+            gameState.touchCount = 0;
+            gameState.currentSide = 'player';
+
+            // Unlock AI server - they can now move forward
+            player3State.isServingNow = false;
+
+            // AI teammate serves with varying strength based on difficulty
+            const aiSettings = getAISettings(gameState.teammateDifficulty, false);
+
+            // 50/50 chance for underhand or overhand serve
+            const serveType = Math.random() < 0.5 ? 'underhand' : 'overhand';
+            let speed, arcMultiplier;
+
+            if (serveType === 'underhand') {
+                // Underhand serve - higher arc, slower speed, safer
+                speed = 10 + aiSettings.accuracy * 1.5;
+                arcMultiplier = 2.0; // High arc
+                showMessage('AI TEAMMATE: UNDERHAND SERVE! 🤚', 1200);
+            } else {
+                // Overhand serve - lower arc, faster speed, more aggressive
+                speed = 13 + aiSettings.accuracy * 3;
+                arcMultiplier = 1.5; // Lower, faster arc
+                showMessage('AI TEAMMATE: OVERHAND SERVE! ✋', 1200);
+            }
+
+            // 80% accuracy - sometimes the serve goes out or into net
+            const serveAccuracy = Math.random();
+
+            if (serveAccuracy < 0.8) {
+                // 80% - Good serve
+                ballState.vx = speed; // Move right toward opponent
+                ballState.vy = speed * arcMultiplier;
+                ballState.vz = (Math.random() - 0.5) * 2;
+                ballState.rotationSpeed = speed * 0.6;
+            } else {
+                // 20% - Bad serve
+                const badServeType = Math.random();
+                if (badServeType < 0.5) {
+                    // Too short - into net
+                    ballState.vx = speed * 0.5;
+                    ballState.vy = speed * arcMultiplier * 0.6;
+                    ballState.vz = (Math.random() - 0.5) * 2;
+                } else {
+                    // Too long - out of bounds
+                    ballState.vx = speed * 1.4;
+                    ballState.vy = speed * arcMultiplier * 0.9;
+                    ballState.vz = (Math.random() - 0.5) * 3;
+                }
+                ballState.rotationSpeed = speed * 0.6;
             }
         }
 
@@ -1789,13 +2409,51 @@
             gameState.touchCount = 0; // Serve doesn't count as a touch
             gameState.currentSide = 'cpu'; // Ball starts on CPU's side
 
-            // CPU serves toward player's side with HIGH arc to clear net
+            // CPU serves with varying strength based on difficulty and randomness
             const aiSettings = getAISettings(gameState.opponentDifficulty, true);
-            const speed = 12 + aiSettings.accuracy * 3; // Varies with difficulty
-            ballState.vx = -speed; // Move left toward player
-            ballState.vy = speed * 1.8; // Much higher upward arc to clear net
-            ballState.vz = (Math.random() - 0.5) * 1.5; // Slight depth variation
-            ballState.rotationSpeed = -8; // Add topspin
+            const randomFactor = Math.random();
+
+            // Determine serve strength: soft (just over net) or hard (powerful)
+            let speed, arcMultiplier;
+            if (randomFactor < 0.3) {
+                // 30% chance: Soft serve (just clears net)
+                speed = 10 + aiSettings.accuracy * 1;
+                arcMultiplier = 1.9; // Higher arc for soft placement
+            } else if (randomFactor < 0.7) {
+                // 40% chance: Medium serve
+                speed = 12 + aiSettings.accuracy * 2;
+                arcMultiplier = 1.7;
+            } else {
+                // 30% chance: Hard serve (powerful)
+                speed = 14 + aiSettings.accuracy * 4;
+                arcMultiplier = 1.5; // Lower, faster arc
+            }
+
+            // 80% accuracy - sometimes the serve goes out or into net
+            const serveAccuracy = Math.random();
+
+            if (serveAccuracy < 0.8) {
+                // 80% - Good serve
+                ballState.vx = -speed; // Move left toward player
+                ballState.vy = speed * arcMultiplier; // Arc varies with strength
+                ballState.vz = (Math.random() - 0.5) * 2; // Random depth variation
+                ballState.rotationSpeed = -speed * 0.6; // Spin based on power
+            } else {
+                // 20% - Bad serve (either too short or too long)
+                const badServeType = Math.random();
+                if (badServeType < 0.5) {
+                    // Too short - into net
+                    ballState.vx = -speed * 0.5; // Slower
+                    ballState.vy = speed * arcMultiplier * 0.6; // Lower arc
+                    ballState.vz = (Math.random() - 0.5) * 2;
+                } else {
+                    // Too long - out of bounds
+                    ballState.vx = -speed * 1.4; // Too fast
+                    ballState.vy = speed * arcMultiplier * 0.9; // Still decent arc
+                    ballState.vz = (Math.random() - 0.5) * 3; // More depth variation
+                }
+                ballState.rotationSpeed = -speed * 0.6;
+            }
         }
 
         function updateBall() {
@@ -1813,7 +2471,7 @@
                         ballState.y = 75;
                         ballState.vy = 0;
                     }
-                } else if (playerState.serving === 'player') {
+                } else if (gameState.serving === 'player') {
                     ballState.x = playerState.x;
                     ballState.y = 80;
                     ballState.z = playerState.z;
@@ -1862,7 +2520,7 @@
             }
 
             // Ground collision (Y = 0 is ground level)
-            if (ballState.y <= 0) {
+            if (ballState.y <= 0 && gameState.ballInPlay) {
                 ballState.y = 0;
 
                 // First bounce - score it but let ball keep bouncing
@@ -1888,7 +2546,7 @@
             }
 
             // Net collision - team that hit ball into net loses point and serve
-            if (Math.abs(ballState.x - netX) < 20 && ballState.y < netHeight) {
+            if (gameState.ballInPlay && Math.abs(ballState.x - netX) < 20 && ballState.y < netHeight) {
                 // Ball hit the net - team that hit it last loses
                 if (!ballState.scored) {
                     ballState.scored = true;
@@ -1897,12 +2555,14 @@
                     if (gameState.lastHitBy === 'player') {
                         // Player team hit into net - opponent scores and gets serve
                         gameState.opponentScore++;
+                        console.log('🔴 NET COLLISION! Player hit into net. New score:', gameState.playerScore, '-', gameState.opponentScore);
                         gameState.serving = 'opponent';
                         showMessage('NET! OPPONENT SCORES! 🏐');
                         makeCrowdCheer('right');
                     } else {
                         // Opponent team hit into net - player scores and gets serve
                         gameState.playerScore++;
+                        console.log('🔵 NET COLLISION! Opponent hit into net. New score:', gameState.playerScore, '-', gameState.opponentScore);
                         gameState.serving = 'player';
                         showMessage('NET! YOU SCORE! 🏐');
                         makeCrowdCheer('left');
@@ -1910,16 +2570,7 @@
 
                     updateScore();
 
-                    // Check for game over
-                    if (gameState.playerScore >= 25 || gameState.opponentScore >= 25) {
-                        const diff = Math.abs(gameState.playerScore - gameState.opponentScore);
-                        if (diff >= 2) {
-                            setTimeout(() => {
-                                endGame();
-                            }, 1000);
-                            return;
-                        }
-                    }
+                    // Infinite play mode - no game over
 
                     // Reset ball immediately (no delay)
                     resetBall();
@@ -1934,10 +2585,13 @@
         function checkCollisions() {
             if (!gameState.ballInPlay) return;
 
+            // Don't allow hitting if ball has already scored (is on ground after bounce)
+            if (ballState.scored) return;
+
             const hitRange = 70;
 
-            // Player hitting ball (only if they weren't the last hitter)
-            if (ballState.x < netX && gameState.lastHitter !== 'player') {
+            // Player hitting ball (only if they weren't the last hitter and ball is in air)
+            if (ballState.x < netX && ballState.y > 5 && gameState.lastHitter !== 'player' && gameState.lastHitter !== 'player2' && gameState.lastHitter !== 'player3' && gameState.lastHitter !== 'player4') {
                 const playerDist = Math.sqrt(
                     Math.pow(ballState.x - playerState.x, 2) +
                     Math.pow(ballState.y - playerState.y, 2) +
@@ -1955,8 +2609,8 @@
                 }
             }
 
-            // Player 2 (teammate AI) hitting ball - avoid hitting when too close to net
-            if (ballState.x < netX && gameState.lastHitter !== 'player2') {
+            // Player 2 (teammate AI) hitting ball - avoid hitting when too close to net or on ground
+            if (ballState.x < netX && ballState.y > 5 && gameState.lastHitter !== 'player' && gameState.lastHitter !== 'player2' && gameState.lastHitter !== 'player3' && gameState.lastHitter !== 'player4') {
                 const player2Dist = Math.sqrt(
                     Math.pow(ballState.x - player2State.x, 2) +
                     Math.pow(ballState.y - player2State.y, 2) +
@@ -1976,8 +2630,8 @@
                 }
             }
 
-            // Player 3 (teammate AI) hitting ball - avoid hitting when too close to net
-            if (ballState.x < netX && gameState.lastHitter !== 'player3') {
+            // Player 3 (teammate AI) hitting ball - avoid hitting when too close to net or on ground
+            if (ballState.x < netX && ballState.y > 5 && gameState.lastHitter !== 'player' && gameState.lastHitter !== 'player2' && gameState.lastHitter !== 'player3' && gameState.lastHitter !== 'player4') {
                 const player3Dist = Math.sqrt(
                     Math.pow(ballState.x - player3State.x, 2) +
                     Math.pow(ballState.y - player3State.y, 2) +
@@ -1994,6 +2648,27 @@
                         player3State.jumpPower = player3State.maxJumpPower;
                     }
                     hitBall('player3');
+                }
+            }
+
+            // Player 4 (teammate AI) hitting ball - avoid hitting when too close to net or on ground
+            if (ballState.x < netX && ballState.y > 5 && gameState.lastHitter !== 'player' && gameState.lastHitter !== 'player2' && gameState.lastHitter !== 'player3' && gameState.lastHitter !== 'player4') {
+                const player4Dist = Math.sqrt(
+                    Math.pow(ballState.x - player4State.x, 2) +
+                    Math.pow(ballState.y - player4State.y, 2) +
+                    Math.pow(ballState.z - player4State.z, 2)
+                );
+
+                // Check if ball is not too close to net (avoid hitting into net)
+                const distFromNet = Math.abs(ballState.x - netX);
+                const safeToHit = distFromNet > 100 || ballState.y > 80;
+
+                if (player4Dist < 70 && safeToHit) {
+                    if (ballState.y > 50 && !player4State.jumping) {
+                        player4State.jumping = true;
+                        player4State.jumpPower = player4State.maxJumpPower;
+                    }
+                    hitBall('player4');
                 }
             }
         }
@@ -2014,17 +2689,19 @@
 
         function hitBall(hitter) {
             // Check 3-touch limit
-            const hitterTeam = (hitter === 'player' || hitter === 'player2' || hitter === 'player3') ? 'player' : 'cpu';
+            const hitterTeam = (hitter === 'player' || hitter === 'player2' || hitter === 'player3' || hitter === 'player4') ? 'player' : 'cpu';
 
             // If ball is on this side and we've hit 3 times already, violation!
             if (gameState.currentSide === hitterTeam && gameState.touchCount >= 3) {
                 // Too many touches - opponent scores
                 if (hitterTeam === 'player') {
                     gameState.opponentScore++;
+                    console.log('🔴 4 TOUCHES VIOLATION by player! New score:', gameState.playerScore, '-', gameState.opponentScore);
                     gameState.serving = 'opponent';
                     showMessage('4 TOUCHES! OPPONENT SCORES! ⚠️', 2000);
                 } else {
                     gameState.playerScore++;
+                    console.log('🔵 4 TOUCHES VIOLATION by opponent! New score:', gameState.playerScore, '-', gameState.opponentScore);
                     gameState.serving = 'player';
                     showMessage('4 TOUCHES! YOU SCORE! ⚠️', 2000);
                 }
@@ -2043,18 +2720,20 @@
                 gameState.touchCount = 1;
             }
 
-            if (hitter === 'player' || hitter === 'player2' || hitter === 'player3') {
+            if (hitter === 'player' || hitter === 'player2' || hitter === 'player3' || hitter === 'player4') {
                 // Use player's chosen hit type
                 const hitType = playerState.hitType || 'auto';
 
                 if (hitType === 'spike') {
                     // Spike - hard hit toward opponent with topspin
-                    const power = 12;
+                    // User player gets enhanced spike power
+                    const power = (hitter === 'player') ? 16 : 12;
+                    const downwardForce = (hitter === 'player') ? -8 : 0; // User gets strong downward spike
                     ballState.vx = power; // Right toward opponent
-                    ballState.vy = power * 0.4; // Small arc
+                    ballState.vy = power * 0.4 + downwardForce; // Small arc, with downward force for user
                     ballState.vz = (Math.random() - 0.5) * 2;
                     ballState.rotationSpeed = 15; // Fast forward spin
-                    showMessage('SPIKE! 🔥', 800);
+                    showMessage((hitter === 'player') ? 'POWER SPIKE! 💥' : 'SPIKE! 🔥', 800);
                 } else if (hitType === 'bump') {
                     // Bump (Q key) - high defensive arc with minimal spin
                     const power = 10;
@@ -2073,11 +2752,24 @@
                     showMessage('VOLLEY! 🤲', 800);
                 } else {
                     // Auto hit for AI teammates - ensure high arc to clear net
-                    const power = 10;
-                    if (hitter === 'player2' || hitter === 'player3') {
-                        // AI teammates use higher arcs to avoid net
-                        ballState.vx = power * 0.8;
-                        ballState.vy = power * 1.0; // Higher arc than player
+                    const power = 12;
+                    if (hitter === 'player2' || hitter === 'player3' || hitter === 'player4') {
+                        // AI teammates use smart hitting based on distance from net
+                        const distFromNet = Math.abs(ballState.x - netX);
+
+                        if (distFromNet < 150) {
+                            // Close to net - use very high arc
+                            ballState.vx = power * 0.7;
+                            ballState.vy = power * 1.5; // Extra high arc
+                        } else if (distFromNet < 250) {
+                            // Medium distance - balanced hit
+                            ballState.vx = power * 0.9;
+                            ballState.vy = power * 1.2; // High arc
+                        } else {
+                            // Far from net - more power needed
+                            ballState.vx = power * 1.0;
+                            ballState.vy = power * 1.3; // High arc with more forward power
+                        }
                         ballState.vz = (Math.random() - 0.5) * 1.5;
                     } else {
                         // Player manual hit
@@ -2096,20 +2788,32 @@
 
                 // Reset scored flag when ball is hit
                 ballState.scored = false;
-            } else if (hitter === 'cpu' || hitter === 'cpu2' || hitter === 'cpu3') {
+            } else if (hitter === 'cpu' || hitter === 'cpu2' || hitter === 'cpu3' || hitter === 'cpu4') {
                 // CPU hit toward player with HIGH arc to avoid net
                 const aiSettings = getAISettings(gameState.opponentDifficulty, true);
-                const power = 10;
+                const power = 12;
 
-                // Calculate distance to net to determine arc height
+                // Calculate distance to net to determine arc height - improved logic
                 const distToNet = Math.abs(ballState.x - netX);
-                const isCloseToNet = distToNet < 150;
 
-                // Use higher arc when close to net to avoid hitting it
-                const arcMultiplier = isCloseToNet ? 1.4 : 1.0;
+                let horizontalPower, verticalPower;
 
-                ballState.vx = -power * 0.8 * aiSettings.accuracy; // Left toward player
-                ballState.vy = power * arcMultiplier; // Higher arc to clear net
+                if (distToNet < 150) {
+                    // Very close to net - use extra high arc and less horizontal speed
+                    horizontalPower = power * 0.6;
+                    verticalPower = power * 1.6;
+                } else if (distToNet < 250) {
+                    // Medium distance from net - balanced approach
+                    horizontalPower = power * 0.8;
+                    verticalPower = power * 1.3;
+                } else {
+                    // Far from net - need more power to reach
+                    horizontalPower = power * 1.0;
+                    verticalPower = power * 1.4;
+                }
+
+                ballState.vx = -horizontalPower * aiSettings.accuracy; // Left toward player
+                ballState.vy = verticalPower; // Higher arc to clear net
                 ballState.vz = (Math.random() - 0.5) * 1.5;
 
                 // Track who hit the ball (team and individual)
@@ -2155,11 +2859,13 @@
             // Award point
             if (scoringTeam === 'player') {
                 gameState.playerScore++;
+                console.log('🔵 PLAYER SCORED! Reason:', reason, 'New score:', gameState.playerScore, '-', gameState.opponentScore);
                 gameState.serving = 'player';
                 showMessage(reason);
                 makeCrowdCheer('left');
             } else {
                 gameState.opponentScore++;
+                console.log('🔴 OPPONENT SCORED! Reason:', reason, 'New score:', gameState.playerScore, '-', gameState.opponentScore);
                 gameState.serving = 'opponent';
                 showMessage(reason);
                 makeCrowdCheer('right');
@@ -2167,17 +2873,16 @@
 
             updateScore();
 
-            // Check for game over (first to 25, win by 2)
-            if (gameState.playerScore >= 25 || gameState.opponentScore >= 25) {
-                const diff = Math.abs(gameState.playerScore - gameState.opponentScore);
-                if (diff >= 2) {
-                    // Wait a bit longer before showing game over to let ball finish bouncing
+            // Check for tournament mode win condition
+            if (gameState.gameMode === 'tournament') {
+                if (gameState.playerScore >= 25 || gameState.opponentScore >= 25) {
                     setTimeout(() => {
                         endGame();
                     }, 2000);
                     return;
                 }
             }
+            // Infinite mode - no score limit, game continues indefinitely
 
             // Reset ball after it finishes bouncing (wait for visual effect)
             setTimeout(() => {
@@ -2249,6 +2954,14 @@
             cpu3Player.style.left = cpu3State.x + 'px';
             cpu3Player.style.bottom = (courtHeight * 0.3 + cpu3State.y) + 'px';
             cpu3Player.style.zIndex = Math.floor(cpu3State.z);
+
+            player4.style.left = player4State.x + 'px';
+            player4.style.bottom = (courtHeight * 0.3 + player4State.y) + 'px';
+            player4.style.zIndex = Math.floor(player4State.z);
+
+            cpu4Player.style.left = cpu4State.x + 'px';
+            cpu4Player.style.bottom = (courtHeight * 0.3 + cpu4State.y) + 'px';
+            cpu4Player.style.zIndex = Math.floor(cpu4State.z);
         }
 
         function endGame() {
@@ -2274,7 +2987,17 @@
             modal.classList.add('show');
         }
 
+        function startGame(mode) {
+            gameState.gameMode = mode;
+            document.getElementById('gameModeModal').style.display = 'none';
+            resetBall();
+        }
+
         function restartGame() {
+            // Show game mode selection again
+            document.getElementById('gameOverModal').classList.remove('show');
+            document.getElementById('gameModeModal').style.display = 'flex';
+
             gameState = {
                 playerScore: 0,
                 opponentScore: 0,
@@ -2286,7 +3009,9 @@
                 teammateDifficulty: gameState.teammateDifficulty || 'medium',
                 opponentDifficulty: gameState.opponentDifficulty || 'medium',
                 touchCount: 0,
-                currentSide: null
+                currentSide: null,
+                playerTeamServer: gameState.playerTeamServer || 'user',
+                gameMode: null
             };
 
             playerState.x = 200;
@@ -2307,12 +3032,16 @@
             cpu3State.x = 775;
             cpu3State.y = 0;
             cpu3State.z = 225;
+            player4State.x = 200;
+            player4State.y = 0;
+            player4State.z = 175;
+            cpu4State.x = 800;
+            cpu4State.y = 0;
+            cpu4State.z = 175;
 
             updateScore();
-            resetBall();
-
-            document.getElementById('gameOverModal').classList.remove('show');
-            requestAnimationFrame(gameLoop);
+            // Don't reset ball yet - wait for mode selection
+            // Game Over modal already hidden above, mode selection modal now showing
         }
 
         // Start game
