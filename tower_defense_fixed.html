@@ -14,19 +14,30 @@
         body {
             font-family: 'Inter', sans-serif;
             overflow: hidden;
-            background: #1a1a1a;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .game-container {
             width: 100vw;
             height: 100vh;
             position: relative;
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 70%);
         }
 
         .game-canvas {
             width: 100%;
             height: 100%;
             cursor: crosshair;
+            background: rgba(0, 0, 0, 0.1);
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.3);
         }
 
         .ui-overlay {
@@ -42,18 +53,30 @@
         }
 
         .resource-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
             padding: 1rem 1.5rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             gap: 0.75rem;
             font-weight: 600;
             color: #2d3748;
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
             pointer-events: auto;
+            transition: all 0.3s ease;
+            animation: cardFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .resource-card:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25), 0 10px 20px rgba(0, 0, 0, 0.15);
         }
 
         .resource-icon {
@@ -69,6 +92,14 @@
             font-size: 1.1rem;
         }
 
+        .level-selector {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            pointer-events: auto;
+            z-index: 1000;
+        }
+
         .level-selector select {
             background: rgba(255, 255, 255, 0.95);
             border: 2px solid rgba(102, 126, 234, 0.3);
@@ -78,6 +109,7 @@
             color: #2d3748;
             cursor: pointer;
             outline: none;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
         }
 
         .tower-selector {
@@ -86,32 +118,225 @@
             left: 20px;
             display: flex;
             gap: 1rem;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 1rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 1.25rem;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            animation: cardFloat 4s ease-in-out infinite;
         }
 
         .tower-option {
-            background: linear-gradient(145deg, #f8fafc 0%, #e2e8f0 100%);
-            border: 2px solid #cbd5e0;
-            border-radius: 15px;
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            border: 3px solid transparent;
+            border-radius: 18px;
             padding: 1rem;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: center;
-            min-width: 80px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            min-width: 85px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.12);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tower-option::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.15) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .tower-option:hover::before {
+            opacity: 1;
+        }
+
+        .tower-option:hover {
+            transform: translateY(-8px) scale(1.08);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.25);
+            border-color: #667eea;
         }
 
         .tower-option.selected {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #8b5cf6 100%);
+            border-color: #8b5cf6;
             color: white;
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            transform: translateY(-5px) scale(1.08);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4), 0 0 20px rgba(139, 92, 246, 0.3);
+            animation: selectedPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes selectedPulse {
+            0%, 100% { box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4), 0 0 20px rgba(139, 92, 246, 0.3); }
+            50% { box-shadow: 0 15px 35px rgba(102, 126, 234, 0.5), 0 0 30px rgba(139, 92, 246, 0.5); }
+        }
+
+        @keyframes magicPulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.3);
+                opacity: 0.8;
+            }
+        }
+
+        /* Atmospheric Particles */
+        .particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.8), transparent);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            animation: float 15s infinite ease-in-out;
+            opacity: 0.6;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0) scale(1);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(50px) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        /* Evolution Choice Modal */
+        .evolution-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .evolution-modal.show {
+            display: flex;
+        }
+
+        .evolution-content {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+            border-radius: 25px;
+            padding: 2.5rem;
+            max-width: 700px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 100px rgba(102, 126, 234, 0.3);
+            border: 3px solid rgba(102, 126, 234, 0.5);
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .evolution-title {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #667eea, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .evolution-subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .evolution-choices {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .evolution-choice {
+            flex: 1;
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border: 3px solid transparent;
+            border-radius: 20px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .evolution-choice::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(139, 92, 246, 0.1));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .evolution-choice:hover::before {
+            opacity: 1;
+        }
+
+        .evolution-choice:hover {
+            transform: translateY(-10px) scale(1.05);
+            border-color: #667eea;
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3), 0 0 30px rgba(139, 92, 246, 0.2);
+        }
+
+        .evolution-choice-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 0.75rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .evolution-choice-desc {
+            font-size: 1rem;
+            color: #64748b;
+            position: relative;
+            z-index: 1;
         }
 
         .tower-emoji {
@@ -176,10 +401,444 @@
             background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
         }
 
-        .control-panel {
+        .upgrade-button {
+            position: absolute;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: 2px solid #fff;
+            border-radius: 12px;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 150;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+            transition: all 0.3s ease;
+            pointer-events: auto;
+        }
+
+        .upgrade-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.6);
+            background: linear-gradient(135deg, #2980b9 0%, #21618c 100%);
+        }
+
+        .upgrade-button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 2px 8px rgba(149, 165, 166, 0.3);
+        }
+
+        .retarget-button {
+            position: absolute;
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            border: 2px solid #fff;
+            border-radius: 12px;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 150;
+            box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4);
+            transition: all 0.3s ease;
+            pointer-events: auto;
+        }
+
+        .retarget-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(243, 156, 18, 0.6);
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+        }
+
+        .retarget-button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 2px 8px rgba(149, 165, 166, 0.3);
+        }
+
+        .tower-level-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            z-index: 200;
+            box-shadow: 0 2px 8px rgba(243, 156, 18, 0.5);
+        }
+
+        .tower-level-badge.max-level {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            box-shadow: 0 2px 8px rgba(155, 89, 182, 0.5), 0 0 15px rgba(155, 89, 182, 0.3);
+        }
+
+        .artillery-target-marker {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+            z-index: 95;
+            animation: targetPulse 1.5s ease-in-out infinite;
+        }
+
+        .artillery-target-crosshair {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid #e74c3c;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.6), inset 0 0 10px rgba(231, 76, 60, 0.3);
+        }
+
+        .artillery-target-crosshair::before,
+        .artillery-target-crosshair::after {
+            content: '';
+            position: absolute;
+            background: #e74c3c;
+            box-shadow: 0 0 5px rgba(231, 76, 60, 0.8);
+        }
+
+        .artillery-target-crosshair::before {
+            width: 3px;
+            height: 60%;
+            left: 50%;
+            top: 20%;
+            transform: translateX(-50%);
+        }
+
+        .artillery-target-crosshair::after {
+            height: 3px;
+            width: 60%;
+            top: 50%;
+            left: 20%;
+            transform: translateY(-50%);
+        }
+
+        @keyframes targetPulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+        }
+
+        .artillery-placement-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(231, 76, 60, 0.95);
+            color: white;
+            padding: 1.5rem 2.5rem;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            z-index: 2000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            pointer-events: none;
+            animation: fadeInBounce 0.3s ease-out;
+        }
+
+        @keyframes fadeInBounce {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -60%) scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .back-button {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(128, 90, 213, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            z-index: 2001;
+            box-shadow: 0 4px 15px rgba(128, 90, 213, 0.4);
+            text-decoration: none;
+            display: inline-block;
+            pointer-events: auto;
+        }
+
+        .back-button:hover {
+            background: rgba(107, 70, 193, 0.95);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(128, 90, 213, 0.6);
+        }
+
+        .soldier-selector {
             position: absolute;
             bottom: 20px;
-            right: 20px;
+            right: 200px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: center;
+            max-height: 60vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .soldier-selector::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .soldier-selector::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .soldier-selector::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            border-radius: 10px;
+        }
+
+        .soldier-selector.collapsed {
+            max-height: 60px;
+            overflow: hidden;
+        }
+
+        .soldier-selector.collapsed .soldier-button:not(:first-child) {
+            display: none;
+        }
+
+        .soldier-toggle-btn {
+            position: sticky;
+            top: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            z-index: 10;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .soldier-toggle-btn:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: scale(1.02);
+        }
+
+        .soldier-button {
+            background: linear-gradient(145deg, #48bb78 0%, #38a169 100%);
+            border: 2px solid #2f855a;
+            border-radius: 15px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            min-width: 100px;
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+            color: white;
+            font-weight: 600;
+        }
+
+        .soldier-button:hover {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+        }
+
+        .soldier-button.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .soldier-emoji {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .soldier-cost {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .soldier-info {
+            font-size: 0.7rem;
+            opacity: 0.9;
+            margin-top: 0.25rem;
+        }
+
+        .placed-soldier {
+            position: absolute;
+            width: 50px;
+            height: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 80;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .placed-soldier:hover {
+            transform: scale(1.1);
+        }
+
+        /* Soldier body parts */
+        .soldier-head {
+            width: 18px;
+            height: 18px;
+            background: radial-gradient(circle at 40% 40%, #ffd1a3, #d4a574);
+            border-radius: 50%;
+            position: relative;
+            z-index: 3;
+            border: 2px solid #8b6f47;
+        }
+
+        .soldier-helmet {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 22px;
+            height: 15px;
+            border-radius: 50% 50% 0 0;
+            z-index: 4;
+        }
+
+        .soldier-body {
+            width: 22px;
+            height: 25px;
+            position: relative;
+            z-index: 2;
+            margin-top: -3px;
+            border-radius: 3px;
+        }
+
+        .soldier-legs {
+            width: 20px;
+            height: 12px;
+            position: relative;
+            z-index: 1;
+            margin-top: -2px;
+        }
+
+        .soldier-weapon {
+            position: absolute;
+            right: -8px;
+            top: 8px;
+            z-index: 2;
+        }
+
+        .placed-soldier.running .soldier-legs {
+            animation: legRun 0.3s infinite;
+        }
+
+        @keyframes legRun {
+            0%, 100% {
+                transform: translateX(0px);
+            }
+            50% {
+                transform: translateX(2px);
+            }
+        }
+
+        .soldier-move-indicator {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 3px dashed #48bb78;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: moveIndicatorPulse 0.8s infinite;
+        }
+
+        @keyframes moveIndicatorPulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+            50% {
+                transform: scale(1.3);
+                opacity: 1;
+            }
+        }
+
+        .soldier-selected {
+            box-shadow: 0 0 20px rgba(72, 187, 120, 1) !important;
+            transform: scale(1.15) !important;
+        }
+
+        .soldier-health-bar {
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 35px;
+            height: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .soldier-health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
+            transition: width 0.3s ease;
+        }
+
+        .soldier-kills-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.65rem;
+            z-index: 85;
+            box-shadow: 0 2px 8px rgba(243, 156, 18, 0.5);
+        }
+
+        .control-panel {
+            position: absolute;
+            top: 100px;
+            left: 20px;
             display: flex;
             flex-direction: column;
             gap: 1rem;
@@ -231,8 +890,9 @@
 
         .wave-preview {
             position: absolute;
-            top: 120px;
-            left: 20px;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 15px;
@@ -282,51 +942,54 @@
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 70px;
-            height: 15px;
-            background: linear-gradient(135deg, #8b7355 0%, #6b5b47 50%, #4a4035 100%);
-            border-radius: 35px;
-            border: 2px solid #3d342a;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset 0 2px 0 rgba(255,255,255,0.1);
+            width: 60px;
+            height: 10px;
+            background: linear-gradient(180deg, #475569 0%, #1e293b 100%);
+            border-radius: 2px;
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 0, 0, 0.3);
         }
 
         .tower-base {
             position: absolute;
-            bottom: 12px;
+            bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
-            width: 50px;
-            height: 25px;
-            background: linear-gradient(135deg, #654321 0%, #8b4513 50%, #654321 100%);
-            border-radius: 25px 25px 10px 10px;
-            border: 2px solid #4a2c17;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 2px 0 rgba(255,255,255,0.1);
+            width: 48px;
+            height: 38px;
+            background: linear-gradient(180deg, #94a3b8 0%, #64748b 50%, #475569 100%);
+            border-radius: 4px 4px 0 0;
+            border: 3px solid #1e293b;
+            border-bottom: none;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255,255,255,0.2), 0 0 20px rgba(148, 163, 184, 0.3);
         }
 
         .tower-middle {
             position: absolute;
-            bottom: 30px;
+            bottom: 48px;
             left: 50%;
             transform: translateX(-50%);
-            width: 35px;
-            height: 30px;
-            background: linear-gradient(135deg, #8b4513 0%, #a0522d 50%, #8b4513 100%);
-            border-radius: 17px 17px 8px 8px;
-            border: 2px solid #654321;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 2px 0 rgba(255,255,255,0.15);
+            width: 46px;
+            height: 28px;
+            background: linear-gradient(180deg, #cbd5e0 0%, #94a3b8 50%, #64748b 100%);
+            border-radius: 4px 4px 0 0;
+            border: 3px solid #475569;
+            border-bottom: none;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255,255,255,0.3), 0 0 25px rgba(203, 213, 224, 0.4);
         }
 
         .tower-top {
             position: absolute;
-            bottom: 55px;
+            bottom: 76px;
             left: 50%;
             transform: translateX(-50%);
-            width: 25px;
-            height: 20px;
-            background: linear-gradient(135deg, #a0522d 0%, #cd853f 50%, #a0522d 100%);
-            border-radius: 12px 12px 6px 6px;
-            border: 2px solid #8b4513;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 2px 0 rgba(255,255,255,0.2);
+            width: 42px;
+            height: 18px;
+            background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e0 100%);
+            border-radius: 6px 6px 0 0;
+            border: 3px solid #94a3b8;
+            border-bottom: 2px solid #64748b;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), inset 0 3px 6px rgba(255,255,255,0.5), 0 0 30px rgba(241, 245, 249, 0.5);
         }
 
         .tower-weapon {
@@ -544,6 +1207,12 @@
     </style>
 </head>
 <body>
+    <!-- Atmospheric Particles -->
+    <div id="particles"></div>
+
+    <!-- Back to Portfolio Button -->
+    <a href="index.html" class="back-button">🏠 Back to Portfolio</a>
+
     <!-- UI Overlay -->
     <div class="ui-overlay">
         <div class="resource-card">
@@ -560,17 +1229,18 @@
             <div class="resource-icon">🌊</div>
             <span id="wave">1</span>
         </div>
-        
-        <div class="level-selector">
-            <select id="levelSelect" onchange="selectLevel(this.value)">
-                <option value="0">Beginner</option>
-                <option value="1">Easy</option>
-                <option value="2">Normal</option>
-                <option value="3">Hard</option>
-                <option value="4">Expert</option>
-                <option value="5">Nightmare</option>
-            </select>
-        </div>
+    </div>
+
+    <!-- Level Selector (moved to bottom-right) -->
+    <div class="level-selector">
+        <select id="levelSelect" onchange="selectLevel(this.value)">
+            <option value="0">Beginner</option>
+            <option value="1">Easy</option>
+            <option value="2">Normal</option>
+            <option value="3">Hard</option>
+            <option value="4">Expert</option>
+            <option value="5">Nightmare</option>
+        </select>
     </div>
 
     <!-- Main Game Area -->
@@ -610,6 +1280,74 @@
         </div>
     </div>
 
+    <!-- Soldier Selector -->
+    <div class="soldier-selector" id="soldierSelector">
+        <button class="soldier-toggle-btn" onclick="toggleSoldierSelector()">
+            <span id="soldierToggleText">▼ Soldiers</span>
+        </button>
+        <div class="soldier-button selected" onclick="selectSoldierLevel(1, this)">
+            <div class="soldier-emoji">🔫</div>
+            <div class="soldier-cost">50G</div>
+            <div class="soldier-info">Lv1: 50 HP | Ranged</div>
+        </div>
+        <div class="soldier-button" onclick="selectSoldierLevel(2, this)">
+            <div class="soldier-emoji">🔫</div>
+            <div class="soldier-cost">100G</div>
+            <div class="soldier-info">Lv2: 80 HP | Ranged</div>
+        </div>
+        <div class="soldier-button" onclick="selectSoldierLevel(3, this)">
+            <div class="soldier-emoji">⚔️</div>
+            <div class="soldier-cost">150G</div>
+            <div class="soldier-info">Lv3: 120 HP | Melee</div>
+        </div>
+        <div class="soldier-button" onclick="selectSoldierLevel(4, this)">
+            <div class="soldier-emoji">🎯</div>
+            <div class="soldier-cost">200G</div>
+            <div class="soldier-info">Lv4: 160 HP | Ranged</div>
+        </div>
+        <div class="soldier-button" onclick="selectSoldierLevel(5, this)">
+            <div class="soldier-emoji">🛡️</div>
+            <div class="soldier-cost">250G</div>
+            <div class="soldier-info">Lv5: 200 HP | Melee</div>
+        </div>
+        <div class="soldier-button" onclick="selectSoldierLevel(6, this)">
+            <div class="soldier-emoji">🔭</div>
+            <div class="soldier-cost">300G</div>
+            <div class="soldier-info">Lv6: 250 HP | Ranged</div>
+        </div>
+        <div class="soldier-button" onclick="selectSoldierLevel(7, this)">
+            <div class="soldier-emoji">🪓</div>
+            <div class="soldier-cost">350G</div>
+            <div class="soldier-info">Lv7: 300 HP | Melee</div>
+        </div>
+        <div class="soldier-button" onclick="selectSoldierLevel(8, this)">
+            <div class="soldier-emoji">🏹</div>
+            <div class="soldier-cost">400G</div>
+            <div class="soldier-info">Lv8: 360 HP | Ranged</div>
+        </div>
+        <div class="soldier-button" onclick="selectSoldierLevel(9, this)">
+            <div class="soldier-emoji">⚔️</div>
+            <div class="soldier-cost">450G</div>
+            <div class="soldier-info">Lv9: 420 HP | Melee</div>
+        </div>
+        <div class="soldier-button" onclick="selectSoldierLevel(10, this)">
+            <div class="soldier-emoji">👑</div>
+            <div class="soldier-cost">500G</div>
+            <div class="soldier-info">Lv10: 500 HP | Ranged</div>
+        </div>
+    </div>
+
+    <!-- Evolution Choice Modal -->
+    <div class="evolution-modal" id="evolutionModal">
+        <div class="evolution-content">
+            <h2 class="evolution-title" id="evolutionTitle">Choose Evolution Path</h2>
+            <p class="evolution-subtitle" id="evolutionSubtitle">Select one upgrade path for your tower</p>
+            <div class="evolution-choices" id="evolutionChoices">
+                <!-- Choices will be inserted here -->
+            </div>
+        </div>
+    </div>
+
     <!-- Control Panel -->
     <div class="control-panel">
         <button class="action-button" id="startWaveBtn" onclick="actuallyStartWave()">Start Wave</button>
@@ -641,7 +1379,334 @@
         let selectedTowerElement = null;
         let rangeIndicator = null;
         let sellButton = null;
+        let upgradeButton = null;
+        let retargetButton = null;
         let wavePreviewShown = false;
+        let artilleryPlacementMode = false;
+        let pendingArtilleryTower = null;
+        let soldierMode = false; // Start with tower selected
+        let placedSoldiers = [];
+        let guardianSoldiers = [];
+        let selectedSoldier = null;
+        let soldierMoveIndicator = null;
+        let soldierProjectiles = [];
+
+        // Tower upgrade configuration
+        const MAX_TOWER_LEVEL = 11;
+        const UPGRADE_COST_MULTIPLIER = 1.5; // Each upgrade costs 1.5x the previous
+
+        // Tower Evolution Paths - 2 choices per upgrade level
+        const towerEvolutions = {
+            arrow: {
+                1: {
+                    pathA: { name: 'Rapid Fire', description: '+50% Attack Speed', effect: 'fireRate', value: 0.5 },
+                    pathB: { name: 'Sharp Arrows', description: '+40% Damage', effect: 'damage', value: 0.4 }
+                },
+                2: {
+                    pathA: { name: 'Multishot', description: 'Shoot 2 arrows at once', effect: 'multishot', value: 2 },
+                    pathB: { name: 'Piercing Arrows', description: 'Arrows hit 2 enemies', effect: 'pierce', value: 2 }
+                },
+                3: {
+                    pathA: { name: 'Storm of Arrows', description: '3 arrows per shot', effect: 'multishot', value: 3 },
+                    pathB: { name: 'Sniper Arrows', description: '+60% Range, +30% Damage', effect: 'sniper', value: { range: 0.6, damage: 0.3 } }
+                },
+                4: {
+                    pathA: { name: 'Arrow Barrage', description: '5 arrows, ultra fast', effect: 'barrage', value: 5 },
+                    pathB: { name: 'Explosive Arrows', description: 'AOE splash damage', effect: 'explosive', value: 50 }
+                },
+                5: {
+                    pathA: { name: 'Homing Arrows', description: 'Never miss + pierce 3', effect: 'homing', value: { accuracy: 1, pierce: 3 } },
+                    pathB: { name: 'Fire Arrows', description: 'Burn damage over time', effect: 'fire', value: 30 }
+                },
+                6: {
+                    pathA: { name: 'Arrow Storm', description: '10 arrows + faster', effect: 'storm', value: { multi: 10, speed: 0.4 } },
+                    pathB: { name: 'Death Arrow', description: '5x damage single target', effect: 'death', value: 5 }
+                },
+                7: {
+                    pathA: { name: 'Arrow Apocalypse', description: '20 arrows everywhere', effect: 'apocalypse', value: 20 },
+                    pathB: { name: 'Arrow of Legends', description: '10x dmg + pierce all', effect: 'legendary', value: { damage: 10, pierce: 999 } }
+                },
+                8: {
+                    pathA: { name: 'Divine Volley', description: '50 arrows + 15x dmg', effect: 'divineVolley', value: { multi: 50, damage: 15 } },
+                    pathB: { name: 'Cosmic Arrows', description: '20x dmg instant kill', effect: 'cosmic', value: { damage: 20, instakill: 0.5 } }
+                },
+                9: {
+                    pathA: { name: 'Universe Barrage', description: '100 homing arrows', effect: 'universeBarrage', value: { multi: 100, homing: true, damage: 25 } },
+                    pathB: { name: 'Infinity Arrow', description: '50x dmg delete bosses', effect: 'infinityArrow', value: { damage: 50, bossDmg: 100 } }
+                },
+                10: {
+                    pathA: { name: 'Omnipotent Arrows', description: 'Unlimited everything', effect: 'omnipotentArrows', value: { damage: 100, multi: 999, pierce: 999, speed: 20 } },
+                    pathB: { name: 'Arrow God', description: 'One arrow = screen wipe', effect: 'arrowGod', value: { damage: 500, aoe: 9999 } }
+                }
+            },
+            cannon: {
+                1: {
+                    pathA: { name: 'Heavy Shells', description: '+60% Damage', effect: 'damage', value: 0.6 },
+                    pathB: { name: 'Bigger Blast', description: '+40% Splash Radius', effect: 'splashRadius', value: 0.4 }
+                },
+                2: {
+                    pathA: { name: 'Armor Piercing', description: 'Deal 2x to tanks', effect: 'armorPierce', value: 2 },
+                    pathB: { name: 'Cluster Bomb', description: 'Triple splash area', effect: 'cluster', value: 3 }
+                },
+                3: {
+                    pathA: { name: 'Bombardment', description: '+80% Damage, +Range', effect: 'bombardment', value: { damage: 0.8, range: 0.3 } },
+                    pathB: { name: 'Shockwave', description: 'Massive AOE, slow enemies', effect: 'shockwave', value: 0.3 }
+                },
+                4: {
+                    pathA: { name: 'Nuclear Shell', description: 'Extreme damage + huge AOE', effect: 'nuclear', value: { damage: 2, splash: 2 } },
+                    pathB: { name: 'Rapid Cannon', description: '3x attack speed', effect: 'rapid', value: 3 }
+                },
+                5: {
+                    pathA: { name: 'Fusion Bomb', description: '4x damage + burn', effect: 'fusion', value: { damage: 4, burn: 50 } },
+                    pathB: { name: 'Chain Explosion', description: 'Explosions trigger more', effect: 'chainExplosion', value: 3 }
+                },
+                6: {
+                    pathA: { name: 'Antimatter Shell', description: '8x damage ultra AOE', effect: 'antimatter', value: { damage: 8, splash: 4 } },
+                    pathB: { name: 'Gatling Cannon', description: '5x attack speed', effect: 'gatling', value: 5 }
+                },
+                7: {
+                    pathA: { name: 'Big Bang', description: 'Screen wipe explosion', effect: 'bigBang', value: { damage: 15, splash: 999 } },
+                    pathB: { name: 'Minigun Cannon', description: '10x speed infinite pierce', effect: 'minigun', value: { speed: 10, pierce: 999 } }
+                },
+                8: {
+                    pathA: { name: 'Supernova Blast', description: '30x dmg universe AOE', effect: 'supernova', value: { damage: 30, aoe: 9999 } },
+                    pathB: { name: 'Quantum Cannon', description: '20x speed + dmg', effect: 'quantum', value: { speed: 20, damage: 25 } }
+                },
+                9: {
+                    pathA: { name: 'Galaxy Destroyer', description: '60x dmg obliterate all', effect: 'galaxy', value: { damage: 60, aoe: 9999, pierce: 999 } },
+                    pathB: { name: 'Infinite Barrage', description: 'Instant fire forever', effect: 'infiniteBarrage', value: { speed: 50, damage: 40 } }
+                },
+                10: {
+                    pathA: { name: 'Universal Annihilation', description: '150x dmg end game', effect: 'universal', value: { damage: 150, aoe: 99999 } },
+                    pathB: { name: 'Cannon Singularity', description: 'Black hole cannon', effect: 'singularity', value: { damage: 100, speed: 100, aoe: 9999 } }
+                }
+            },
+            magic: {
+                1: {
+                    pathA: { name: 'Arcane Power', description: '+50% Damage', effect: 'damage', value: 0.5 },
+                    pathB: { name: 'Chain Lightning', description: 'Hit 3 enemies at once', effect: 'chain', value: 3 }
+                },
+                2: {
+                    pathA: { name: 'Mana Surge', description: '+70% Attack Speed', effect: 'fireRate', value: 0.7 },
+                    pathB: { name: 'Spell Echo', description: 'Cast twice per shot', effect: 'echo', value: 2 }
+                },
+                3: {
+                    pathA: { name: 'Meteor Strike', description: 'AOE damage on hit', effect: 'meteor', value: 80 },
+                    pathB: { name: 'Lightning Storm', description: 'Chain to 6 enemies', effect: 'storm', value: 6 }
+                },
+                4: {
+                    pathA: { name: 'Arcane Mastery', description: '3x damage, massive range', effect: 'mastery', value: { damage: 3, range: 0.8 } },
+                    pathB: { name: 'Mana Overflow', description: 'Ultra fast, infinite chain', effect: 'overflow', value: { speed: 5, chain: 999 } }
+                },
+                5: {
+                    pathA: { name: 'Void Magic', description: '5x dmg + ignore armor', effect: 'void', value: { damage: 5, pierce: true } },
+                    pathB: { name: 'Elemental Chaos', description: 'All elements at once', effect: 'chaos', value: { fire: 30, ice: 0.5, lightning: 10 } }
+                },
+                6: {
+                    pathA: { name: 'Black Hole', description: 'Pull + massive dmg', effect: 'blackHole', value: { damage: 8, pull: 100 } },
+                    pathB: { name: 'Arcane Storm', description: 'Chain 20 + AOE', effect: 'arcaneStorm', value: { chain: 20, aoe: 150 } }
+                },
+                7: {
+                    pathA: { name: 'Reality Warp', description: 'Delete all on screen', effect: 'reality', value: 9999 },
+                    pathB: { name: 'God of Magic', description: 'Infinite power', effect: 'god', value: { damage: 20, speed: 10, chain: 999 } }
+                },
+                8: {
+                    pathA: { name: 'Dimensional Rift', description: '40x dmg void erasure', effect: 'dimensional', value: { damage: 40, erase: true } },
+                    pathB: { name: 'Archmage Supreme', description: '30x all stats', effect: 'archmage', value: { damage: 30, speed: 15, chain: 999 } }
+                },
+                9: {
+                    pathA: { name: 'Time Stop Magic', description: 'Freeze time + 80x dmg', effect: 'timeStop', value: { damage: 80, freeze: 999 } },
+                    pathB: { name: 'Omnimancer', description: 'All magic at once', effect: 'omnimancer', value: { damage: 60, speed: 25, all: true } }
+                },
+                10: {
+                    pathA: { name: 'Magic Singularity', description: 'Reality collapse', effect: 'magicSingularity', value: { damage: 200, reality: true } },
+                    pathB: { name: 'Eternal Mage', description: 'Transcend existence', effect: 'eternalMage', value: { damage: 150, speed: 50, infinite: true } }
+                }
+            },
+            freeze: {
+                1: {
+                    pathA: { name: 'Deep Freeze', description: '+40% Slow Effect', effect: 'slowPower', value: 0.4 },
+                    pathB: { name: 'Chill Aura', description: '+50% Slow Duration', effect: 'slowDuration', value: 0.5 }
+                },
+                2: {
+                    pathA: { name: 'Ice Shards', description: '+50% Damage', effect: 'damage', value: 0.5 },
+                    pathB: { name: 'Permafrost', description: 'Enemies stay frozen', effect: 'permafrost', value: 2 }
+                },
+                3: {
+                    pathA: { name: 'Blizzard', description: 'AOE freeze effect', effect: 'blizzard', value: 100 },
+                    pathB: { name: 'Absolute Zero', description: '90% slow, +3s duration', effect: 'absoluteZero', value: { slow: 0.9, duration: 3 } }
+                },
+                4: {
+                    pathA: { name: 'Ice Age', description: 'Freeze entire screen', effect: 'iceAge', value: 999 },
+                    pathB: { name: 'Glacial Spike', description: 'Freeze + huge damage', effect: 'glacialSpike', value: { freeze: 1, damage: 3 } }
+                },
+                5: {
+                    pathA: { name: 'Arctic Storm', description: '95% slow all + dmg', effect: 'arctic', value: { slow: 0.95, damage: 2 } },
+                    pathB: { name: 'Ice Prison', description: 'Freeze in place 5s', effect: 'prison', value: 5 }
+                },
+                6: {
+                    pathA: { name: 'Eternal Winter', description: 'Permanent slow AOE', effect: 'eternal', value: { slow: 0.8, duration: 999 } },
+                    pathB: { name: 'Frozen Death', description: 'Shatter = 10x dmg', effect: 'shatter', value: 10 }
+                },
+                7: {
+                    pathA: { name: 'Cryogenic Annihilation', description: 'Freeze all forever', effect: 'cryo', value: { slow: 1, duration: 999, aoe: 999 } },
+                    pathB: { name: 'Absolute Zero Death', description: 'Instant kill + freeze', effect: 'zeroKill', value: 9999 }
+                },
+                8: {
+                    pathA: { name: 'Frozen Dimension', description: 'Stop all motion', effect: 'frozenDimension', value: { slow: 1, damage: 30, permanent: true } },
+                    pathB: { name: 'Ice Apocalypse', description: '50x dmg ice nova', effect: 'iceApocalypse', value: { damage: 50, aoe: 9999 } }
+                },
+                9: {
+                    pathA: { name: 'Time Freeze', description: 'Freeze time itself', effect: 'timeFreeze', value: { slow: 1, damage: 100, timestop: true } },
+                    pathB: { name: 'Extinction Frost', description: '100x kill all', effect: 'extinctionFrost', value: { damage: 100, instakill: 0.9 } }
+                },
+                10: {
+                    pathA: { name: 'Absolute Zero Realm', description: 'Nothing moves', effect: 'zeroRealm', value: { slow: 1, damage: 250, eternal: true } },
+                    pathB: { name: 'Ice God', description: 'Infinite freeze power', effect: 'iceGod', value: { damage: 200, aoe: 99999, slow: 1 } }
+                }
+            },
+            air: {
+                1: {
+                    pathA: { name: 'Flak Cannon', description: '+45% Damage vs flying', effect: 'flak', value: 0.45 },
+                    pathB: { name: 'Tracking System', description: '+40% Attack Speed', effect: 'fireRate', value: 0.4 }
+                },
+                2: {
+                    pathA: { name: 'Anti-Air Missiles', description: 'Hit 2 flyers at once', effect: 'multiTarget', value: 2 },
+                    pathB: { name: 'Ground Support', description: 'Can now hit ground units', effect: 'groundSupport', value: true }
+                },
+                3: {
+                    pathA: { name: 'SAM Battery', description: '4 missiles, ultra range', effect: 'sam', value: { multi: 4, range: 0.7 } },
+                    pathB: { name: 'Dual Purpose', description: '+80% damage to all', effect: 'dualPurpose', value: 0.8 }
+                },
+                4: {
+                    pathA: { name: 'Sky Dominance', description: 'Instant kill flyers', effect: 'skyDominance', value: 9999 },
+                    pathB: { name: 'Total Defense', description: 'Attack everything, massive range', effect: 'totalDefense', value: { all: true, range: 1.5 } }
+                },
+                5: {
+                    pathA: { name: 'Patriot System', description: '10 missiles homing', effect: 'patriot', value: { multi: 10, homing: true } },
+                    pathB: { name: 'Omni Turret', description: '3x dmg everything', effect: 'omni', value: 3 }
+                },
+                6: {
+                    pathA: { name: 'Air Supremacy', description: 'All flyers die instant', effect: 'supremacy', value: { airKill: 9999, multi: 20 } },
+                    pathB: { name: 'Hybrid Destroyer', description: '5x dmg + 5x speed all', effect: 'hybrid', value: { damage: 5, speed: 5 } }
+                },
+                7: {
+                    pathA: { name: 'Aegis System', description: 'Delete all air units', effect: 'aegis', value: { airKill: 99999, range: 999 } },
+                    pathB: { name: 'Ultimate Defense', description: '10x everything', effect: 'ultimate', value: { damage: 10, speed: 10, range: 2 } }
+                },
+                8: {
+                    pathA: { name: 'Sky Eater', description: 'Consume all flyers', effect: 'skyEater', value: { airKill: 999999, damage: 35 } },
+                    pathB: { name: 'Omega Turret', description: '20x dmg + speed all', effect: 'omega', value: { damage: 20, speed: 20, all: true } }
+                },
+                9: {
+                    pathA: { name: 'Celestial Purge', description: 'Erase air existence', effect: 'celestial', value: { airKill: 9999999, damage: 70 } },
+                    pathB: { name: 'God Defense', description: '50x everything', effect: 'godDefense', value: { damage: 50, speed: 30, range: 3 } }
+                },
+                10: {
+                    pathA: { name: 'Heaven\'s Wrath', description: 'No fly zone', effect: 'heavensWrath', value: { airKill: 99999999, aoe: 99999 } },
+                    pathB: { name: 'Defense Singularity', description: '100x all stats', effect: 'defenseSingularity', value: { damage: 100, speed: 50, range: 5 } }
+                }
+            },
+            tesla: {
+                1: {
+                    pathA: { name: 'High Voltage', description: '+55% Damage', effect: 'damage', value: 0.55 },
+                    pathB: { name: 'Arc Spread', description: 'Chain to 2 enemies', effect: 'chain', value: 2 }
+                },
+                2: {
+                    pathA: { name: 'Overcharge', description: '+60% Attack Speed', effect: 'fireRate', value: 0.6 },
+                    pathB: { name: 'Tesla Coil', description: 'Chain to 4 enemies', effect: 'coil', value: 4 }
+                },
+                3: {
+                    pathA: { name: 'Lightning Rod', description: 'Massive damage, stun', effect: 'lightningRod', value: { damage: 1.2, stun: 1 } },
+                    pathB: { name: 'Energy Web', description: 'Chain to 8 enemies', effect: 'web', value: 8 }
+                },
+                4: {
+                    pathA: { name: 'Thunderstorm', description: 'AOE lightning everywhere', effect: 'thunderstorm', value: 200 },
+                    pathB: { name: 'Infinite Chain', description: 'Chain to all enemies', effect: 'infiniteChain', value: 999 }
+                },
+                5: {
+                    pathA: { name: 'Plasma Bolt', description: '4x dmg + stun all', effect: 'plasma', value: { damage: 4, stun: 2 } },
+                    pathB: { name: 'Chain Reaction', description: 'Each hit chains more', effect: 'reaction', value: 999 }
+                },
+                6: {
+                    pathA: { name: 'Thunder God', description: '8x dmg screen AOE', effect: 'thunderGod', value: { damage: 8, aoe: 999 } },
+                    pathB: { name: 'Unlimited Power', description: 'Infinite chain + speed', effect: 'unlimited', value: { chain: 999, speed: 10 } }
+                },
+                7: {
+                    pathA: { name: 'Zeus Wrath', description: 'Delete everything', effect: 'zeus', value: { damage: 20, aoe: 999, chain: 999 } },
+                    pathB: { name: 'Eternal Storm', description: 'Constant lightning field', effect: 'eternalStorm', value: { damage: 15, permanent: true } }
+                },
+                8: {
+                    pathA: { name: 'Thor\'s Hammer', description: '40x dmg world chain', effect: 'thor', value: { damage: 40, chain: 9999 } },
+                    pathB: { name: 'Plasma Apocalypse', description: 'Plasma everywhere', effect: 'plasmaApocalypse', value: { damage: 35, permanent: true, aoe: 999 } }
+                },
+                9: {
+                    pathA: { name: 'Lightning Dimension', description: 'Pure energy 80x', effect: 'lightningDimension', value: { damage: 80, chain: 99999, speed: 30 } },
+                    pathB: { name: 'Infinite Voltage', description: 'Unlimited power', effect: 'infiniteVoltage', value: { damage: 60, speed: 40, permanent: true } }
+                },
+                10: {
+                    pathA: { name: 'Electric God', description: 'Ultimate lightning', effect: 'electricGod', value: { damage: 200, chain: 999999 } },
+                    pathB: { name: 'Eternal Plasma', description: 'Forever electricity', effect: 'eternalPlasma', value: { damage: 150, speed: 60, infinite: true } }
+                }
+            },
+            artillery: {
+                1: {
+                    pathA: { name: 'Heavy Artillery', description: '+70% Damage', effect: 'damage', value: 0.7 },
+                    pathB: { name: 'Carpet Bomb', description: '+60% Splash Area', effect: 'splashRadius', value: 0.6 }
+                },
+                2: {
+                    pathA: { name: 'Bunker Buster', description: '3x damage to bosses', effect: 'bunkerBuster', value: 3 },
+                    pathB: { name: 'Fragmentation', description: 'Huge AOE splash', effect: 'fragmentation', value: 2.5 }
+                },
+                3: {
+                    pathA: { name: 'Rail Gun', description: 'Extreme damage, pierce all', effect: 'railGun', value: { damage: 2.5, pierce: 999 } },
+                    pathB: { name: 'Napalm Strike', description: 'DOT + massive splash', effect: 'napalm', value: { dot: 50, splash: 3 } }
+                },
+                4: {
+                    pathA: { name: 'Orbital Strike', description: 'Screen-wide devastation', effect: 'orbital', value: 9999 },
+                    pathB: { name: 'MOAB', description: 'Ultra damage + slow all', effect: 'moab', value: { damage: 5, slow: 0.5 } }
+                },
+                5: {
+                    pathA: { name: 'Tactical Nuke', description: '10x dmg huge AOE', effect: 'nuke', value: { damage: 10, splash: 5 } },
+                    pathB: { name: 'Hellfire Barrage', description: 'Continuous bombardment', effect: 'hellfire', value: { multi: 5, burn: 100 } }
+                },
+                6: {
+                    pathA: { name: 'Antimatter Warhead', description: '20x dmg + vaporize', effect: 'antimatterWar', value: { damage: 20, vaporize: true } },
+                    pathB: { name: 'Apocalypse Rain', description: 'Non-stop explosions', effect: 'apocalypseRain', value: { continuous: true, damage: 8 } }
+                },
+                7: {
+                    pathA: { name: 'Planet Buster', description: 'One shot everything', effect: 'planetBuster', value: { damage: 99999, aoe: 999 } },
+                    pathB: { name: 'Armageddon', description: 'End of all things', effect: 'armageddon', value: { damage: 50, permanent: true, aoe: 999 } }
+                },
+                8: {
+                    pathA: { name: 'Star Destroyer', description: 'Delete solar systems', effect: 'starDestroyer', value: { damage: 200000, aoe: 9999 } },
+                    pathB: { name: 'Eternal Bombardment', description: 'Never stop firing', effect: 'eternalBombard', value: { damage: 80, speed: 50, permanent: true } }
+                },
+                9: {
+                    pathA: { name: 'Galaxy Buster', description: 'End galaxies', effect: 'galaxyBuster', value: { damage: 500000, aoe: 99999 } },
+                    pathB: { name: 'Apocalypse Engine', description: 'Infinite destruction', effect: 'apocalypseEngine', value: { damage: 120, speed: 100, infinite: true } }
+                },
+                10: {
+                    pathA: { name: 'Universe Ender', description: 'Delete universe', effect: 'universeEnder', value: { damage: 999999, aoe: 999999 } },
+                    pathB: { name: 'Artillery God', description: 'Omnipotent artillery', effect: 'artilleryGod', value: { damage: 300, speed: 200, aoe: 99999 } }
+                }
+            }
+        };
+
+        // Soldier configurations (10 levels) - Mix of ranged and melee
+        const soldierConfigs = {
+            1: { cost: 50, maxKills: 2, health: 50, damage: 5, name: 'Recruit', helmet: '#8b8b8b', body: '#4a5568', weapon: '🔫', type: 'ranged', range: 250 },
+            2: { cost: 100, maxKills: 4, health: 80, damage: 8, name: 'Infantry', helmet: '#4a5568', body: '#2d3748', weapon: '🔫', type: 'ranged', range: 280 },
+            3: { cost: 150, maxKills: 6, health: 120, damage: 40, name: 'Swordsman', helmet: '#38a169', body: '#2f855a', weapon: '⚔️', type: 'melee', range: 50 },
+            4: { cost: 200, maxKills: 8, health: 160, damage: 12, name: 'Marksman', helmet: '#3182ce', body: '#2c5282', weapon: '🎯', type: 'ranged', range: 320 },
+            5: { cost: 250, maxKills: 10, health: 200, damage: 60, name: 'Knight', helmet: '#805ad5', body: '#6b46c1', weapon: '🛡️', type: 'melee', range: 50 },
+            6: { cost: 300, maxKills: 12, health: 250, damage: 18, name: 'Sniper', helmet: '#d69e2e', body: '#b7791f', weapon: '🔭', type: 'ranged', range: 400 },
+            7: { cost: 350, maxKills: 14, health: 300, damage: 90, name: 'Berserker', helmet: '#dd6b20', body: '#c05621', weapon: '🪓', type: 'melee', range: 50 },
+            8: { cost: 400, maxKills: 16, health: 360, damage: 24, name: 'Archer', helmet: '#e53e3e', body: '#c53030', weapon: '🏹', type: 'ranged', range: 350 },
+            9: { cost: 450, maxKills: 18, health: 420, damage: 130, name: 'Crusader', helmet: '#d53f8c', body: '#b83280', weapon: '⚔️', type: 'melee', range: 50 },
+            10: { cost: 500, maxKills: 20, health: 500, damage: 30, name: 'Commander', helmet: '#ffd700', body: '#ff8c00', weapon: '👑', type: 'ranged', range: 450 }
+        };
+        let selectedSoldierLevel = 1;
 
         // Level configurations
         const levelConfigs = [
@@ -649,8 +1714,8 @@
             { name: "Easy", waves: 8, startingGold: 100 },
             { name: "Normal", waves: 12, startingGold: 100 },
             { name: "Hard", waves: 15, startingGold: 100 },
-            { name: "Expert", waves: 20, startingGold: 150 },
-            { name: "Nightmare", waves: 25, startingGold: 150 }
+            { name: "Expert", waves: 18, startingGold: 200 },
+            { name: "Nightmare", waves: 22, startingGold: 250 }
         ];
         
         // Tower configs
@@ -691,44 +1756,200 @@
                 const y = event.clientY - rect.top;
                 console.log('Click at:', x, y);
 
+                // If in artillery placement mode, set the target location
+                if (artilleryPlacementMode && pendingArtilleryTower) {
+                    setArtilleryTarget(x, y);
+                    return;
+                }
+
+                // If a soldier is selected, move them to the clicked location
+                if (selectedSoldier && selectedSoldier.alive) {
+                    if (isOnPath(x, y)) {
+                        selectedSoldier.moveTo(x, y);
+                        showMoveIndicator(x, y);
+                        showToast(`${selectedSoldier.config.name} moving!`);
+                        deselectSoldier();
+                    } else {
+                        showToast('Soldiers can only move on the path!');
+                    }
+                    return;
+                }
+
                 // Hide range indicator when clicking on canvas
                 hideRangeIndicator();
 
-                placeTower(x, y);
+                // Place soldier or tower based on mode
+                if (soldierMode) {
+                    placeSoldier(x, y);
+                } else {
+                    placeTower(x, y);
+                }
             });
+        }
+
+        function selectSoldierForMovement(soldier) {
+            // Deselect previous soldier
+            if (selectedSoldier) {
+                selectedSoldier.element.classList.remove('soldier-selected');
+            }
+
+            selectedSoldier = soldier;
+            soldier.element.classList.add('soldier-selected');
+            showToast(`${soldier.config.name} selected - Click path to move`);
+        }
+
+        function deselectSoldier() {
+            if (selectedSoldier) {
+                selectedSoldier.element.classList.remove('soldier-selected');
+                selectedSoldier = null;
+            }
+        }
+
+        function showMoveIndicator(x, y) {
+            // Remove old indicator
+            if (soldierMoveIndicator && soldierMoveIndicator.parentNode) {
+                soldierMoveIndicator.remove();
+            }
+
+            // Create new indicator
+            soldierMoveIndicator = document.createElement('div');
+            soldierMoveIndicator.className = 'soldier-move-indicator';
+            soldierMoveIndicator.style.left = (x - 15) + 'px';
+            soldierMoveIndicator.style.top = (y - 15) + 'px';
+            document.querySelector('.game-container').appendChild(soldierMoveIndicator);
+
+            // Remove after animation
+            setTimeout(() => {
+                if (soldierMoveIndicator && soldierMoveIndicator.parentNode) {
+                    soldierMoveIndicator.remove();
+                }
+            }, 1500);
+        }
+
+        function toggleSoldierSelector() {
+            const selector = document.getElementById('soldierSelector');
+            const toggleText = document.getElementById('soldierToggleText');
+
+            if (selector.classList.contains('collapsed')) {
+                selector.classList.remove('collapsed');
+                toggleText.textContent = '▼ Soldiers';
+            } else {
+                selector.classList.add('collapsed');
+                toggleText.textContent = '▶ Soldiers';
+            }
+        }
+
+        function placeSoldier(x, y) {
+            console.log('Placing soldier at', x, y);
+
+            const config = soldierConfigs[selectedSoldierLevel];
+
+            // Check gold
+            if (gold < config.cost) {
+                showToast(`Not enough gold! Need ${config.cost}G`);
+                return;
+            }
+
+            // Check if on path
+            if (!isOnPath(x, y)) {
+                showToast('Soldiers can only be placed on the path!');
+                return;
+            }
+
+            // Deduct gold
+            gold -= config.cost;
+            updateGoldDisplay();
+
+            // Create soldier with selected level
+            const soldier = new Soldier(x, y, selectedSoldierLevel);
+            placedSoldiers.push(soldier);
+
+            showToast(`${config.name} deployed! (Lv${selectedSoldierLevel})`);
+            console.log('Soldier placed! Total soldiers:', placedSoldiers.length);
         }
 
         function showTowerRange(tower) {
             // Remove previous range indicator and sell button
             hideRangeIndicator();
 
-            // Determine range based on tower type - matching the updateTowers function
-            let range = 120; // Default range for most towers
+            // Determine range based on tower type and level
+            let baseRange = 120; // Default range for most towers
             if (tower.type === 'freeze') {
-                range = 150; // Freeze towers have larger range
+                baseRange = 150; // Freeze towers have larger range
+            } else if (tower.type === 'artillery') {
+                baseRange = 999999; // Artillery has unlimited range - don't show indicator
             }
-            // Add other tower-specific ranges here if needed
-            // Example: if (tower.type === 'artillery') range = 180;
 
-            // Create range indicator
-            rangeIndicator = document.createElement('div');
-            rangeIndicator.className = 'range-indicator';
-            const diameter = range * 2;
-            rangeIndicator.style.width = diameter + 'px';
-            rangeIndicator.style.height = diameter + 'px';
-            rangeIndicator.style.left = (tower.x - range) + 'px';
-            rangeIndicator.style.top = (tower.y - range) + 'px';
+            // Apply range bonus from upgrades
+            const level = tower.level || 1;
+            const range = baseRange + ((level - 1) * 15); // +15 range per level
 
-            document.querySelector('.game-container').appendChild(rangeIndicator);
+            // Create range indicator (skip for artillery)
+            if (tower.type !== 'artillery') {
+                rangeIndicator = document.createElement('div');
+                rangeIndicator.className = 'range-indicator';
+                const diameter = range * 2;
+                rangeIndicator.style.width = diameter + 'px';
+                rangeIndicator.style.height = diameter + 'px';
+                rangeIndicator.style.left = (tower.x - range) + 'px';
+                rangeIndicator.style.top = (tower.y - range) + 'px';
+
+                document.querySelector('.game-container').appendChild(rangeIndicator);
+            }
+
             selectedTowerElement = tower.element;
+
+            let buttonOffsetY = 85; // Start position for buttons
+
+            // Create retarget button for artillery (only when not in wave and target is set)
+            if (tower.type === 'artillery' && tower.targetX !== null && !waveInProgress) {
+                retargetButton = document.createElement('button');
+                retargetButton.className = 'retarget-button';
+                retargetButton.textContent = '🎯 Change Target';
+                retargetButton.style.left = (tower.x - 60) + 'px';
+                retargetButton.style.top = (tower.y - buttonOffsetY) + 'px';
+
+                retargetButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    retargetArtillery(tower);
+                });
+
+                document.querySelector('.game-container').appendChild(retargetButton);
+                buttonOffsetY += 35; // Move next button down
+            }
+
+            // Create upgrade button
+            const currentLevel = tower.level || 1;
+            const upgradeCost = getUpgradeCost(tower);
+            const canUpgrade = currentLevel < MAX_TOWER_LEVEL;
+
+            if (canUpgrade) {
+                upgradeButton = document.createElement('button');
+                upgradeButton.className = 'upgrade-button';
+                upgradeButton.textContent = `Upgrade (${upgradeCost}G)`;
+                upgradeButton.style.left = (tower.x - 45) + 'px';
+                upgradeButton.style.top = (tower.y - buttonOffsetY) + 'px';
+
+                if (gold < upgradeCost) {
+                    upgradeButton.disabled = true;
+                }
+
+                upgradeButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    upgradeTower(tower);
+                });
+
+                document.querySelector('.game-container').appendChild(upgradeButton);
+                buttonOffsetY += 35; // Move next button down
+            }
 
             // Create sell button
             sellButton = document.createElement('button');
             sellButton.className = 'sell-button';
-            const sellPrice = Math.floor(tower.config.cost * 0.7); // Get 70% of original cost
+            const sellPrice = getSellPrice(tower);
             sellButton.textContent = `Sell (${sellPrice}G)`;
             sellButton.style.left = (tower.x - 45) + 'px';
-            sellButton.style.top = (tower.y - 85) + 'px';
+            sellButton.style.top = (tower.y - buttonOffsetY) + 'px';
 
             sellButton.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -747,12 +1968,227 @@
                 sellButton.remove();
                 sellButton = null;
             }
+            if (upgradeButton && upgradeButton.parentNode) {
+                upgradeButton.remove();
+                upgradeButton = null;
+            }
+            if (retargetButton && retargetButton.parentNode) {
+                retargetButton.remove();
+                retargetButton = null;
+            }
             selectedTowerElement = null;
         }
 
+        function retargetArtillery(tower) {
+            if (waveInProgress) {
+                showToast('Cannot change artillery target during wave!');
+                return;
+            }
+
+            // Remove old target marker
+            if (tower.targetMarker && tower.targetMarker.parentNode) {
+                tower.targetMarker.remove();
+                tower.targetMarker = null;
+            }
+
+            // Reset target
+            tower.targetX = null;
+            tower.targetY = null;
+
+            // Enter artillery target selection mode
+            pendingArtilleryTower = tower;
+            artilleryPlacementMode = true;
+            canvas.style.cursor = 'pointer';
+
+            // Hide current UI
+            hideRangeIndicator();
+
+            // Show overlay message
+            const overlay = document.createElement('div');
+            overlay.className = 'artillery-placement-overlay';
+            overlay.textContent = '🎯 Click anywhere to set new artillery target';
+            document.body.appendChild(overlay);
+
+            showToast('Select new artillery target location');
+        }
+
+        function getUpgradeCost(tower) {
+            const currentLevel = tower.level || 1;
+            const baseCost = tower.config.cost;
+            let cost = Math.floor(baseCost * Math.pow(UPGRADE_COST_MULTIPLIER, currentLevel - 1));
+
+            // Make levels 8-10 significantly more expensive
+            if (currentLevel >= 7) {
+                cost *= 5; // 5x more expensive for level 8
+            }
+            if (currentLevel >= 8) {
+                cost *= 3; // Additional 3x for level 9 (15x total)
+            }
+            if (currentLevel >= 9) {
+                cost *= 4; // Additional 4x for level 10 (60x total)
+            }
+
+            return cost;
+        }
+
+        function getSellPrice(tower) {
+            const currentLevel = tower.level || 1;
+            const totalInvestment = tower.totalCost || tower.config.cost;
+            return Math.floor(totalInvestment * 0.7); // Get 70% of total investment
+        }
+
+        function showEvolutionChoice(tower) {
+            const currentLevel = tower.level || 1;
+            const towerType = tower.type;
+
+            // Get evolution options for this tower type and level
+            const evolutions = towerEvolutions[towerType];
+            if (!evolutions || !evolutions[currentLevel]) {
+                // No evolution choices available, do basic upgrade
+                const upgradeCost = tower._pendingUpgradeCost || 0;
+                completeUpgrade(tower, null, upgradeCost);
+                return;
+            }
+
+            const options = evolutions[currentLevel];
+            const modal = document.getElementById('evolutionModal');
+            const title = document.getElementById('evolutionTitle');
+            const subtitle = document.getElementById('evolutionSubtitle');
+            const choicesContainer = document.getElementById('evolutionChoices');
+
+            title.textContent = `${tower.config.name} - Level ${currentLevel + 1}`;
+            subtitle.textContent = 'Choose your evolution path';
+
+            choicesContainer.innerHTML = `
+                <div class="evolution-choice" onclick="selectEvolution('${tower.id}', 'pathA')">
+                    <div class="evolution-choice-name">${options.pathA.name}</div>
+                    <div class="evolution-choice-desc">${options.pathA.description}</div>
+                </div>
+                <div class="evolution-choice" onclick="selectEvolution('${tower.id}', 'pathB')">
+                    <div class="evolution-choice-name">${options.pathB.name}</div>
+                    <div class="evolution-choice-desc">${options.pathB.description}</div>
+                </div>
+            `;
+
+            modal.classList.add('show');
+        }
+
+        function selectEvolution(towerId, path) {
+            const tower = placedTowers.find(t => t.id === towerId);
+            if (!tower) {
+                console.error('Tower not found:', towerId);
+                return;
+            }
+
+            const modal = document.getElementById('evolutionModal');
+            modal.classList.remove('show');
+
+            const upgradeCost = tower._pendingUpgradeCost || 0;
+            completeUpgrade(tower, path, upgradeCost);
+        }
+
+        function completeUpgrade(tower, evolutionPath, upgradeCost) {
+            const currentLevel = tower.level || 1;
+
+            // Initialize evolution tracking
+            if (!tower.evolutions) {
+                tower.evolutions = {};
+            }
+
+            // Store the chosen evolution
+            if (evolutionPath) {
+                const towerType = tower.type;
+                const evolutionData = towerEvolutions[towerType][currentLevel][evolutionPath];
+                tower.evolutions[currentLevel] = {
+                    path: evolutionPath,
+                    data: evolutionData
+                };
+                showToast(`Unlocked: ${evolutionData.name}!`);
+            }
+
+            // Upgrade tower
+            tower.level = currentLevel + 1;
+            tower.totalCost = (tower.totalCost || tower.config.cost) + upgradeCost;
+
+            // Update visual level badge
+            updateTowerLevelBadge(tower);
+
+            // Update tower visuals based on level
+            updateTowerVisuals(tower);
+
+            // Hide and re-show the range indicator with updated stats
+            hideRangeIndicator();
+            showTowerRange(tower);
+
+            showToast(`Tower upgraded to level ${tower.level}!`);
+        }
+
+        function upgradeTower(tower) {
+            const currentLevel = tower.level || 1;
+            const upgradeCost = getUpgradeCost(tower);
+
+            if (currentLevel >= MAX_TOWER_LEVEL) {
+                showToast('Tower is already max level!');
+                return;
+            }
+
+            // Lock levels 8-10 for expert and nightmare only
+            if (currentLevel >= 7 && selectedLevel < 4) {
+                showToast('Levels 8+ only available in Expert and Nightmare difficulty!');
+                return;
+            }
+
+            if (gold < upgradeCost) {
+                showToast('Not enough gold to upgrade!');
+                return;
+            }
+
+            // Deduct gold
+            gold -= upgradeCost;
+            updateGoldDisplay();
+
+            // Store the upgrade cost to pass to completeUpgrade
+            tower._pendingUpgradeCost = upgradeCost;
+
+            // Show evolution choice modal
+            showEvolutionChoice(tower);
+        }
+
+        function updateTowerLevelBadge(tower) {
+            // Remove existing badge if any
+            const existingBadge = tower.element.querySelector('.tower-level-badge');
+            if (existingBadge) {
+                existingBadge.remove();
+            }
+
+            // Only show badge if level > 1
+            if (tower.level > 1) {
+                const badge = document.createElement('div');
+                badge.className = 'tower-level-badge';
+                if (tower.level >= MAX_TOWER_LEVEL) {
+                    badge.classList.add('max-level');
+                }
+                badge.textContent = tower.level;
+                tower.element.appendChild(badge);
+            }
+        }
+
+        function updateTowerVisuals(tower) {
+            const level = tower.level || 1;
+
+            // Enhance tower appearance based on level
+            if (level >= 3) {
+                tower.element.style.transform = 'scale(1.1)';
+            }
+            if (level >= 5) {
+                tower.element.style.transform = 'scale(1.2)';
+                tower.element.style.filter = 'drop-shadow(0 0 10px rgba(155, 89, 182, 0.8))';
+            }
+        }
+
         function sellTower(tower) {
-            // Calculate sell price (70% of original cost)
-            const sellPrice = Math.floor(tower.config.cost * 0.7);
+            // Calculate sell price (70% of total investment)
+            const sellPrice = getSellPrice(tower);
             gold += sellPrice;
             updateGoldDisplay();
 
@@ -760,6 +2196,11 @@
             const index = placedTowers.findIndex(t => t.element === tower.element);
             if (index > -1) {
                 placedTowers.splice(index, 1);
+            }
+
+            // Remove artillery target marker if it exists
+            if (tower.targetMarker && tower.targetMarker.parentNode) {
+                tower.targetMarker.remove();
             }
 
             // Remove tower element
@@ -770,7 +2211,8 @@
             // Hide range indicator and sell button
             hideRangeIndicator();
 
-            showToast(`${tower.config.name} sold for ${sellPrice} gold!`);
+            const levelInfo = (tower.level && tower.level > 1) ? ` (Lv${tower.level})` : '';
+            showToast(`${tower.config.name}${levelInfo} sold for ${sellPrice} gold!`);
         }
         
         function resizeCanvas() {
@@ -783,20 +2225,53 @@
         
         function drawGameField() {
             if (!canvas || !ctx) return;
-            
+
             console.log('Drawing field, canvas size:', canvas.width, 'x', canvas.height);
-            
-            // Green background
-            ctx.fillStyle = '#27ae60';
+
+            // Gradient grass background
+            const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            bgGradient.addColorStop(0, '#2ecc71');
+            bgGradient.addColorStop(0.5, '#27ae60');
+            bgGradient.addColorStop(1, '#229954');
+            ctx.fillStyle = bgGradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Brown path
-            ctx.strokeStyle = '#8b4513';
+
+            // Add grass texture dots
+            ctx.fillStyle = 'rgba(34, 153, 84, 0.3)';
+            for (let i = 0; i < 200; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                ctx.fillRect(x, y, 2, 2);
+            }
+
+            // Path shadow/outline
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.lineWidth = 52;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(-10, canvas.height * 0.5);
+            ctx.lineTo(canvas.width * 0.2, canvas.height * 0.5);
+            ctx.quadraticCurveTo(canvas.width * 0.25, canvas.height * 0.6, canvas.width * 0.2, canvas.height * 0.7);
+            ctx.lineTo(canvas.width * 0.1, canvas.height * 0.7);
+            ctx.quadraticCurveTo(canvas.width * 0.05, canvas.height * 0.6, canvas.width * 0.1, canvas.height * 0.3);
+            ctx.lineTo(canvas.width * 0.7, canvas.height * 0.3);
+            ctx.quadraticCurveTo(canvas.width * 0.75, canvas.height * 0.4, canvas.width * 0.7, canvas.height * 0.8);
+            ctx.lineTo(canvas.width * 0.9, canvas.height * 0.8);
+            ctx.quadraticCurveTo(canvas.width * 0.95, canvas.height * 0.7, canvas.width + 10, canvas.height * 0.6);
+            ctx.stroke();
+
+            // Main path with gradient
+            const pathGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            pathGradient.addColorStop(0, '#d4a574');
+            pathGradient.addColorStop(0.5, '#c9984a');
+            pathGradient.addColorStop(1, '#a67c52');
+            ctx.strokeStyle = pathGradient;
             ctx.lineWidth = 45;
             ctx.lineJoin = 'round';
             ctx.lineCap = 'round';
             ctx.beginPath();
-            
+
             // Complex path
             ctx.moveTo(-10, canvas.height * 0.5);
             ctx.lineTo(canvas.width * 0.2, canvas.height * 0.5);
@@ -807,19 +2282,159 @@
             ctx.quadraticCurveTo(canvas.width * 0.75, canvas.height * 0.4, canvas.width * 0.7, canvas.height * 0.8);
             ctx.lineTo(canvas.width * 0.9, canvas.height * 0.8);
             ctx.quadraticCurveTo(canvas.width * 0.95, canvas.height * 0.7, canvas.width + 10, canvas.height * 0.6);
-            
+
             ctx.stroke();
+
+            // Path center line for detail
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(-10, canvas.height * 0.5);
+            ctx.lineTo(canvas.width * 0.2, canvas.height * 0.5);
+            ctx.quadraticCurveTo(canvas.width * 0.25, canvas.height * 0.6, canvas.width * 0.2, canvas.height * 0.7);
+            ctx.lineTo(canvas.width * 0.1, canvas.height * 0.7);
+            ctx.quadraticCurveTo(canvas.width * 0.05, canvas.height * 0.6, canvas.width * 0.1, canvas.height * 0.3);
+            ctx.lineTo(canvas.width * 0.7, canvas.height * 0.3);
+            ctx.quadraticCurveTo(canvas.width * 0.75, canvas.height * 0.4, canvas.width * 0.7, canvas.height * 0.8);
+            ctx.lineTo(canvas.width * 0.9, canvas.height * 0.8);
+            ctx.quadraticCurveTo(canvas.width * 0.95, canvas.height * 0.7, canvas.width + 10, canvas.height * 0.6);
+            ctx.stroke();
+
+            // Draw castle at the end of the path
+            drawCastle();
+
             console.log('Path drawn');
         }
-        
+
+        function drawCastle() {
+            const castleX = canvas.width - 100;
+            const castleY = canvas.height * 0.6 - 80;
+
+            // Castle base
+            ctx.fillStyle = '#7f8c8d';
+            ctx.fillRect(castleX, castleY + 40, 80, 60);
+
+            // Castle towers (left and right)
+            ctx.fillStyle = '#95a5a6';
+            ctx.fillRect(castleX - 15, castleY + 20, 25, 80);
+            ctx.fillRect(castleX + 70, castleY + 20, 25, 80);
+
+            // Tower tops
+            ctx.fillStyle = '#c0392b';
+            ctx.beginPath();
+            ctx.moveTo(castleX - 20, castleY + 20);
+            ctx.lineTo(castleX - 2.5, castleY);
+            ctx.lineTo(castleX + 15, castleY + 20);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(castleX + 65, castleY + 20);
+            ctx.lineTo(castleX + 82.5, castleY);
+            ctx.lineTo(castleX + 100, castleY + 20);
+            ctx.fill();
+
+            // Castle gate
+            ctx.fillStyle = '#34495e';
+            ctx.fillRect(castleX + 25, castleY + 65, 30, 35);
+
+            // Castle battlements
+            ctx.fillStyle = '#95a5a6';
+            for (let i = 0; i < 5; i++) {
+                ctx.fillRect(castleX + (i * 20), castleY + 40, 12, 8);
+            }
+
+            // Castle windows
+            ctx.fillStyle = '#f39c12';
+            ctx.fillRect(castleX + 10, castleY + 55, 8, 12);
+            ctx.fillRect(castleX + 62, castleY + 55, 8, 12);
+            ctx.fillRect(castleX - 7, castleY + 45, 6, 8);
+            ctx.fillRect(castleX + 81, castleY + 45, 6, 8);
+
+            // Castle flag
+            ctx.strokeStyle = '#34495e';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(castleX + 40, castleY + 40);
+            ctx.lineTo(castleX + 40, castleY + 15);
+            ctx.stroke();
+
+            ctx.fillStyle = '#e74c3c';
+            ctx.beginPath();
+            ctx.moveTo(castleX + 40, castleY + 15);
+            ctx.lineTo(castleX + 55, castleY + 20);
+            ctx.lineTo(castleX + 40, castleY + 25);
+            ctx.fill();
+        }
+
+        function createGuardianSoldiers() {
+            // Clear any existing guardians
+            guardianSoldiers.forEach(guardian => {
+                if (guardian.element && guardian.element.parentNode) {
+                    guardian.element.remove();
+                }
+            });
+            guardianSoldiers = [];
+
+            // Determine number of guardians based on difficulty
+            let numGuardians = 2; // Default for beginner to hard
+            if (selectedLevel === 4) { // Expert
+                numGuardians = 3;
+            } else if (selectedLevel === 5) { // Nightmare
+                numGuardians = 4;
+            }
+
+            // Position guardians near the castle at the end of the path
+            // Path ends at canvas.width * 0.9 at y = 0.8, curving to canvas.width + 10 at y = 0.6
+            // Castle is at canvas.width - 100
+            const guardX = canvas.width * 0.92;
+            const baseY = canvas.height * 0.65;
+            const spacing = 40;
+
+            // Create guardian soldiers (Level 9 Crusaders - melee)
+            for (let i = 0; i < numGuardians; i++) {
+                const guardY = baseY + (i * spacing);
+                const guardian = new Soldier(guardX, guardY, 9);
+                guardian.isGuardian = true; // Mark as guardian
+                guardianSoldiers.push(guardian);
+            }
+
+            // Make guardians visually distinct
+            guardianSoldiers.forEach(guardian => {
+                guardian.element.style.border = '3px solid gold';
+                guardian.element.style.boxShadow = '0 0 15px rgba(255, 215, 0, 0.8)';
+            });
+        }
+
         function selectTower(type, element) {
             selectedTower = type;
+            soldierMode = false;
             console.log('Selected tower:', type);
-            
+
             document.querySelectorAll('.tower-option').forEach(option => {
                 option.classList.remove('selected');
             });
             element.classList.add('selected');
+
+            // Deselect soldier
+            document.querySelectorAll('.soldier-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+        }
+
+        function selectSoldierLevel(level, element) {
+            soldierMode = true;
+            selectedSoldierLevel = level;
+            console.log('Selected soldier level:', level);
+
+            document.querySelectorAll('.soldier-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            element.classList.add('selected');
+
+            // Deselect towers
+            document.querySelectorAll('.tower-option').forEach(option => {
+                option.classList.remove('selected');
+            });
         }
         
         function selectLevel(levelIndex) {
@@ -829,20 +2444,158 @@
             showToast(`Level: ${levelConfig.name} - Starting Gold: ${levelConfig.startingGold}`);
         }
         
+        function placeArtilleryTower(x, y, config) {
+            // Create detailed 3D tower structure
+            const towerElement = document.createElement('div');
+            towerElement.className = `placed-tower tower-artillery`;
+            towerElement.style.left = (x - 45) + 'px';
+            towerElement.style.top = (y - 55) + 'px';
+
+            // Create tower foundation
+            const foundation = document.createElement('div');
+            foundation.className = 'tower-foundation';
+            towerElement.appendChild(foundation);
+
+            // Create tower base layers
+            const base = document.createElement('div');
+            base.className = 'tower-base';
+            towerElement.appendChild(base);
+
+            const middle = document.createElement('div');
+            middle.className = 'tower-middle';
+            towerElement.appendChild(middle);
+
+            const top = document.createElement('div');
+            top.className = 'tower-top';
+            towerElement.appendChild(top);
+
+            // Create weapon system
+            const weapon = document.createElement('div');
+            weapon.className = 'tower-weapon tower-weapon-artillery';
+            weapon.innerHTML = `
+                <div style="
+                    width: 25px; height: 10px;
+                    background: linear-gradient(90deg, #2c3e50 0%, #34495e 100%);
+                    border-radius: 5px;
+                    position: relative;
+                ">
+                    <div style="
+                        position: absolute; right: -2px; top: 50%;
+                        transform: translateY(-50%); width: 5px; height: 5px;
+                        background: #000; border-radius: 50%;
+                    "></div>
+                </div>
+            `;
+
+            towerElement.appendChild(weapon);
+            document.querySelector('.game-container').appendChild(towerElement);
+
+            // Initialize tower data
+            const towerData = {
+                id: 'tower_' + Date.now() + '_' + Math.random(),
+                x,
+                y,
+                type: 'artillery',
+                element: towerElement,
+                config,
+                level: 1,
+                totalCost: config.cost,
+                targetX: null,
+                targetY: null,
+                targetMarker: null,
+                evolutions: {}
+            };
+
+            // Add click event to show range and allow retargeting between waves
+            towerElement.addEventListener('click', (e) => {
+                e.stopPropagation();
+
+                // Allow retargeting only when wave is not in progress
+                if (towerData.targetX !== null && waveInProgress) {
+                    showToast('Cannot change artillery target during wave!');
+                    showTowerRange(towerData);
+                } else {
+                    showTowerRange(towerData);
+                }
+            });
+
+            placedTowers.push(towerData);
+            pendingArtilleryTower = towerData;
+
+            // Enter artillery target selection mode
+            artilleryPlacementMode = true;
+            canvas.style.cursor = 'pointer';
+
+            // Show overlay message
+            const overlay = document.createElement('div');
+            overlay.className = 'artillery-placement-overlay';
+            overlay.textContent = '🎯 Click anywhere to set artillery target';
+            document.body.appendChild(overlay);
+
+            showToast('Artillery Tower placed! Now select a target location.');
+            console.log('Artillery tower placed! Awaiting target selection...');
+        }
+
+        function setArtilleryTarget(x, y) {
+            if (!pendingArtilleryTower) return;
+
+            // Set the target location for the artillery tower
+            pendingArtilleryTower.targetX = x;
+            pendingArtilleryTower.targetY = y;
+
+            // Remove old marker if retargeting
+            if (pendingArtilleryTower.targetMarker && pendingArtilleryTower.targetMarker.parentNode) {
+                pendingArtilleryTower.targetMarker.remove();
+            }
+
+            // Create visual target marker
+            const targetMarker = document.createElement('div');
+            targetMarker.className = 'artillery-target-marker';
+            targetMarker.style.left = (x - 20) + 'px';
+            targetMarker.style.top = (y - 20) + 'px';
+            targetMarker.innerHTML = '<div class="artillery-target-crosshair"></div>';
+            document.querySelector('.game-container').appendChild(targetMarker);
+            pendingArtilleryTower.targetMarker = targetMarker;
+
+            // Exit artillery placement mode
+            artilleryPlacementMode = false;
+            pendingArtilleryTower = null;
+
+            // Remove overlay message
+            const overlay = document.querySelector('.artillery-placement-overlay');
+            if (overlay) overlay.remove();
+
+            // Restore normal cursor
+            canvas.style.cursor = 'crosshair';
+
+            showToast('Artillery target set! Can be changed between waves.');
+        }
+
         function placeTower(x, y) {
             const config = towerConfigs[selectedTower];
             console.log('Placing', config.name, 'at', x, y);
-            
+
             if (gold < config.cost) {
                 showToast('Not enough gold!');
                 return;
             }
-            
+
             if (!canPlaceTower(x, y)) {
                 showToast('Cannot place tower here!');
                 return;
             }
-            
+
+            // Special handling for artillery tower
+            if (selectedTower === 'artillery') {
+                // Deduct gold first
+                gold -= config.cost;
+                updateGoldDisplay();
+
+                // Place the tower but don't set target yet
+                placeArtilleryTower(x, y, config);
+                return;
+            }
+
             // Deduct gold
             gold -= config.cost;
             updateGoldDisplay();
@@ -957,13 +2710,26 @@
             towerElement.appendChild(weapon);
             document.querySelector('.game-container').appendChild(towerElement);
 
+            // Initialize tower with level 1
+            const towerData = {
+                id: 'tower_' + Date.now() + '_' + Math.random(),
+                x,
+                y,
+                type: selectedTower,
+                element: towerElement,
+                config,
+                level: 1,
+                totalCost: config.cost,
+                evolutions: {}
+            };
+
             // Add click event to show range
             towerElement.addEventListener('click', (e) => {
                 e.stopPropagation();
-                showTowerRange({ x, y, type: selectedTower, element: towerElement, config });
+                showTowerRange(towerData);
             });
 
-            placedTowers.push({ x, y, type: selectedTower, element: towerElement, config });
+            placedTowers.push(towerData);
             showToast(`${config.name} placed!`);
             console.log('Tower placed! Total towers:', placedTowers.length);
         }
@@ -1011,44 +2777,58 @@
             return false;
         }
         
+        // Enemy types configuration
+        const enemyTypes = {
+            basic: { emoji: '👹', color: '#e74c3c', border: '#c0392b', speedMult: 1, healthMult: 1, reward: 10, size: 30 },
+            fast: { emoji: '🐺', color: '#3498db', border: '#2980b9', speedMult: 1.5, healthMult: 0.7, reward: 12, size: 28 },
+            tank: { emoji: '🐻', color: '#95a5a6', border: '#7f8c8d', speedMult: 0.6, healthMult: 2, reward: 20, size: 35 },
+            boss: { emoji: '🐉', color: '#9b59b6', border: '#8e44ad', speedMult: 0.5, healthMult: 3, reward: 50, size: 40 },
+            flying: { emoji: '🦅', color: '#f39c12', border: '#e67e22', speedMult: 1.2, healthMult: 0.8, reward: 15, size: 30 }
+        };
+
         // Enemy class
         class Enemy {
             constructor(type, health, isFlying = false) {
                 this.type = type;
-                this.health = health;
-                this.maxHealth = health;
+                const typeConfig = enemyTypes[type] || enemyTypes.basic;
+
+                this.health = health * typeConfig.healthMult;
+                this.maxHealth = this.health;
                 this.progress = 0;
-                this.baseSpeed = 0.08; // Base speed
-                this.speed = 0.08; // Current speed (affected by slow)
+                this.baseSpeed = 0.06 * typeConfig.speedMult; // Reduced from 0.08 to make monsters slower
+                this.speed = this.baseSpeed;
                 this.alive = true;
-                this.reward = 10;
-                this.isFlying = isFlying; // Flying enemies can only be hit by air defense
-                this.slowEffect = 1; // Speed multiplier (1 = normal, 0.5 = half speed)
-                this.slowTimer = 0; // Timer for slow effect
-                
+                this.reward = typeConfig.reward;
+                this.isFlying = isFlying;
+                this.slowEffect = 1;
+                this.slowTimer = 0;
+
                 // Create DOM element
                 this.element = document.createElement('div');
                 this.element.style.position = 'absolute';
-                this.element.style.width = '30px';
-                this.element.style.height = '30px';
+                this.element.style.width = typeConfig.size + 'px';
+                this.element.style.height = typeConfig.size + 'px';
                 this.element.style.borderRadius = '50%';
-                this.element.style.background = '#e74c3c';
-                this.element.style.border = '2px solid #c0392b';
+                this.element.style.background = typeConfig.color;
+                this.element.style.border = `2px solid ${typeConfig.border}`;
                 this.element.style.zIndex = this.isFlying ? '60' : '50';
                 this.element.style.transition = 'all 0.1s ease';
-                this.element.textContent = this.isFlying ? '🦅' : '👹';
+                this.element.textContent = typeConfig.emoji;
                 this.element.style.display = 'flex';
                 this.element.style.alignItems = 'center';
                 this.element.style.justifyContent = 'center';
-                this.element.style.fontSize = '20px';
-                
+                this.element.style.fontSize = (typeConfig.size - 10) + 'px';
+
                 document.querySelector('.game-container').appendChild(this.element);
-                
+
                 this.updatePosition();
             }
             
             update(deltaTime = 1/60) {
                 if (!this.alive) return;
+
+                // Check for soldiers in range to attack
+                this.checkSoldierAttack(deltaTime);
 
                 // Update slow effect timer
                 if (this.slowTimer > 0) {
@@ -1072,6 +2852,56 @@
                 }
 
                 this.updatePosition();
+            }
+
+            checkSoldierAttack(deltaTime) {
+                if (this.isFlying) return; // Flying enemies don't attack soldiers
+
+                const collisionRange = 30; // Very close range for collision
+                const attackRange = 50;
+                let nearestSoldier = null;
+                let nearestDistance = Infinity;
+
+                // Combine placed soldiers and guardians
+                const allSoldiers = [...placedSoldiers, ...guardianSoldiers];
+
+                allSoldiers.forEach(soldier => {
+                    if (!soldier.alive) return;
+
+                    const dx = soldier.x - this.x;
+                    const dy = soldier.y - this.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    // Check for direct collision with melee soldiers - they block enemies
+                    if (soldier.config.type === 'melee' && distance <= collisionRange) {
+                        // Stop the enemy from moving forward
+                        this.progress -= this.speed * deltaTime * 2; // Push back
+                        if (this.progress < 0) this.progress = 0;
+
+                        // Melee soldier attacks the enemy immediately (continuous damage)
+                        this.takeDamage(soldier.config.damage * deltaTime * 2);
+
+                        // Enemy attacks the soldier (continuous damage)
+                        soldier.takeDamage(this.damage * deltaTime * 2);
+                        return;
+                    }
+
+                    if (distance <= attackRange && distance < nearestDistance) {
+                        nearestSoldier = soldier;
+                        nearestDistance = distance;
+                    }
+                });
+
+                if (nearestSoldier) {
+                    // Attack soldier (deal damage over time)
+                    if (!this.soldierAttackCooldown) this.soldierAttackCooldown = 0;
+                    this.soldierAttackCooldown -= deltaTime * 1000;
+
+                    if (this.soldierAttackCooldown <= 0) {
+                        nearestSoldier.takeDamage(this.damage * 0.5); // Enemy damage to soldier per attack
+                        this.soldierAttackCooldown = 1000; // Attack every second
+                    }
+                }
             }
 
             applySlow(slowMultiplier, duration) {
@@ -1119,10 +2949,365 @@
                 }
             }
         }
-        
+
+        // Soldier class
+        class Soldier {
+            constructor(x, y, level) {
+                this.x = x;
+                this.y = y;
+                this.level = level;
+                this.config = soldierConfigs[level];
+                this.health = this.config.health;
+                this.maxHealth = this.config.health;
+                this.kills = 0;
+                this.maxKills = this.config.maxKills;
+                this.damage = this.config.damage;
+                this.alive = true;
+                this.targetEnemy = null;
+                this.attackCooldown = 0;
+                this.attackRate = 800; // Attack every 800ms
+
+                // Movement properties
+                this.targetX = null;
+                this.targetY = null;
+                this.moveSpeed = 100; // pixels per second
+                this.isMoving = false;
+
+                // Create DOM element
+                this.element = document.createElement('div');
+                this.element.className = 'placed-soldier';
+                this.element.style.left = (x - 25) + 'px';
+                this.element.style.top = (y - 30) + 'px';
+
+                // Build soldier visual
+                this.createSoldierVisual();
+
+                // Health bar
+                const healthBar = document.createElement('div');
+                healthBar.className = 'soldier-health-bar';
+                const healthFill = document.createElement('div');
+                healthFill.className = 'soldier-health-fill';
+                healthFill.style.width = '100%';
+                healthBar.appendChild(healthFill);
+                this.element.appendChild(healthBar);
+                this.healthFill = healthFill;
+
+                // Kills badge (hidden initially)
+                this.killsBadge = document.createElement('div');
+                this.killsBadge.className = 'soldier-kills-badge';
+                this.killsBadge.textContent = '0';
+                this.killsBadge.style.display = 'none';
+                this.element.appendChild(this.killsBadge);
+
+                // Add click handler for soldier selection
+                this.element.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectSoldierForMovement(this);
+                });
+
+                document.querySelector('.game-container').appendChild(this.element);
+            }
+
+            moveTo(targetX, targetY) {
+                this.targetX = targetX;
+                this.targetY = targetY;
+                this.isMoving = true;
+                this.element.classList.add('running');
+            }
+
+            updateMovement(deltaTime) {
+                if (!this.isMoving || this.targetX === null) return;
+
+                const dx = this.targetX - this.x;
+                const dy = this.targetY - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < 5) {
+                    // Reached destination
+                    this.isMoving = false;
+                    this.targetX = null;
+                    this.targetY = null;
+                    this.element.classList.remove('running');
+                    return;
+                }
+
+                // Move towards target
+                const moveDistance = this.moveSpeed * deltaTime;
+                const ratio = moveDistance / distance;
+
+                this.x += dx * ratio;
+                this.y += dy * ratio;
+
+                // Update element position
+                this.element.style.left = (this.x - 25) + 'px';
+                this.element.style.top = (this.y - 30) + 'px';
+            }
+
+            createSoldierVisual() {
+                // Head
+                const head = document.createElement('div');
+                head.className = 'soldier-head';
+
+                // Helmet
+                const helmet = document.createElement('div');
+                helmet.className = 'soldier-helmet';
+                helmet.style.background = `linear-gradient(135deg, ${this.config.helmet}, ${this.darkenColor(this.config.helmet)})`;
+                helmet.style.boxShadow = `0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)`;
+                head.appendChild(helmet);
+
+                // Body (uniform)
+                const body = document.createElement('div');
+                body.className = 'soldier-body';
+                body.style.background = `linear-gradient(180deg, ${this.config.body}, ${this.darkenColor(this.config.body)})`;
+                body.style.border = `2px solid ${this.darkenColor(this.config.body)}`;
+                body.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
+
+                // Legs
+                const legs = document.createElement('div');
+                legs.className = 'soldier-legs';
+                legs.style.background = `linear-gradient(180deg, ${this.darkenColor(this.config.body)}, #2d3748)`;
+                legs.style.borderRadius = '0 0 3px 3px';
+
+                // Weapon (draw realistic gun for ranged units)
+                const weapon = document.createElement('div');
+                weapon.className = 'soldier-weapon';
+
+                if (this.config.type === 'ranged') {
+                    // Create realistic gun visual
+                    weapon.innerHTML = `
+                        <div style="position: relative; width: 18px; height: 10px;">
+                            <div style="position: absolute; left: 0; top: 2px; width: 14px; height: 4px; background: linear-gradient(180deg, #4a5568 0%, #2d3748 100%); border-radius: 1px; box-shadow: 0 1px 2px rgba(0,0,0,0.5);"></div>
+                            <div style="position: absolute; left: 12px; top: 0; width: 6px; height: 6px; background: linear-gradient(135deg, #6b7280 0%, #4a5568 100%); border-radius: 1px; box-shadow: inset 0 1px 1px rgba(0,0,0,0.3);"></div>
+                            <div style="position: absolute; left: 4px; top: 6px; width: 3px; height: 3px; background: #2d3748; border-radius: 0 0 1px 1px;"></div>
+                        </div>
+                    `;
+                } else {
+                    weapon.textContent = this.config.weapon;
+                    weapon.style.fontSize = '16px';
+                    weapon.style.filter = 'drop-shadow(0 2px 2px rgba(0,0,0,0.3))';
+                }
+
+                this.element.appendChild(head);
+                this.element.appendChild(body);
+                this.element.appendChild(legs);
+                this.element.appendChild(weapon);
+            }
+
+            darkenColor(hex) {
+                // Darken a hex color by 20%
+                const num = parseInt(hex.replace('#', ''), 16);
+                const r = Math.max(0, (num >> 16) - 30);
+                const g = Math.max(0, ((num >> 8) & 0x00FF) - 30);
+                const b = Math.max(0, (num & 0x0000FF) - 30);
+                return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+            }
+
+            update(deltaTime) {
+                if (!this.alive) return;
+
+                // Update movement
+                this.updateMovement(deltaTime);
+
+                // Update attack cooldown
+                if (this.attackCooldown > 0) {
+                    this.attackCooldown -= deltaTime * 1000;
+                }
+
+                // Find nearest enemy in range
+                if (!this.targetEnemy || !this.targetEnemy.alive) {
+                    this.findTarget();
+                }
+
+                // Attack enemy if in range and cooldown ready
+                if (this.targetEnemy && this.attackCooldown <= 0) {
+                    this.attackEnemy();
+                }
+            }
+
+            findTarget() {
+                const attackRange = this.config.range; // Use soldier's configured range
+                let nearestEnemy = null;
+                let nearestDistance = Infinity;
+
+                enemies.forEach(enemy => {
+                    // Guardians can attack flying enemies, regular soldiers cannot
+                    if (!enemy.alive) return;
+                    if (enemy.isFlying && !this.isGuardian) return; // Only guardians can attack flying enemies
+
+                    const dx = enemy.x - this.x;
+                    const dy = enemy.y - this.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance <= attackRange && distance < nearestDistance) {
+                        nearestEnemy = enemy;
+                        nearestDistance = distance;
+                    }
+                });
+
+                this.targetEnemy = nearestEnemy;
+            }
+
+            attackEnemy() {
+                if (!this.targetEnemy || !this.targetEnemy.alive) return;
+
+                // Ranged soldiers shoot projectiles with lead targeting
+                if (this.config.type === 'ranged') {
+                    const leadTarget = this.calculateLeadTarget(this.targetEnemy);
+                    const projectile = new SoldierProjectile(
+                        this.x, this.y,
+                        leadTarget.x, leadTarget.y,
+                        this.damage
+                    );
+                    soldierProjectiles.push(projectile);
+                } else {
+                    // Melee soldiers deal instant damage
+                    this.targetEnemy.takeDamage(this.damage);
+                }
+
+                // Check if enemy died
+                if (!this.targetEnemy.alive) {
+                    this.kills++;
+                    this.updateKillsBadge();
+
+                    // Check if soldier reached max kills
+                    if (this.kills >= this.maxKills) {
+                        this.die();
+                        return;
+                    }
+                }
+
+                this.attackCooldown = this.attackRate;
+            }
+
+            takeDamage(damage) {
+                this.health -= damage;
+                this.updateHealthBar();
+
+                if (this.health <= 0) {
+                    this.die();
+                }
+            }
+
+            updateHealthBar() {
+                const healthPercent = (this.health / this.maxHealth) * 100;
+                this.healthFill.style.width = healthPercent + '%';
+
+                // Change color based on health
+                if (healthPercent > 60) {
+                    this.healthFill.style.background = 'linear-gradient(90deg, #48bb78 0%, #38a169 100%)';
+                } else if (healthPercent > 30) {
+                    this.healthFill.style.background = 'linear-gradient(90deg, #f39c12 0%, #e67e22 100%)';
+                } else {
+                    this.healthFill.style.background = 'linear-gradient(90deg, #e74c3c 0%, #c0392b 100%)';
+                }
+            }
+
+            updateKillsBadge() {
+                this.killsBadge.textContent = this.kills;
+                this.killsBadge.style.display = 'flex';
+            }
+
+            calculateLeadTarget(enemy) {
+                // Calculate distance to enemy
+                const dx = enemy.x - this.x;
+                const dy = enemy.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                // Projectile speed (matches SoldierProjectile speed)
+                const projectileSpeed = 500;
+
+                // Time for projectile to reach enemy
+                const timeToReach = distance / projectileSpeed;
+
+                // Get enemy's current position on path
+                const currentProgress = enemy.progress;
+
+                // Predict enemy's future position
+                const futureProgress = currentProgress + (enemy.speed * timeToReach);
+                const futurePosition = getPathPositionAtProgress(futureProgress);
+
+                return { x: futurePosition.x, y: futurePosition.y };
+            }
+
+            die() {
+                this.alive = false;
+                if (this.element && this.element.parentNode) {
+                    this.element.remove();
+                }
+            }
+        }
+
+        // Soldier Projectile class
+        class SoldierProjectile {
+            constructor(startX, startY, targetX, targetY, damage) {
+                this.x = startX;
+                this.y = startY;
+                this.targetX = targetX;
+                this.targetY = targetY;
+                this.damage = damage;
+                this.speed = 500; // pixels per second - increased for better accuracy
+
+                // Calculate velocity
+                const dx = targetX - startX;
+                const dy = targetY - startY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                this.velocityX = (dx / distance) * this.speed;
+                this.velocityY = (dy / distance) * this.speed;
+
+                // Create DOM element
+                this.element = document.createElement('div');
+                this.element.style.position = 'absolute';
+                this.element.style.width = '8px';
+                this.element.style.height = '8px';
+                this.element.style.background = 'radial-gradient(circle, #ffd700, #ff8c00)';
+                this.element.style.borderRadius = '50%';
+                this.element.style.boxShadow = '0 0 8px rgba(255, 215, 0, 0.8)';
+                this.element.style.zIndex = '75';
+                this.element.style.left = (startX - 4) + 'px';
+                this.element.style.top = (startY - 4) + 'px';
+                document.querySelector('.game-container').appendChild(this.element);
+            }
+
+            update(deltaTime) {
+                this.x += this.velocityX * deltaTime;
+                this.y += this.velocityY * deltaTime;
+
+                this.element.style.left = (this.x - 4) + 'px';
+                this.element.style.top = (this.y - 4) + 'px';
+
+                // Check collision with enemies (larger hit radius for better accuracy)
+                const hitEnemy = enemies.find(enemy => {
+                    if (!enemy.alive || enemy.isFlying) return false;
+                    const dx = this.x - enemy.x;
+                    const dy = this.y - enemy.y;
+                    return Math.sqrt(dx * dx + dy * dy) < 25; // Increased from 20 to 25
+                });
+
+                if (hitEnemy) {
+                    hitEnemy.takeDamage(this.damage);
+                    this.destroy();
+                    return true;
+                }
+
+                // Check if off screen
+                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                    this.destroy();
+                    return true;
+                }
+
+                return false;
+            }
+
+            destroy() {
+                if (this.element && this.element.parentNode) {
+                    this.element.remove();
+                }
+            }
+        }
+
         // Projectile class
         class Projectile {
-            constructor(startX, startY, targetX, targetY, damage, towerType, towerConfig = null) {
+            constructor(startX, startY, targetX, targetY, damage, towerType, towerConfig = null, splashRadius = 80) {
                 this.x = startX;
                 this.y = startY;
                 this.targetX = targetX;
@@ -1131,6 +3316,7 @@
                 this.speed = 500; // Increased from 400 to match tower calculations
                 this.towerType = towerType;
                 this.towerConfig = towerConfig; // Store tower config for special effects
+                this.splashRadius = splashRadius; // Store splash radius for AOE attacks
 
                 const dx = targetX - startX;
                 const dy = targetY - startY;
@@ -1145,30 +3331,32 @@
 
                 // Different projectile styles based on tower type
                 if (towerType === 'arrow') {
-                    // Arrow projectile - thin line with triangle tip
-                    this.element.style.width = '3px';
-                    this.element.style.height = '15px';
-                    this.element.style.background = 'linear-gradient(to bottom, #8B4513 0%, #A0522D 50%, #D2691E 100%)';
-                    this.element.style.borderRadius = '1px';
-                    this.element.style.boxShadow = '0 0 3px rgba(139, 69, 19, 0.5)';
-                    // Add arrowhead
-                    this.element.style.clipPath = 'polygon(50% 0%, 100% 20%, 70% 20%, 70% 100%, 30% 100%, 30% 20%, 0% 20%)';
+                    // Arrow projectile - glowing arrow with trail
+                    this.element.style.width = '6px';
+                    this.element.style.height = '30px';
+                    this.element.style.background = 'linear-gradient(to bottom, #FFD700 0%, #FFA500 50%, #FF8C00 100%)';
+                    this.element.style.borderRadius = '3px';
+                    this.element.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 140, 0, 0.6), 0 0 30px rgba(255, 140, 0, 0.4)';
+                    this.element.style.clipPath = 'polygon(50% 0%, 100% 25%, 75% 25%, 75% 100%, 25% 100%, 25% 25%, 0% 25%)';
+                    this.element.style.filter = 'brightness(1.2)';
                 } else if (towerType === 'cannon') {
-                    // Cannonball - large black sphere
+                    // Cannonball - explosive glowing sphere
+                    this.element.style.width = '14px';
+                    this.element.style.height = '14px';
+                    this.element.style.background = 'radial-gradient(circle at 30% 30%, #ff6b6b, #c92a2a)';
+                    this.element.style.borderRadius = '50%';
+                    this.element.style.boxShadow = '0 0 15px rgba(255, 107, 107, 0.9), 0 0 25px rgba(201, 42, 42, 0.6), inset -2px -2px 6px rgba(255,255,255,0.3)';
+                    this.element.style.border = '2px solid #ff5252';
+                    this.element.style.filter = 'brightness(1.3)';
+                } else if (towerType === 'magic') {
+                    // Magic orb - intensely glowing sphere
                     this.element.style.width = '12px';
                     this.element.style.height = '12px';
-                    this.element.style.background = 'radial-gradient(circle at 30% 30%, #444, #000)';
+                    this.element.style.background = 'radial-gradient(circle at 40% 40%, #a78bfa, #7c3aed)';
                     this.element.style.borderRadius = '50%';
-                    this.element.style.boxShadow = '0 0 8px rgba(0,0,0,0.9), inset -2px -2px 4px rgba(255,255,255,0.2)';
-                    this.element.style.border = '1px solid #222';
-                } else if (towerType === 'magic') {
-                    // Magic orb - purple/pink glowing sphere
-                    this.element.style.width = '10px';
-                    this.element.style.height = '10px';
-                    this.element.style.background = 'radial-gradient(circle at 40% 40%, #ff00ff, #8b00ff)';
-                    this.element.style.borderRadius = '50%';
-                    this.element.style.boxShadow = '0 0 12px #ff00ff, 0 0 20px #ff00ff, inset 0 0 8px rgba(255,255,255,0.5)';
-                    this.element.style.animation = 'pulse 0.3s infinite';
+                    this.element.style.boxShadow = '0 0 20px #a78bfa, 0 0 35px #7c3aed, 0 0 50px #6d28d9, inset 0 0 10px rgba(255,255,255,0.6)';
+                    this.element.style.animation = 'magicPulse 0.4s infinite';
+                    this.element.style.filter = 'brightness(1.4)';
                 } else if (towerType === 'freeze') {
                     // Ice shard - crystalline appearance
                     this.element.style.width = '8px';
@@ -1216,39 +3404,90 @@
                 this.x += this.velocityX * deltaTime;
                 this.y += this.velocityY * deltaTime;
                 this.updatePosition();
-                
-                // Check collision with enemies
-                const hitEnemy = enemies.find(enemy => {
-                    if (!enemy.alive) return false;
 
-                    // Flying enemies can only be hit by air defense towers
-                    if (enemy.isFlying && this.towerConfig && !this.towerConfig.canHitAir) {
-                        return false;
+                // Artillery projectiles explode when reaching target (area damage)
+                if (this.towerType === 'artillery') {
+                    const dx = this.x - this.targetX;
+                    const dy = this.y - this.targetY;
+                    const distanceToTarget = Math.sqrt(dx * dx + dy * dy);
+
+                    // Check if reached target location (within 15px)
+                    if (distanceToTarget < 15) {
+                        // Area damage - hit all enemies within blast radius
+                        const blastRadius = this.splashRadius; // Use dynamic splash radius from evolutions
+                        enemies.forEach(enemy => {
+                            if (!enemy.alive) return;
+
+                            const ex = this.x - enemy.x;
+                            const ey = this.y - enemy.y;
+                            const distToEnemy = Math.sqrt(ex * ex + ey * ey);
+
+                            if (distToEnemy <= blastRadius) {
+                                // Full damage at center, reduced at edges
+                                const damageMultiplier = 1 - (distToEnemy / blastRadius) * 0.5;
+                                enemy.takeDamage(this.damage * damageMultiplier);
+                            }
+                        });
+
+                        this.destroy();
+                        return true;
                     }
+                } else {
+                    // Normal projectiles - check collision with enemies
+                    const hitEnemy = enemies.find(enemy => {
+                        if (!enemy.alive) return false;
 
-                    const dx = this.x - enemy.x;
-                    const dy = this.y - enemy.y;
-                    return Math.sqrt(dx * dx + dy * dy) < 20;
-                });
+                        // Flying enemies can only be hit by air defense towers
+                        if (enemy.isFlying && this.towerConfig && !this.towerConfig.canHitAir) {
+                            return false;
+                        }
 
-                if (hitEnemy) {
-                    hitEnemy.takeDamage(this.damage);
+                        const dx = this.x - enemy.x;
+                        const dy = this.y - enemy.y;
+                        return Math.sqrt(dx * dx + dy * dy) < 20;
+                    });
 
-                    // Apply slow effect if this is a freeze tower
-                    if (this.towerConfig && this.towerConfig.slowEffect) {
-                        hitEnemy.applySlow(this.towerConfig.slowEffect, this.towerConfig.slowDuration);
+                    if (hitEnemy) {
+                        // Check if this projectile should do splash damage (cannon or high-level AOE evolutions)
+                        if ((this.towerType === 'cannon' || this.splashRadius > 100) && this.splashRadius) {
+                            // Apply splash damage to all enemies within splash radius
+                            enemies.forEach(enemy => {
+                                if (!enemy.alive) return;
+
+                                const dx = this.x - enemy.x;
+                                const dy = this.y - enemy.y;
+                                const distToEnemy = Math.sqrt(dx * dx + dy * dy);
+
+                                if (distToEnemy < this.splashRadius) {
+                                    enemy.takeDamage(this.damage);
+
+                                    // Apply slow effect if this is a freeze tower
+                                    if (this.towerConfig && this.towerConfig.slowEffect) {
+                                        enemy.applySlow(this.towerConfig.slowEffect, this.towerConfig.slowDuration);
+                                    }
+                                }
+                            });
+                        } else {
+                            // Single target damage
+                            hitEnemy.takeDamage(this.damage);
+
+                            // Apply slow effect if this is a freeze tower
+                            if (this.towerConfig && this.towerConfig.slowEffect) {
+                                hitEnemy.applySlow(this.towerConfig.slowEffect, this.towerConfig.slowDuration);
+                            }
+                        }
+
+                        this.destroy();
+                        return true;
                     }
-
-                    this.destroy();
-                    return true;
                 }
-                
+
                 // Check if projectile is off screen
                 if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
                     this.destroy();
                     return true;
                 }
-                
+
                 return false;
             }
             
@@ -1256,7 +3495,7 @@
                 // Different offsets for different projectile sizes
                 let offset = 3;
                 if (this.towerType === 'cannon') offset = 6;
-                else if (this.towerType === 'arrow') offset = 1.5;
+                else if (this.towerType === 'arrow') offset = 3; // Updated for larger arrows (width 6px / 2 = 3px)
                 else if (this.towerType === 'magic') offset = 5;
                 else if (this.towerType === 'freeze') offset = 4;
                 else if (this.towerType === 'air') offset = 3;
@@ -1393,13 +3632,13 @@
 
             // Difficulty multipliers based on level
             const difficultyMultipliers = {
-                enemyCount: 1 + (selectedLevel * 0.3), // More enemies on harder levels
+                enemyCount: 1 + (selectedLevel * 0.2), // Reduced from 0.3 - fewer enemies on harder levels
                 health: 1 + (selectedLevel * 0.5), // More health on harder levels
                 speed: 1 + (selectedLevel * 0.15), // Faster enemies on harder levels
-                spawnRate: Math.max(300, 1000 - (selectedLevel * 150)) // Faster spawning on harder levels
+                spawnRate: Math.max(150, 500 - (selectedLevel * 50) - (currentWave * 10)) // Slower spawning (was 100/400)
             };
 
-            const enemyCount = Math.floor((5 + currentWave * 2) * difficultyMultipliers.enemyCount);
+            const enemyCount = Math.floor((6 + currentWave * 2.5) * difficultyMultipliers.enemyCount); // Reduced from 8 + wave*3
             let spawnedCount = 0;
 
             const spawnInterval = setInterval(() => {
@@ -1416,12 +3655,32 @@
                     return;
                 }
 
-                // Every 3rd wave (starting from wave 3), spawn some flying enemies
-                const isFlying = currentWave >= 3 && spawnedCount % 3 === 0;
-                const baseHealth = isFlying ? 15 + currentWave * 8 : 20 + currentWave * 10;
+                // Determine enemy type based on wave and spawn pattern
+                let enemyType = 'basic';
+                let isFlying = false;
+
+                // Boss every 5 waves
+                if (spawnedCount === enemyCount - 1 && currentWave % 5 === 0) {
+                    enemyType = 'boss';
+                }
+                // Flying enemies from wave 3+
+                else if (currentWave >= 3 && spawnedCount % 4 === 0) {
+                    enemyType = 'flying';
+                    isFlying = true;
+                }
+                // Tank enemies from wave 4+
+                else if (currentWave >= 4 && spawnedCount % 5 === 0) {
+                    enemyType = 'tank';
+                }
+                // Fast enemies from wave 2+
+                else if (currentWave >= 2 && spawnedCount % 3 === 0) {
+                    enemyType = 'fast';
+                }
+
+                const baseHealth = 20 + currentWave * 10;
                 const health = Math.floor(baseHealth * difficultyMultipliers.health);
 
-                const enemy = new Enemy('basic', health, isFlying);
+                const enemy = new Enemy(enemyType, health, isFlying);
 
                 // Apply speed multiplier based on difficulty
                 enemy.baseSpeed = enemy.baseSpeed * difficultyMultipliers.speed;
@@ -1453,12 +3712,12 @@
 
             // Calculate wave stats
             const difficultyMultipliers = {
-                enemyCount: 1 + (selectedLevel * 0.3),
+                enemyCount: 1 + (selectedLevel * 0.2), // Match spawn wave multiplier
                 health: 1 + (selectedLevel * 0.5),
                 speed: 1 + (selectedLevel * 0.15)
             };
 
-            const totalEnemies = Math.floor((5 + currentWave * 2) * difficultyMultipliers.enemyCount);
+            const totalEnemies = Math.floor((6 + currentWave * 2.5) * difficultyMultipliers.enemyCount); // Match spawn wave formula
             const flyingEnemies = currentWave >= 3 ? Math.floor(totalEnemies / 3) : 0;
             const groundEnemies = totalEnemies - flyingEnemies;
 
@@ -1495,17 +3754,382 @@
             wavePreview.style.display = 'block';
         }
         
+        // Get tower stats based on level
+        function getTowerStats(tower) {
+            const level = tower.level || 1;
+            const baseDamage = 15;
+            let baseRange = 120;
+
+            // Special ranges for different towers
+            if (tower.type === 'freeze') {
+                baseRange = 150;
+            } else if (tower.type === 'artillery') {
+                baseRange = 999999; // Artillery has unlimited range
+            }
+
+            const baseFireRate = 800;
+
+            // Stats increase with level
+            let damage = baseDamage + ((level - 1) * 5); // +5 damage per level
+            let range = baseRange + ((level - 1) * 15); // +15 range per level
+            let fireRate = Math.max(300, baseFireRate - ((level - 1) * 80)); // Faster fire rate, min 300ms
+
+            // Initialize splash radius (for artillery and cannon)
+            let splashRadius = 80; // Base splash radius for artillery
+            if (tower.type === 'cannon') splashRadius = 50; // Base splash radius for cannon
+
+            // Apply evolution bonuses
+            if (tower.evolutions) {
+                for (let lvl in tower.evolutions) {
+                    const evolution = tower.evolutions[lvl];
+                    const effect = evolution.data.effect;
+                    const value = evolution.data.value;
+
+                    switch (effect) {
+                        case 'damage':
+                            damage *= (1 + value);
+                            break;
+                        case 'fireRate':
+                            fireRate *= (1 - value); // Lower is faster
+                            fireRate = Math.max(100, fireRate);
+                            break;
+                        case 'range':
+                            range *= (1 + value);
+                            break;
+                        case 'sniper':
+                            if (value.range) range *= (1 + value.range);
+                            if (value.damage) damage *= (1 + value.damage);
+                            break;
+                        case 'bombardment':
+                            if (value.damage) damage *= (1 + value.damage);
+                            if (value.range) range *= (1 + value.range);
+                            break;
+                        case 'mastery':
+                            if (value.damage) damage *= value.damage;
+                            if (value.range) range *= (1 + value.range);
+                            break;
+                        case 'nuclear':
+                            if (value.damage) damage *= (1 + value.damage);
+                            break;
+                        case 'rapid':
+                            fireRate /= value;
+                            fireRate = Math.max(100, fireRate);
+                            break;
+                        case 'overflow':
+                            if (value.speed) fireRate /= value.speed;
+                            fireRate = Math.max(50, fireRate);
+                            break;
+                        case 'sam':
+                            if (value.range) range *= (1 + value.range);
+                            break;
+                        case 'totalDefense':
+                            if (value.range) range *= value.range;
+                            break;
+                        case 'lightningRod':
+                            if (value.damage) damage *= (1 + value.damage);
+                            break;
+                        case 'absoluteZero':
+                            // Slow effect handled elsewhere
+                            break;
+                        case 'glacialSpike':
+                            if (value.damage) damage *= value.damage;
+                            break;
+                        case 'dualPurpose':
+                            damage *= (1 + value);
+                            break;
+                        case 'flak':
+                            // Conditional damage bonus handled in combat
+                            break;
+                        // New level 5-7 evolutions
+                        case 'homing':
+                        case 'fire':
+                        case 'death':
+                            if (value.damage) damage *= value.damage;
+                            if (value.pierce) {}  // Handled in projectile
+                            break;
+                        case 'apocalypse':
+                        case 'legendary':
+                            if (value.damage) damage *= value.damage;
+                            break;
+                        case 'fusion':
+                        case 'antimatter':
+                        case 'bigBang':
+                            if (value.damage) damage *= value.damage;
+                            break;
+                        case 'gatling':
+                        case 'minigun':
+                            if (value.speed) {
+                                fireRate /= value.speed;
+                                fireRate = Math.max(50, fireRate);
+                            }
+                            break;
+                        case 'chainExplosion':
+                            // Handled in projectile logic
+                            break;
+                        case 'void':
+                        case 'blackHole':
+                        case 'reality':
+                            if (value.damage) damage *= value.damage;
+                            if (typeof value === 'number') damage *= value;
+                            break;
+                        case 'god':
+                            if (value.damage) damage *= value.damage;
+                            if (value.speed) {
+                                fireRate /= value.speed;
+                                fireRate = Math.max(30, fireRate);
+                            }
+                            break;
+                        case 'chaos':
+                        case 'arcaneStorm':
+                            // Multi-element effects in combat
+                            break;
+                        case 'arctic':
+                        case 'shatter':
+                        case 'cryo':
+                        case 'zeroKill':
+                            if (value.damage) damage *= value.damage;
+                            if (typeof value === 'number') damage *= value;
+                            break;
+                        case 'prison':
+                        case 'eternal':
+                            // Freeze effects handled in projectile
+                            break;
+                        case 'patriot':
+                        case 'omni':
+                        case 'supremacy':
+                        case 'aegis':
+                            if (typeof value === 'number') damage *= value;
+                            if (value.damage) damage *= value.damage;
+                            break;
+                        case 'hybrid':
+                        case 'ultimate':
+                            if (value.damage) damage *= value.damage;
+                            if (value.speed) {
+                                fireRate /= value.speed;
+                                fireRate = Math.max(50, fireRate);
+                            }
+                            if (value.range) range *= value.range;
+                            break;
+                        case 'plasma':
+                        case 'thunderGod':
+                        case 'zeus':
+                            if (value.damage) damage *= value.damage;
+                            break;
+                        case 'reaction':
+                        case 'unlimited':
+                        case 'eternalStorm':
+                            if (value.damage) damage *= value.damage;
+                            if (value.speed) {
+                                fireRate /= value.speed;
+                                fireRate = Math.max(30, fireRate);
+                            }
+                            break;
+                        case 'nuke':
+                        case 'antimatterWar':
+                        case 'planetBuster':
+                        case 'armageddon':
+                            if (value.damage) damage *= value.damage;
+                            if (typeof value === 'number') damage *= value;
+                            if (value.aoe) splashRadius = value.aoe;
+                            if (value.splash) splashRadius *= value.splash;
+                            break;
+                        case 'hellfire':
+                        case 'apocalypseRain':
+                            if (value.damage) damage *= value.damage;
+                            if (value.aoe) splashRadius = value.aoe;
+                            break;
+                        // Level 8-10 evolutions
+                        case 'divineVolley':
+                        case 'cosmic':
+                        case 'universeBarrage':
+                        case 'infinityArrow':
+                        case 'omnipotentArrows':
+                            if (value.damage) damage *= value.damage;
+                            if (value.speed) {
+                                fireRate /= value.speed;
+                                fireRate = Math.max(20, fireRate);
+                            }
+                            break;
+                        case 'arrowGod':
+                            if (value.damage) damage *= value.damage;
+                            if (value.speed) {
+                                fireRate /= value.speed;
+                                fireRate = Math.max(20, fireRate);
+                            }
+                            if (value.aoe) splashRadius = value.aoe;
+                            break;
+                        case 'supernova':
+                        case 'quantum':
+                        case 'galaxy':
+                        case 'infiniteBarrage':
+                        case 'universal':
+                            if (value.damage) damage *= value.damage;
+                            if (value.speed) {
+                                fireRate /= value.speed;
+                                fireRate = Math.max(10, fireRate);
+                            }
+                            break;
+                        case 'singularity':
+                            if (value.damage) damage *= value.damage;
+                            if (value.speed) {
+                                fireRate /= value.speed;
+                                fireRate = Math.max(10, fireRate);
+                            }
+                            if (value.aoe) splashRadius = value.aoe;
+                            break;
+                        case 'dimensional':
+                        case 'archmage':
+                        case 'timeStop':
+                        case 'omnimancer':
+                        case 'magicSingularity':
+                        case 'eternalMage':
+                            if (value.damage) damage *= value.damage;
+                            if (value.speed) {
+                                fireRate /= value.speed;
+                                fireRate = Math.max(10, fireRate);
+                            }
+                            break;
+                        case 'frozenDimension':
+                        case 'iceApocalypse':
+                        case 'timeFreeze':
+                        case 'extinctionFrost':
+                        case 'zeroRealm':
+                        case 'iceGod':
+                            if (value.damage) damage *= value.damage;
+                            if (typeof value === 'number') damage *= value;
+                            break;
+                        case 'skyEater':
+                        case 'omega':
+                        case 'celestial':
+                        case 'godDefense':
+                        case 'heavensWrath':
+                        case 'defenseSingularity':
+                            if (value.damage) damage *= value.damage;
+                            if (value.speed) {
+                                fireRate /= value.speed;
+                                fireRate = Math.max(10, fireRate);
+                            }
+                            if (value.range) range *= value.range;
+                            break;
+                        case 'thor':
+                        case 'plasmaApocalypse':
+                        case 'lightningDimension':
+                        case 'infiniteVoltage':
+                        case 'electricGod':
+                        case 'eternalPlasma':
+                            if (value.damage) damage *= value.damage;
+                            if (value.speed) {
+                                fireRate /= value.speed;
+                                fireRate = Math.max(10, fireRate);
+                            }
+                            break;
+                        case 'starDestroyer':
+                        case 'eternalBombard':
+                        case 'galaxyBuster':
+                        case 'apocalypseEngine':
+                        case 'universeEnder':
+                        case 'artilleryGod':
+                            if (value.damage) damage *= value.damage;
+                            if (typeof value === 'number') damage *= value;
+                            if (value.speed) {
+                                fireRate /= value.speed;
+                                fireRate = Math.max(5, fireRate);
+                            }
+                            if (value.aoe) splashRadius = value.aoe;
+                            break;
+                        // Original special effects
+                        case 'multishot':
+                        case 'pierce':
+                        case 'barrage':
+                        case 'explosive':
+                        case 'chain':
+                        case 'echo':
+                        case 'meteor':
+                        case 'storm':
+                        case 'coil':
+                        case 'web':
+                        case 'infiniteChain':
+                        case 'thunderstorm':
+                        case 'railGun':
+                            if (value.damage) damage *= value.damage;
+                            if (value.pierce) {} // Handled in projectile
+                            break;
+                        case 'napalm':
+                            if (value.splash) splashRadius *= value.splash;
+                            if (value.dot) {} // DOT handled in projectile
+                            break;
+                        case 'orbital':
+                            if (typeof value === 'number') splashRadius = value;
+                            break;
+                        case 'moab':
+                            if (value.damage) damage *= value.damage;
+                            if (value.slow) {} // Slow handled in projectile
+                            break;
+                        case 'armorPierce':
+                        case 'cluster':
+                            // Special effects handled in combat logic
+                            break;
+                        case 'shockwave':
+                            if (typeof value === 'number') splashRadius *= (1 + value);
+                            break;
+                        case 'bunkerBuster':
+                            // Boss damage handled in combat
+                            break;
+                        case 'fragmentation':
+                            if (typeof value === 'number') splashRadius *= value;
+                            break;
+                        case 'slowPower':
+                        case 'slowDuration':
+                        case 'permafrost':
+                        case 'blizzard':
+                        case 'iceAge':
+                        case 'multiTarget':
+                        case 'groundSupport':
+                        case 'skyDominance':
+                            // Special effects handled in combat logic
+                            break;
+                        case 'splashRadius':
+                            if (typeof value === 'number') splashRadius *= (1 + value);
+                            break;
+                    }
+                }
+            }
+
+            return { damage, range, fireRate, splashRadius };
+        }
+
         // Tower shooting functionality with improved accuracy
         function updateTowers(deltaTime) {
             placedTowers.forEach(tower => {
                 if (!tower.lastFireTime) tower.lastFireTime = 0;
 
                 const now = Date.now();
-                const fireRate = 800; // Faster firing rate (reduced from 1000ms to 800ms)
+                const stats = getTowerStats(tower);
+
+                // Artillery towers shoot at their fixed target location continuously
+                if (tower.type === 'artillery') {
+                    // Only fire if target has been set
+                    if (tower.targetX === null || tower.targetY === null) return;
+
+                    if (now - tower.lastFireTime < stats.fireRate) return;
+
+                    tower.lastFireTime = now;
+
+                    // Create projectile aimed at the fixed target
+                    const projectile = new Projectile(
+                        tower.x, tower.y,
+                        tower.targetX, tower.targetY,
+                        stats.damage, // Damage scales with level
+                        tower.type,
+                        tower.config,
+                        stats.splashRadius // Pass splash radius for AOE
+                    );
+                    projectiles.push(projectile);
+                    return; // Skip normal targeting logic
+                }
 
                 // Ice towers automatically freeze all enemies in range continuously
                 if (tower.type === 'freeze' && tower.config) {
-                    const freezeRange = 150; // Freeze towers have larger range
                     enemies.forEach(enemy => {
                         if (!enemy.alive) return;
 
@@ -1513,17 +4137,47 @@
                         const dy = enemy.y - tower.y;
                         const distance = Math.sqrt(dx * dx + dy * dy);
 
-                        if (distance <= freezeRange) {
+                        if (distance <= stats.range) {
                             // Continuously apply freeze effect
                             enemy.applySlow(tower.config.slowEffect, tower.config.slowDuration);
                         }
                     });
                 }
 
-                if (now - tower.lastFireTime < fireRate) return;
+                if (now - tower.lastFireTime < stats.fireRate) return;
 
-                // Find nearest enemy in range
-                const range = 120; // Increased range
+                // Check if tower has a locked target that's still valid
+                if (tower.lockedTarget && tower.lockedTarget.alive) {
+                    const dx = tower.lockedTarget.x - tower.x;
+                    const dy = tower.lockedTarget.y - tower.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    // If locked target is still in range, keep firing at it
+                    if (distance <= stats.range) {
+                        const nearestEnemy = tower.lockedTarget;
+
+                        tower.lastFireTime = now;
+
+                        const projectile = new Projectile(
+                            tower.x, tower.y,
+                            nearestEnemy.x, nearestEnemy.y,
+                            stats.damage,
+                            tower.type,
+                            tower.config,
+                            stats.splashRadius
+                        );
+                        projectiles.push(projectile);
+                        return; // Continue focusing on locked target
+                    } else {
+                        // Target out of range, clear lock
+                        tower.lockedTarget = null;
+                    }
+                } else {
+                    // Clear invalid locked target
+                    tower.lockedTarget = null;
+                }
+
+                // Find nearest enemy in range (only if no locked target)
                 let nearestEnemy = null;
                 let nearestDistance = Infinity;
 
@@ -1535,17 +4189,25 @@
                         return;
                     }
 
+                    // Air defense towers can ONLY target flying enemies
+                    if (tower.config && tower.config.canHitAir && !enemy.isFlying) {
+                        return;
+                    }
+
                     const dx = enemy.x - tower.x;
                     const dy = enemy.y - tower.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
 
-                    if (distance <= range && distance < nearestDistance) {
+                    if (distance <= stats.range && distance < nearestDistance) {
                         nearestEnemy = enemy;
                         nearestDistance = distance;
                     }
                 });
 
                 if (nearestEnemy) {
+                    // Lock onto this target
+                    tower.lockedTarget = nearestEnemy;
+
                     tower.lastFireTime = now;
 
                     // Calculate lead target position for better accuracy
@@ -1555,9 +4217,10 @@
                     const projectile = new Projectile(
                         tower.x, tower.y,
                         leadTarget.x, leadTarget.y,
-                        15, // Increased damage
+                        stats.damage, // Damage scales with level
                         tower.type, // Pass tower type for different projectile styles
-                        tower.config // Pass tower config for special effects (slow, air defense, etc.)
+                        tower.config, // Pass tower config for special effects (slow, air defense, etc.)
+                        stats.splashRadius // Pass splash radius for AOE
                     );
                     projectiles.push(projectile);
 
@@ -1603,23 +4266,37 @@
         function gameLoop(currentTime) {
             const deltaTime = Math.min((currentTime - lastFrameTime) / 1000, 0.1);
             lastFrameTime = currentTime;
-            
+
             if (waveInProgress) {
                 // Update enemies
                 enemies.forEach(enemy => enemy.update(deltaTime));
                 enemies = enemies.filter(enemy => enemy.alive);
-                
+
+                // Update soldiers
+                placedSoldiers.forEach(soldier => soldier.update(deltaTime));
+                placedSoldiers = placedSoldiers.filter(soldier => soldier.alive);
+
+                // Update guardian soldiers (always active)
+                guardianSoldiers.forEach(guardian => guardian.update(deltaTime));
+                guardianSoldiers = guardianSoldiers.filter(guardian => guardian.alive);
+
+                // Update soldier projectiles
+                soldierProjectiles = soldierProjectiles.filter(projectile => {
+                    const result = projectile.update(deltaTime);
+                    return !result; // Keep if update returns false
+                });
+
                 // Update projectiles
                 projectiles.forEach(projectile => projectile.update(deltaTime));
                 projectiles = projectiles.filter(projectile => {
                     const result = projectile.update(deltaTime);
                     return !result; // Keep if update returns false
                 });
-                
+
                 // Update towers
                 updateTowers(deltaTime);
             }
-            
+
             requestAnimationFrame(gameLoop);
         }
         
@@ -1631,10 +4308,24 @@
             waveInProgress = false;
             wavePreviewShown = false; // Reset preview flag
 
-            // Remove all towers
+            // Reset artillery placement mode
+            artilleryPlacementMode = false;
+            pendingArtilleryTower = null;
+
+            // Remove artillery placement overlay if exists
+            const overlay = document.querySelector('.artillery-placement-overlay');
+            if (overlay) overlay.remove();
+
+            // Restore cursor
+            if (canvas) canvas.style.cursor = 'crosshair';
+
+            // Remove all towers and their markers
             placedTowers.forEach(tower => {
                 if (tower.element && tower.element.parentNode) {
                     tower.element.remove();
+                }
+                if (tower.targetMarker && tower.targetMarker.parentNode) {
+                    tower.targetMarker.remove();
                 }
             });
             placedTowers = [];
@@ -1646,6 +4337,25 @@
                 }
             });
             enemies = [];
+
+            // Remove all soldiers
+            placedSoldiers.forEach(soldier => {
+                if (soldier.element && soldier.element.parentNode) {
+                    soldier.element.remove();
+                }
+            });
+            placedSoldiers = [];
+
+            // Recreate guardian soldiers
+            createGuardianSoldiers();
+
+            // Remove all soldier projectiles
+            soldierProjectiles.forEach(projectile => {
+                if (projectile.element && projectile.element.parentNode) {
+                    projectile.element.remove();
+                }
+            });
+            soldierProjectiles = [];
 
             // Remove all projectiles
             projectiles.forEach(projectile => {
@@ -1690,11 +4400,27 @@
             }, duration);
         }
         
+        // Create atmospheric particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.bottom = '-10px';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
         // Initialize everything
         console.log('Setting up game...');
+        createParticles();
         if (initializeCanvas()) {
             window.addEventListener('resize', resizeCanvas);
             resizeCanvas();
+            createGuardianSoldiers();
             updateGoldDisplay();
             updateLivesDisplay();
             updateWaveDisplay();

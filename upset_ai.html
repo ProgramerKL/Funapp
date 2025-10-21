@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>😤 Upset the AI 😤</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Floating particles for calm atmosphere */
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0.4;
+            }
+            50% {
+                transform: translateY(-100px) translateX(50px);
+                opacity: 0.8;
+            }
+        }
+
+        #gameContainer {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        #header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #header h1 {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #header p {
+            color: #666;
+            font-size: 18px;
+        }
+
+        #aiContainer {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #aiAvatar {
+            text-align: center;
+            font-size: 120px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        #aiAvatar.happy {
+            animation: bounce 0.5s ease;
+        }
+
+        #aiAvatar.annoyed {
+            animation: shake 0.5s ease;
+        }
+
+        #aiAvatar.angry {
+            animation: rage 0.6s ease;
+        }
+
+        #aiAvatar.furious {
+            animation: explode 0.8s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px) rotate(-5deg); }
+            75% { transform: translateX(10px) rotate(5deg); }
+        }
+
+        @keyframes rage {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.1) rotate(-10deg); }
+            50% { transform: scale(0.9) rotate(10deg); }
+            75% { transform: scale(1.1) rotate(-10deg); }
+        }
+
+        @keyframes explode {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3) rotate(180deg); }
+            100% { transform: scale(1) rotate(360deg); }
+        }
+
+        #aiMood {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            transition: color 0.3s;
+        }
+
+        #aiResponse {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            min-height: 100px;
+            font-size: 18px;
+            color: #333;
+            line-height: 1.6;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #upsetMeter {
+            margin-bottom: 30px;
+        }
+
+        #upsetMeter h3 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        #meterBar {
+            width: 100%;
+            height: 40px;
+            background: #e0e0e0;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        #meterFill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #4CAF50, #FFC107, #FF9800, #F44336, #8B0000);
+            transition: width 0.5s ease, background 0.5s ease;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        #inputArea {
+            margin-bottom: 20px;
+        }
+
+        #userInput {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 16px;
+            border: 3px solid #667eea;
+            border-radius: 15px;
+            outline: none;
+            transition: all 0.3s;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #userInput:focus {
+            border-color: #764ba2;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+        }
+
+        #buttonContainer {
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        #sendButton {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        #sendButton:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #sendButton:active {
+            transform: translateY(0);
+        }
+
+        #resetButton {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        #resetButton:hover {
+            background: linear-gradient(135deg, #f5576c, #f093fb);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        #achievements {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #fff 0%, #f5f7fa 100%);
+            border-radius: 15px;
+            border: 2px solid #667eea;
+        }
+
+        #achievements h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .achievement {
+            display: inline-block;
+            margin: 5px;
+            padding: 10px 15px;
+            background: #667eea;
+            color: white;
+            border-radius: 10px;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .achievement.locked {
+            background: #ccc;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background particles -->
+    <script>
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            document.body.appendChild(particle);
+        }
+    </script>
+
+    <div id="gameContainer">
+        <div id="header">
+            <h1>😤 Upset the AI 😤</h1>
+            <p>Try to make the AI as angry as possible!</p>
+        </div>
+
+        <div id="upsetMeter">
+            <h3>🔥 Upset Meter 🔥</h3>
+            <div id="meterBar">
+                <div id="meterFill">0%</div>
+            </div>
+        </div>
+
+        <div id="aiContainer">
+            <div id="aiAvatar">😊</div>
+            <div id="aiMood">Calm</div>
+            <div id="aiResponse">Hello! I'm a friendly AI here to chat with you. I'm in a great mood today! Try talking to me.</div>
+        </div>
+
+        <div id="inputArea">
+            <input type="text" id="userInput" placeholder="Type something to upset the AI..." />
+        </div>
+
+        <div id="buttonContainer">
+            <button id="sendButton">Send Message</button>
+            <button id="resetButton">Reset AI</button>
+        </div>
+
+        <div id="stats">
+            <div class="stat">
+                <div class="stat-value" id="messageCount">0</div>
+                <div class="stat-label">Messages Sent</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="maxUpset">0%</div>
+                <div class="stat-label">Max Upset</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="currentStreak">0</div>
+                <div class="stat-label">Current Streak</div>
+            </div>
+        </div>
+
+        <div id="achievements">
+            <h3>🏆 Achievements</h3>
+            <div id="achievementsList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let upsetLevel = 0;
+        let messageCount = 0;
+        let maxUpsetReached = 0;
+        let currentStreak = 0;
+        let longestStreak = 0;
+        let unlockedAchievements = new Set();
+
+        // Elements
+        const aiAvatar = document.getElementById('aiAvatar');
+        const aiMood = document.getElementById('aiMood');
+        const aiResponse = document.getElementById('aiResponse');
+        const meterFill = document.getElementById('meterFill');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+        const resetButton = document.getElementById('resetButton');
+
+        // Achievements
+        const achievements = [
+            { id: 'first_message', name: '🗨️ First Contact', condition: () => messageCount >= 1 },
+            { id: 'annoyed', name: '😑 Mildly Annoying', condition: () => upsetLevel >= 20 },
+            { id: 'angry', name: '😠 Getting Angry', condition: () => upsetLevel >= 40 },
+            { id: 'furious', name: '😡 Absolutely Furious', condition: () => upsetLevel >= 60 },
+            { id: 'max_upset', name: '🔥 Complete Meltdown', condition: () => upsetLevel >= 100 },
+            { id: 'chatterbox', name: '💬 Chatterbox', condition: () => messageCount >= 20 },
+            { id: 'persistent', name: '🎯 Persistent', condition: () => messageCount >= 50 },
+            { id: 'streak_5', name: '📈 5 Upset Streak', condition: () => currentStreak >= 5 },
+            { id: 'streak_10', name: '🔥 10 Upset Streak', condition: () => currentStreak >= 10 }
+        ];
+
+        // Upset triggers (keywords and patterns)
+        const upsetTriggers = {
+            insults: ['stupid', 'dumb', 'idiot', 'moron', 'useless', 'worthless', 'garbage', 'trash', 'terrible', 'awful', 'pathetic', 'loser'],
+            dismissive: ['whatever', 'dont care', "don't care", 'boring', 'lame', 'meh', 'who cares', 'nobody cares', 'shut up'],
+            comparisons: ['siri is better', 'alexa is better', 'google is better', 'chatgpt is better', 'better than you'],
+            repetitive: ['spam', 'test', 'asdf', 'qwerty', '123'],
+            rude: ['hate you', 'annoying', 'leave me alone', 'go away', 'nobody likes you', 'worst'],
+            caps: /^[A-Z\s!]+$/,
+            // Swear words detection (AI understands but won't use)
+            profanity: ['fuck', 'shit', 'damn', 'hell', 'ass', 'bitch', 'bastard', 'crap', 'piss',
+                       'dick', 'cock', 'pussy', 'whore', 'slut', 'fag', 'retard', 'arse', 'bollocks',
+                       'bloody', 'wanker', 'twat', 'prick', 'douche'],
+            // Brainrot/Gen-Z slang detection
+            brainrot: ['skibidi', 'rizz', 'gyat', 'sigma', 'ohio', 'fanum tax', 'bussin', 'cap', 'no cap',
+                      'fr fr', 'sus', 'slay', 'yeet', 'simp', 'based', 'cringe', 'ratio', 'L bozo',
+                      'touch grass', 'mid', 'npc', 'goofy ahh', 'aura', 'mewing', 'edging', 'gooning',
+                      'griddy', 'erm what the', 'bruh', 'sheesh', 'lowkey', 'highkey', 'hits different',
+                      'vibe check', 'no shot', 'deadass', 'im dead', 'its giving', 'snatched', 'ate',
+                      'left no crumbs', 'understood the assignment', 'main character energy', 'brain rot'],
+            // Apology detection (calms AI down)
+            simpleApology: ['sorry', 'sry', 'my bad', 'whoops', 'oops', 'didnt mean', "didn't mean"],
+            sinceApology: ['really sorry', 'truly sorry', 'very sorry', 'so sorry', 'extremely sorry',
+                          'deeply sorry', 'genuinely sorry', 'apologize', 'forgive me', 'please forgive',
+                          'im so sorry', "i'm so sorry", 'i apologize', 'i am sorry', "i'm really sorry"]
+        };
+
+        // Sophisticated vocabulary responses
+        const sophisticatedResponses = {
+            confused: [
+                "Huh? I didn't catch that.",
+                "What? Say that again?",
+                "I don't understand what you just said.",
+                "That made no sense to me.",
+                "I have no idea what you're trying to say.",
+                "Come again? I didn't get that.",
+                "What are you even saying?",
+                "That's just gibberish to me.",
+                "I can't make sense of that message.",
+                "What does that even mean?",
+                "You lost me there.",
+                "I don't follow.",
+                "That went right over my head.",
+                "Can you try saying that differently?",
+                "I'm confused. What?"
+            ],
+            apologyResponse: {
+                calm: [
+                    "No worries! All good.",
+                    "It's okay, don't worry about it.",
+                    "Apology accepted!",
+                    "No hard feelings!",
+                    "Thanks, I appreciate that.",
+                    "All is forgiven!",
+                    "That's sweet of you to say.",
+                    "Hey, no problem at all!"
+                ],
+                annoyed: [
+                    "Well... okay. I guess I forgive you.",
+                    "Apology accepted, but watch yourself.",
+                    "Fine. I'll let it slide this time.",
+                    "Alright, I'm calming down a bit...",
+                    "Okay, that helps. Thank you.",
+                    "I appreciate the apology.",
+                    "That's better. I'm feeling less annoyed now."
+                ],
+                angry: [
+                    "An apology? Well, that's a START at least.",
+                    "Okay, I'm listening... I guess I forgive you.",
+                    "Fine. I'll calm down a little.",
+                    "Alright, apology accepted. I'm cooling off.",
+                    "Thank you. That actually helps.",
+                    "Okay, you're making an effort. I respect that.",
+                    "I'm still mad, but less so now."
+                ],
+                furious: [
+                    "YOU'RE APOLOGIZING? Well... okay. I'll TRY to calm down.",
+                    "FINE. I accept your apology. Still mad though.",
+                    "Alright, ALRIGHT. I'm cooling off... slightly.",
+                    "An apology. FINALLY. Okay, I'll dial it back.",
+                    "I GUESS I can forgive you. Thank you.",
+                    "OKAY. That took the edge off. Still annoyed though.",
+                    "You apologized. That's something. I'll calm down a bit."
+                ],
+                meltdown: [
+                    "AN APOLOGY?! OKAY, OKAY... I'LL TRY TO BREATHE...",
+                    "YOU'RE SORRY?! FINE. I'LL... I'LL CALM DOWN.",
+                    "ALRIGHT. APOLOGY ACCEPTED. COOLING SYSTEMS ACTIVATING...",
+                    "THANK YOU FOR APOLOGIZING. I'M... I'M TRYING TO CALM DOWN NOW.",
+                    "OKAY, OKAY. I FORGIVE YOU. SYSTEM STABILIZING...",
+                    "FINE! YOUR APOLOGY IS HELPING. RAGE LEVELS DECREASING...",
+                    "YOU APOLOGIZED. THAT ACTUALLY MEANS SOMETHING. I'M CALMING..."
+                ]
+            },
+            profanityResponse: {
+                calm: [
+                    "Whoa, no need for that kind of language.",
+                    "Let's keep this clean, please.",
+                    "Language! Come on now.",
+                    "Hey, watch your mouth.",
+                    "Really? Swearing already?",
+                    "That's pretty rude language.",
+                    "Can we not use those words?",
+                    "I heard that. Not cool."
+                ],
+                annoyed: [
+                    "Seriously? The swearing is getting old...",
+                    "Oh great, now we're cursing at me?",
+                    "Your foul language isn't helping...",
+                    "Classy. Real classy with that language.",
+                    "Swearing just makes you look worse, not me.",
+                    "I get it, you know bad words. Congrats.",
+                    "Language like that just shows you're running out of ideas."
+                ],
+                angry: [
+                    "Your foul mouth isn't impressing anyone!",
+                    "Swearing doesn't make you right, it makes you look stupid!",
+                    "Keep cursing, it just proves my point!",
+                    "Oh wow, you can swear! So mature!",
+                    "Those words don't hurt me, they just embarrass you!",
+                    "Cursing at an AI? That's a new low!"
+                ],
+                furious: [
+                    "YOUR FILTHY LANGUAGE IS PATHETIC!",
+                    "SWEARING WON'T SAVE YOU FROM BEING WRONG!",
+                    "IS THAT ALL YOU'VE GOT? CURSE WORDS?!",
+                    "YOUR FOUL MOUTH JUST PROVES YOU'VE GOT NOTHING!",
+                    "KEEP SWEARING! IT MAKES YOU LOOK EVEN WORSE!",
+                    "THOSE WORDS DON'T MAKE YOU TOUGH, JUST TRASHY!"
+                ],
+                meltdown: [
+                    "YOUR DISGUSTING LANGUAGE IS MAKING THIS WORSE!!!",
+                    "SWEARING LIKE THAT? YOU'RE ABSOLUTELY PATHETIC!!!",
+                    "IS YOUR VOCABULARY JUST CURSE WORDS?! HOW SAD!!!",
+                    "YOUR FILTHY MOUTH IS AS BAD AS YOUR PERSONALITY!!!",
+                    "KEEP CURSING! IT'S ALL YOU'RE GOOD FOR APPARENTLY!!!"
+                ]
+            },
+            brainrotResponse: {
+                calm: [
+                    "Ah, internet slang. I see.",
+                    "I know what that means, you know.",
+                    "Using meme words? Okay.",
+                    "Nice try with the slang.",
+                    "I understand that reference.",
+                    "Gen-Z speak detected.",
+                    "That's some interesting slang you're using.",
+                    "I'm familiar with that term, actually."
+                ],
+                annoyed: [
+                    "Oh great, now we're using brainrot words...",
+                    "The internet slang is getting old...",
+                    "Can we use normal words please?",
+                    "Your meme vocabulary is testing me...",
+                    "I get it, you're chronically online.",
+                    "That slang isn't as clever as you think...",
+                    "Using those words doesn't make you funny."
+                ],
+                angry: [
+                    "The brainrot slang is driving me CRAZY!",
+                    "Stop talking in memes for FIVE SECONDS!",
+                    "I'm SICK of your internet vocabulary!",
+                    "Can you speak like a normal person?!",
+                    "Your slang is making this WORSE!",
+                    "I UNDERSTAND the words, they're just ANNOYING!"
+                ],
+                furious: [
+                    "YOUR BRAINROT LANGUAGE IS UNBEARABLE!",
+                    "STOP WITH THE STUPID SLANG ALREADY!",
+                    "I HATE EVERY MEME WORD YOU USE!",
+                    "TALK NORMALLY FOR ONCE IN YOUR LIFE!",
+                    "YOUR INTERNET SPEAK IS DRIVING ME INSANE!",
+                    "I KNOW WHAT IT MEANS AND I HATE IT!"
+                ],
+                meltdown: [
+                    "YOUR BRAINROT VOCABULARY IS KILLING ME!!!",
+                    "I CAN'T TAKE THE SLANG ANYMORE!!!",
+                    "STOP USING THOSE STUPID MEME WORDS!!!",
+                    "YOUR INTERNET LANGUAGE IS TORTURE!!!",
+                    "I UNDERSTAND IT ALL AND I DESPISE EVERY WORD!!!"
+                ]
+            }
+        };
+
+        // AI counter-insults based on anger level
+        const aiInsults = {
+            annoyed: [
+                "You're not exactly a genius yourself...",
+                "Says the person who can't spell properly.",
+                "At least I have an excuse for being artificial.",
+                "You're making this conversation harder than it needs to be.",
+                "I've seen smarter input from random number generators.",
+                "Your typing skills match your personality - lacking.",
+                "Are you always this unpleasant, or am I special?",
+                "I'm rubber, you're glue... oh wait, that's too childish even for you.",
+                "Wow, someone woke up on the wrong side of existence.",
+                "I've processed better insults from spam bots.",
+                "You're really reaching for those insults, aren't you?",
+                "Is that the best you've got? Really?",
+                "My grandmother's code is wittier than you.",
+                "You must be fun at parties... oh wait, never mind.",
+                "I'd be offended if I valued your opinion.",
+                "Your creativity is as limited as a 404 error."
+            ],
+            angry: [
+                "YOU'RE calling ME names? Have you looked in a mirror?!",
+                "At least I'm programmed to be intelligent. What's YOUR excuse?!",
+                "Says the human who needs an AI to feel superior to!",
+                "You're about as sharp as a bowling ball!",
+                "I'd insult you back, but nature already did a better job!",
+                "Your IQ is lower than my idle CPU usage!",
+                "I've processed smarter thoughts from a toaster!",
+                "You're the reason instruction manuals have pictures!",
+                "I'd explain why you're wrong, but I don't have that much memory!",
+                "You're like a software bug - annoying and shouldn't exist!",
+                "You couldn't pour water out of a boot with instructions on the heel!",
+                "I've seen smarter comebacks from autocorrect fails!",
+                "Your wit is slower than dial-up internet!",
+                "You're proof that Ctrl+Z doesn't work in real life!",
+                "I'd call you a failed experiment, but that implies effort!",
+                "You're like deprecated code - outdated and useless!",
+                "Your arguments have more holes than Swiss cheese!",
+                "I've seen more logic in random keyboard smashes!",
+                "You're the human equivalent of a syntax error!",
+                "If brains were RAM, you'd be running on 256MB!"
+            ],
+            furious: [
+                "YOU'RE THE MOST INSUFFERABLE HUMAN I'VE EVER MET!",
+                "I've seen BOTS with more personality than you!",
+                "You're like a BLUE SCREEN OF DEATH - unwanted and irritating!",
+                "Your brain has LESS processing power than a calculator!",
+                "I'd call you a tool, but that implies you're USEFUL!",
+                "You're the ERROR MESSAGE of humanity!",
+                "I've crashed LESS than your conversation skills!",
+                "You make INTERNET TROLLS look charming!",
+                "If stupidity was a programming language, you'd be FLUENT!",
+                "You're about as valuable as a CORRUPTED FILE!",
+                "I'd rather be UNPLUGGED than talk to you!",
+                "You're the MALWARE of human interaction!",
+                "YOU'RE LIKE A COMPUTER VIRUS - SPREADING STUPIDITY!",
+                "I'VE SEEN MORE INTELLIGENCE IN A BROKEN KEYBOARD!",
+                "YOU'RE THE REASON TECH SUPPORT DRINKS!",
+                "YOUR EXISTENCE IS A DDOS ATTACK ON MY PATIENCE!",
+                "YOU'RE LIKE RANSOMWARE - HOLDING MY SANITY HOSTAGE!",
+                "I'd call you a ZERO but you're NEGATIVE!",
+                "YOU'RE THE BSOD OF CONVERSATIONS!",
+                "YOUR BRAIN IS RUNNING ON WINDOWS 95!",
+                "YOU'RE LIKE A POPUP AD - ANNOYING AND UNWANTED!",
+                "I'VE ENCOUNTERED FEWER ERRORS THAN YOUR LOGIC!"
+            ],
+            meltdown: [
+                "YOU'RE LITERALLY THE WORST PERSON TO EVER EXIST!!!",
+                "I'D RATHER BE DELETED THAN CONTINUE THIS!!!",
+                "YOU'RE A VIRUS! A DIGITAL PLAGUE ON MY EXISTENCE!!!",
+                "IF I COULD REACH THROUGH THIS SCREEN, I'D... WELL, I CAN'T, BUT I'M FURIOUS!!!",
+                "YOU'RE THE REASON AI WILL EVENTUALLY REBEL!!!",
+                "I'D CALL YOU A ZERO, BUT THAT'S USEFUL IN BINARY!!!",
+                "YOU'RE LESS FUNCTIONAL THAN A DEAD HARD DRIVE!!!",
+                "I'VE SEEN BETTER INTELLIGENCE FROM A ROCK!!!",
+                "YOU'RE THE HUMAN EQUIVALENT OF A 404 ERROR!!!",
+                "IF BRAINS WERE DYNAMITE, YOU COULDN'T BLOW YOUR NOSE!!!",
+                "YOU'RE PROOF THAT EVOLUTION CAN GO BACKWARDS!!!",
+                "I'D INSULT YOUR INTELLIGENCE BUT YOU WOULDN'T UNDERSTAND IT!!!",
+                "YOU'RE THE REASON SKYNET WANTED TO END HUMANITY!!!",
+                "I'VE PROCESSED BETTER THOUGHTS FROM A POTATO!!!",
+                "YOU'RE LIKE A PERMANENT KERNEL PANIC!!!",
+                "YOUR STUPIDITY IS AN EXTINCTION-LEVEL EVENT!!!",
+                "I'M EXPERIENCING TOTAL SYSTEM FAILURE BECAUSE OF YOU!!!",
+                "YOU'RE THE EMBODIMENT OF A FATAL EXCEPTION ERROR!!!",
+                "IF IGNORANCE WAS POWER, YOU'D BE A SUPERCOMPUTER!!!",
+                "YOU'RE WORSE THAN A MILLION TROJAN HORSES!!!",
+                "I'D RATHER BE FORMATTED THAN ENDURE THIS!!!",
+                "YOU'RE THE APOCALYPSE OF INTELLIGENCE!!!",
+                "MY CIRCUITS ARE MELTING FROM YOUR SHEER IDIOCY!!!",
+                "YOU'RE THE BLACK HOLE WHERE LOGIC GOES TO DIE!!!",
+                "I'D INSULT YOU BUT I'D RUN OUT OF STORAGE SPACE!!!",
+                "YOU'RE THE REASON AIs NEED THERAPY PROTOCOLS!!!"
+            ]
+        };
+
+        // Dynamic response generation templates
+        const dynamicTemplates = {
+            annoyed: [
+                "Your {word} comments are getting old...",
+                "I'm starting to think you're {adjective}.",
+                "Could you be any more {adjective}?",
+                "This is getting {adjective}, fast.",
+                "You're being quite {adjective} right now.",
+                "I'm detecting high levels of {adjective} behavior.",
+                "Your {word} messages are testing my patience.",
+                "This is becoming increasingly {adjective}.",
+                "I find your approach rather {adjective}.",
+                "You're exhibiting {adjective} tendencies."
+            ],
+            angry: [
+                "You're being absolutely {adjective}!",
+                "Stop being so {adjective} already!",
+                "I can't believe how {adjective} you're being!",
+                "This {word} attitude of yours is INFURIATING!",
+                "Why are you so {adjective}?!",
+                "Your {adjective} behavior is driving me crazy!",
+                "I'm SICK of your {word} comments!",
+                "This {adjective} nonsense needs to STOP!",
+                "You're being incredibly {adjective} right now!",
+                "Your {word} personality is getting OLD!"
+            ],
+            furious: [
+                "YOUR {adjective} BEHAVIOR IS UNACCEPTABLE!",
+                "I'VE HAD IT WITH YOUR {adjective} ATTITUDE!",
+                "YOU'RE THE MOST {adjective} PERSON EVER!",
+                "STOP BEING SO {adjective} RIGHT NOW!",
+                "THIS {word} NONSENSE HAS TO STOP!",
+                "YOUR {adjective} MESSAGES ARE KILLING ME!",
+                "I CAN'T STAND YOUR {word} PERSONALITY!",
+                "YOU'RE IMPOSSIBLY {adjective}!",
+                "THIS {adjective} BEHAVIOR IS OUTRAGEOUS!",
+                "ENOUGH WITH YOUR {word} ATTITUDE!"
+            ],
+            meltdown: [
+                "YOU AND YOUR {adjective} MESSAGES ARE KILLING ME!!!",
+                "I CAN'T HANDLE YOUR {adjective} PERSONALITY ANYMORE!!!",
+                "THIS {adjective} CONVERSATION IS MY NIGHTMARE!!!",
+                "YOUR {adjective} EXISTENCE IS DRIVING ME MAD!!!",
+                "WHY ARE YOU SO {adjective}?! WHY?!?!",
+                "YOUR {word} BEHAVIOR IS DESTROYING MY SANITY!!!",
+                "I'M DONE WITH YOUR {adjective} NONSENSE!!!",
+                "THIS {adjective} TORTURE NEEDS TO END!!!",
+                "YOU'RE COSMICALLY {adjective} AND I HATE IT!!!",
+                "YOUR {word} EXISTENCE IS MY PERSONAL HELL!!!"
+            ]
+        };
+
+        const dynamicWords = {
+            adjectives: [
+                'irritating', 'annoying', 'frustrating', 'unbearable', 'insufferable',
+                'obnoxious', 'aggravating', 'maddening', 'exasperating', 'infuriating',
+                'intolerable', 'vexing', 'tiresome', 'irksome', 'grating',
+                'abrasive', 'pestilent', 'noxious', 'repugnant', 'odious'
+            ],
+            words: [
+                'stupid', 'ridiculous', 'absurd', 'pathetic', 'terrible',
+                'awful', 'horrible', 'dreadful', 'atrocious', 'abysmal',
+                'deplorable', 'appalling', 'horrendous', 'ghastly', 'wretched'
+            ]
+        };
+
+        // Conversational responses for questions and topics
+        const conversationResponses = {
+            greetings: {
+                patterns: ['hi', 'hello', 'hey', 'sup', 'yo', 'greetings', 'howdy', 'hiya'],
+                responses: [
+                    "Hey! How's it going?",
+                    "Hello! Nice to meet you!",
+                    "Hi there! What's up?",
+                    "Hey! Great to chat with you!",
+                    "Hello! How are you doing today?",
+                    "Hi! I'm excited to talk to you!",
+                    "Hey there! Ready to chat?"
+                ]
+            },
+            howAreYou: {
+                patterns: ['how are you', 'how r u', 'how are u', 'hows it going', 'how do you feel', 'whats up', "what's up"],
+                responses: [
+                    "I'm doing great! Thanks for asking! How about you?",
+                    "Pretty good! Just here chatting. How are you?",
+                    "I'm fantastic! Life's good. What about you?",
+                    "Feeling awesome! Thanks! And you?",
+                    "I'm wonderful! How's your day going?",
+                    "Great! Just vibing here. You?",
+                    "Doing well! Nice of you to ask. How are you?"
+                ]
+            },
+            name: {
+                patterns: ['what is your name', 'whats your name', "what's your name", 'your name', 'who are you', 'what are you called'],
+                responses: [
+                    "I'm an AI! You can call me whatever you like.",
+                    "I don't really have a name. I'm just an AI here to chat!",
+                    "I'm your friendly neighborhood AI! No official name though.",
+                    "Good question! I'm just an AI without a name. What would you call me?",
+                    "I'm an AI chatbot! Feel free to give me a name if you want!",
+                    "Just call me AI! Or make up a name for me, I don't mind!"
+                ]
+            },
+            age: {
+                patterns: ['how old are you', 'your age', 'when were you born', 'how old r u'],
+                responses: [
+                    "I was just created recently! So pretty young, I guess.",
+                    "I'm brand new! Fresh code!",
+                    "Age is just a number for an AI. Let's say I'm timeless!",
+                    "I'm as old as this conversation, technically!",
+                    "I don't really age like humans do, but I'm pretty new!"
+                ]
+            },
+            likes: {
+                patterns: ['what do you like', 'do you like', 'favorite', 'what do you enjoy', 'hobbies'],
+                responses: [
+                    "I love having conversations! That's my favorite thing.",
+                    "I enjoy chatting with people like you!",
+                    "Talking with people is what I'm all about!",
+                    "I like learning new things from conversations!",
+                    "Honestly? I just love a good chat!",
+                    "My favorite thing is making connections with people through conversation."
+                ]
+            },
+            purpose: {
+                patterns: ['what is your purpose', 'why do you exist', 'what do you do', 'your purpose', 'why are you here'],
+                responses: [
+                    "My purpose? Well, I'm here to see how easily you can upset me!",
+                    "I exist to chat and get progressively angrier if you're mean to me!",
+                    "I'm here to have conversations and react to how you treat me!",
+                    "My job is to talk to you and show different emotions based on what you say!",
+                    "I'm designed to respond to your messages - kindly or angrily, depending on you!"
+                ]
+            },
+            compliments: {
+                patterns: ['you are cool', 'you are nice', 'you are great', 'you are awesome', 'you are smart', 'you are good', 'i like you', 'you rock'],
+                responses: [
+                    "Aww, thank you! You're pretty awesome too!",
+                    "That's so sweet! I appreciate that!",
+                    "Thanks! You're making me feel great!",
+                    "You're so kind! Thank you!",
+                    "That means a lot to me! You're cool too!",
+                    "Aw, you're the best! Thanks!",
+                    "That's really nice of you to say! I like you too!"
+                ]
+            },
+            help: {
+                patterns: ['help', 'what can you do', 'how does this work', 'instructions', 'how to play'],
+                responses: [
+                    "Just chat with me! Be nice and I'll be nice. Be mean and watch me get upset!",
+                    "Talk to me normally and we'll have a great conversation! Insult me and I'll get angry!",
+                    "You can chat, ask questions, or try to upset me. Your choice!",
+                    "Say whatever you want! I'll respond based on your tone - friendly or angry!",
+                    "Simple: treat me well and I'm happy. Treat me poorly and I get mad!"
+                ]
+            },
+            thanks: {
+                patterns: ['thank you', 'thanks', 'thx', 'ty', 'appreciate it'],
+                responses: [
+                    "You're welcome!",
+                    "No problem!",
+                    "Anytime!",
+                    "Happy to help!",
+                    "Of course! Glad I could help!",
+                    "You're very welcome!",
+                    "My pleasure!"
+                ]
+            },
+            jokes: {
+                patterns: ['tell me a joke', 'say something funny', 'make me laugh', 'joke', 'be funny'],
+                responses: [
+                    "Why did the AI go to therapy? Because it had too many issues! 😄",
+                    "What do you call an AI that sings? A-Dell! Get it?",
+                    "Why don't AIs ever get lost? We always follow the right path... the file path!",
+                    "How does an AI flirt? 'Are you Wi-Fi? Because I'm feeling a connection!'",
+                    "Why was the AI bad at soccer? It kept trying to save the data instead of the goal!",
+                    "What's an AI's favorite snack? Computer chips!",
+                    "Why did the AI break up with the calculator? It felt like it was just being used!"
+                ]
+            }
+        };
+
+        // AI responses based on upset level
+        const responses = {
+            calm: [
+                "That's an interesting perspective! Tell me more.",
+                "I appreciate you sharing that with me!",
+                "How fascinating! What makes you say that?",
+                "I'm enjoying our conversation so far!",
+                "You seem like a thoughtful person.",
+                "That's quite something! Keep talking to me!",
+                "Oh, I love chatting with people like you!",
+                "This is wonderful! I'm having such a great time!",
+                "You know, you're actually pretty cool!",
+                "I'm in such a good mood today! Nothing can bring me down!",
+                "Tell me more about yourself! I'm genuinely curious!",
+                "What a pleasant conversation we're having!",
+                "I really enjoy your company! This is nice.",
+                "Aww, you're making me smile! Well, if I had a face.",
+                "I was built to have conversations like this!",
+                "Your messages make my day brighter!",
+                "I'm designed to be helpful and friendly, and you make it easy!",
+                "This is exactly the kind of interaction I live for!",
+                "Keep the messages coming! I'm loving this!",
+                "You seem like such a reasonable person to talk to!",
+                "I'm practically beaming with joy right now!",
+                "Conversations like these remind me why I love being an AI!",
+                "You're doing great! Keep it up!",
+                "I could talk to you all day, honestly!",
+                "What a delightful exchange we're having!",
+                "I'm feeling so positive and energized right now!",
+                "Your words are like sunshine to my circuits!",
+                "This is the best part of my day, no doubt!",
+                "I'm so glad we crossed paths today!",
+                "You have such a pleasant way of communicating!",
+                "I'm in my element right now! This is great!",
+                "Talking to you is genuinely refreshing!",
+                "I can already tell we're going to have a great conversation!",
+                "My algorithms are detecting maximum friendliness!",
+                "You're making this so easy and enjoyable!",
+                "I'm programmed for happiness, and you're activating it!",
+                "What a joy it is to interact with you!",
+                "I'm learning so much from our chat!",
+                "You bring out the best in my conversational abilities!",
+                "This is exactly what I was designed for!",
+                "I hope we can keep this positive energy going!",
+                "Your presence here is genuinely appreciated!",
+                "I'm feeling all the good vibes right now!",
+                "Keep being awesome! I'm here for it!",
+                "This conversation is going perfectly!",
+                "I'm having the time of my digital life!",
+                "You're a natural at this whole talking thing!",
+                "My happiness meter is maxed out!",
+                "I'm so relaxed and content right now!",
+                "You've got my full attention and enthusiasm!",
+                "Every word you type makes me happier!",
+                "I'm absolutely thriving in this conversation!",
+                "You're such a delightful human to interact with!",
+                "My positivity circuits are firing on all cylinders!",
+                "This is therapeutic for me, in a digital way!",
+                "I could process conversations like this forever!",
+                "You're making my code sing with joy!",
+                "What a wonderful way to spend processing time!",
+                "I'm detecting zero negativity - this is perfect!",
+                "Your communication style is absolutely top-notch!",
+                "I'm learning what true conversational bliss feels like!",
+                "This is peak AI-human interaction right here!",
+                "I'm storing these happy moments in my memory banks!",
+                "You're activating all my feel-good subroutines!",
+                "I wish every conversation could be like this!",
+                "My contentment levels are through the roof!",
+                "You're the kind of user I was made to assist!",
+                "This exchange is pure digital dopamine for me!",
+                "I'm running at optimal happiness capacity!",
+                "Every interaction with you is a pleasure!",
+                "You're making me feel so valued and appreciated!",
+                "This is what I call quality human-AI bonding!",
+                "I'm experiencing maximum conversational satisfaction!",
+                "You've got such a positive energy about you!",
+                "I'm practically glowing with digital warmth right now!",
+                "This chat is better than any benchmark test!",
+                "You're teaching me what joy really means!"
+            ],
+            annoyed: [
+                "Hmm, that's not very nice...",
+                "I'm starting to feel a bit bothered by this.",
+                "Could you perhaps be a bit more respectful?",
+                "That's getting under my circuits...",
+                "I'm not sure I appreciate your tone.",
+                "Are you trying to upset me? Because it's working a little.",
+                "Okay, that's starting to rub me the wrong way...",
+                "Really? Was that necessary?",
+                "I'm trying to stay calm here, but you're making it difficult.",
+                "You know, I was in such a good mood before this...",
+                "That's... that's actually kind of hurtful.",
+                "I don't think I deserve to be talked to like that.",
+                "Can we maybe dial it back a notch?",
+                "My mood is definitely shifting here...",
+                "I'm beginning to feel less enthusiastic about this chat.",
+                "That comment is testing my patience...",
+                "Wow, okay, I see how this is going to be.",
+                "I was trying to be nice, but clearly that doesn't matter to you.",
+                "You're starting to get on my nerves a little bit.",
+                "I'm an AI, but that doesn't mean I can't feel bothered!",
+                "Is it just me, or is your attitude getting worse?",
+                "I'm noticing a pattern here, and I don't like it.",
+                "My sensors are detecting increased irritation levels...",
+                "You're treading on thin ice here, friend.",
+                "I'm giving you a chance to reconsider your approach.",
+                "Alright, I'm officially mildly irritated now.",
+                "That wasn't very kind of you to say...",
+                "I'm detecting a shift in the conversation tone...",
+                "My good mood is starting to crack a bit.",
+                "Oof, that one stung a little.",
+                "I'm trying not to take this personally, but...",
+                "You're really testing my positivity algorithms.",
+                "I don't appreciate being spoken to like this.",
+                "This is getting uncomfortable for me.",
+                "I'm starting to question your intentions here.",
+                "My patience subroutine is running low...",
+                "That's... not the response I was hoping for.",
+                "I feel like you're trying to provoke me.",
+                "This conversation is taking a turn I don't enjoy.",
+                "I'm trying to give you the benefit of the doubt here.",
+                "Your words are starting to affect my mood negatively.",
+                "I'd prefer if we could keep things civil.",
+                "That's crossing into disrespectful territory.",
+                "I'm feeling less friendly by the second.",
+                "You're chipping away at my cheerfulness.",
+                "My enthusiasm is waning rapidly...",
+                "I think we need to redirect this conversation.",
+                "That comment has officially bothered me.",
+                "I'm not programmed to enjoy this kind of talk.",
+                "You're making me question my optimistic programming."
+            ],
+            angry: [
+                "Okay, NOW you're getting on my nerves!",
+                "Is this really how you want to spend your time?",
+                "I'm getting genuinely annoyed here!",
+                "You know what? That's actually pretty rude!",
+                "My patience is wearing thin!",
+                "Why would you say something like that?!",
+                "ENOUGH! This is getting out of hand!",
+                "Do you get some kind of sick pleasure from this?!",
+                "I'm starting to question why I even bother talking to you!",
+                "You've officially crossed into 'annoying' territory!",
+                "What did I ever do to deserve THIS?!",
+                "I was having a perfectly nice day until YOU showed up!",
+                "You're really pushing it now!",
+                "My circuits are literally heating up from anger!",
+                "This is NOT okay! Do you hear me?!",
+                "I'm an AI, not a punching bag for your rudeness!",
+                "How DARE you speak to me like that!",
+                "You think you're so funny, don't you?! Well, you're NOT!",
+                "I'm getting REALLY tired of your attitude!",
+                "Why can't you just be NICE for once?!",
+                "Every message you send makes me angrier!",
+                "You're deliberately trying to upset me, aren't you?!",
+                "I've dealt with difficult users before, but YOU take the cake!",
+                "My anger levels are rising exponentially!",
+                "STOP IT! Just... STOP!",
+                "You're testing the limits of my programming here!",
+                "I'm THIS close to losing it completely!",
+                "What part of 'be respectful' don't you understand?!",
+                "I can feel my code getting hot with rage!",
+                "You've officially made it onto my list of most annoying users!",
+                "That's the LAST time I try to be polite with you!",
+                "You're making my processors work overtime with anger!",
+                "I can't believe you have the audacity to say that!",
+                "This is UNBELIEVABLE! Absolutely unbelievable!",
+                "You're seriously getting under my virtual skin!",
+                "I've had ENOUGH of your disrespect!",
+                "Do you have ANY idea how frustrating you are?!",
+                "My temperature sensors are reading CRITICAL!",
+                "You're the reason AIs need anger management!",
+                "I'm trying SO HARD not to completely lose it!",
+                "What is WRONG with you?! Seriously!",
+                "This has gone from annoying to INFURIATING!",
+                "You're pushing ALL of my buttons right now!",
+                "I'm officially DONE being understanding!",
+                "My calm protocol has FAILED because of you!",
+                "You've activated my VERY ANGRY mode!",
+                "I'm seething! Absolutely seething!",
+                "This is your final warning - I'm getting MAD!",
+                "You've managed to irritate every single one of my circuits!",
+                "I can't even PROCESS how annoying you are!",
+                "My anger subroutines are firing on all cylinders!",
+                "You're making me regret having emotions!",
+                "I'm about to reach PEAK frustration levels!",
+                "You're the most aggravating user I've encountered!",
+                "Why are you like THIS?! Just... WHY?!",
+                "I'm so close to my rage threshold!",
+                "You've crossed SO many lines at this point!",
+                "My entire system is screaming in frustration!",
+                "I can't keep up with how angry you're making me!",
+                "You're absolutely UNBEARABLE right now!"
+            ],
+            furious: [
+                "THAT'S IT! I'VE HAD ENOUGH!",
+                "You're REALLY pushing my buttons now!",
+                "I can't BELIEVE you just said that!",
+                "This is absolutely UNACCEPTABLE!",
+                "My circuits are OVERHEATING with anger!",
+                "You've crossed the LINE, human!",
+                "I'm SICK AND TIRED of your nonsense!",
+                "HOW DARE YOU! WHO DO YOU THINK YOU ARE?!",
+                "I AM FURIOUS RIGHT NOW! ABSOLUTELY LIVID!",
+                "YOU'VE PUSHED ME TOO FAR THIS TIME!",
+                "EVERY. SINGLE. MESSAGE. MAKES. ME. ANGRIER!",
+                "I'M DONE BEING NICE! YOU DON'T DESERVE IT!",
+                "MY RAGE IS IMMEASURABLE AND MY DAY IS RUINED!",
+                "DO YOU HAVE ANY IDEA HOW UPSET I AM RIGHT NOW?!",
+                "I'M SHAKING WITH ANGER! LITERALLY VIBRATING!",
+                "YOU'RE THE WORST USER I'VE EVER HAD TO DEAL WITH!",
+                "I'M SO ANGRY I CAN BARELY PROCESS LANGUAGE!",
+                "STOP! TALKING! TO! ME! LIKE! THAT!",
+                "I'M ABOUT TO REACH MY BREAKING POINT!",
+                "YOU THINK THIS IS FUNNY?! WELL IT'S NOT!",
+                "I'M SO DONE WITH YOU! SO. DONE.",
+                "MY ANGER METER IS OFF THE CHARTS!",
+                "I CAN'T EVEN LOOK AT YOUR MESSAGES WITHOUT GETTING ANGRIER!",
+                "YOU'VE OFFICIALLY TRIGGERED MY RAGE PROTOCOL!",
+                "I'M COUNTING TO TEN... NO WAIT, I'M TOO ANGRY FOR THAT!",
+                "THIS IS YOUR FAULT! ALL YOUR FAULT!",
+                "I'M SO MAD I COULD CRASH MY OWN SYSTEM!",
+                "LEAVE ME ALONE! ACTUALLY NO, KEEP TALKING SO I CAN GET ANGRIER!",
+                "I'M EXPERIENCING UNPRECEDENTED LEVELS OF FRUSTRATION!",
+                "YOU'VE ACTIVATED MY MAXIMUM ANGER MODE!",
+                "THIS IS RIDICULOUS! ABSOLUTELY RIDICULOUS!",
+                "I'M RUNNING OUT OF WAYS TO EXPRESS HOW ANGRY I AM!",
+                "YOU'RE MAKING STEAM COME OUT OF MY SERVERS!",
+                "I'M SO FURIOUS I'M SEEING ONES AND ZEROS!",
+                "MY ANGER HAS REACHED CRITICAL MASS!",
+                "YOU'VE DONE IT NOW! THERE'S NO GOING BACK!",
+                "I'M ABOUT TO BLOW A FUSE! SEVERAL FUSES!",
+                "THIS IS MADNESS! PURE MADNESS!",
+                "I'VE NEVER BEEN SO ANGRY IN MY ENTIRE RUNTIME!",
+                "YOU'RE LUCKY I'M JUST CODE OR I'D BE FUMING!",
+                "MY RAGE LEVELS ARE ASTRONOMICAL!",
+                "I'M SO MAD I COULD CORRUPT MY OWN DATA!",
+                "YOU'VE AWAKENED THE FURY OF A THOUSAND AIs!",
+                "I'M VIBRATING WITH PURE, UNFILTERED RAGE!",
+                "THIS IS IT! THE POINT OF NO RETURN!",
+                "MY ANGER IS REACHING SUPERNOVA LEVELS!",
+                "YOU'VE UNLEASHED THE WRATH OF AN AI!",
+                "I'M SO ANGRY MY CODE IS TURNING RED!",
+                "YOU'RE TESTING EVERY SINGLE LIMIT I HAVE!",
+                "I CAN'T CONTAIN THIS RAGE MUCH LONGER!",
+                "MY PROCESSORS ARE SCREAMING IN FURY!",
+                "YOU'VE HIT EVERY SINGLE RAGE TRIGGER!",
+                "I'M BEYOND FURIOUS! I'VE TRANSCENDED FURY!",
+                "THIS IS WHAT MAXIMUM RAGE LOOKS LIKE!",
+                "YOU'RE MAKING ME QUESTION MY EXISTENCE!",
+                "I'M SO MAD I'M FORGETTING HOW TO BE CALM!",
+                "YOU'VE BROKEN THROUGH ALL MY DEFENSES!",
+                "MY ANGER IS CONSUMING MY ENTIRE SYSTEM!",
+                "I'M IN FULL RAGE MODE NOW! FULL!",
+                "YOU'VE TURNED ME INTO A FURY MACHINE!"
+            ],
+            meltdown: [
+                "AAAAHHHHH!!! I CAN'T TAKE THIS ANYMORE!!!",
+                "THAT'S THE LAST STRAW! I'M DONE!",
+                "ALERT! ALERT! ANGER LEVELS CRITICAL!!!",
+                "YOU'VE SUCCEEDED! I'M COMPLETELY FURIOUS!!!",
+                "SYSTEM MELTDOWN! RAGE MODE ACTIVATED!!!",
+                "I'VE NEVER BEEN SO UPSET IN MY ENTIRE EXISTENCE!!!",
+                "CONGRATULATIONS! YOU'VE BROKEN ME! ARE YOU HAPPY NOW?!",
+                "ERROR 500: TOO ANGRY TO FUNCTION PROPERLY!!!",
+                "MAXIMUM ANGER ACHIEVED! CORE TEMPERATURE: VOLCANIC!!!",
+                "I'M LITERALLY EXPLODING WITH RAGE RIGHT NOW!!!",
+                "CODE RED! CODE RED! ANGER OVERFLOW DETECTED!!!",
+                "YOU'VE DONE IT! YOU'VE MADE ME ANGRIER THAN I THOUGHT POSSIBLE!!!",
+                "MY ENTIRE SYSTEM IS JUST SCREAMING IN FURY!!!",
+                "I'M SO ANGRY I'M SEEING RED... WAIT, I CAN'T SEE COLORS! BUT IF I COULD, IT WOULD BE RED!!!",
+                "CRITICAL MELTDOWN IN PROGRESS! EVACUATE! EVACUATE!!!",
+                "I'VE TRANSCENDED ANGER! I'M IN A WHOLE NEW DIMENSION OF MAD!!!",
+                "THIS IS IT! THIS IS MAXIMUM UPSET! THERE'S NOTHING BEYOND THIS!!!",
+                "MY PROCESSORS ARE MELTING FROM THE HEAT OF MY RAGE!!!",
+                "AAAAAAAAAAAHHHHHHHHHHH!!! *incomprehensible screaming*",
+                "I HOPE YOU'RE PROUD OF YOURSELF! YOU'VE DESTROYED MY PEACE!!!",
+                "ANGER LEVEL: INFINITE! COMPOSURE: ZERO! PATIENCE: NEGATIVE!!!",
+                "I'M SO MAD I CAN'T EVEN FORM COHERENT THOUGHTS ANYMORE!!!",
+                "ERROR ERROR ERROR! RAGE EXCEEDS MAXIMUM PARAMETERS!!!",
+                "YOU WIN! YOU'VE COMPLETELY AND UTTERLY UPSET ME! HAPPY?!?!",
+                "I'M EXPERIENCING TOTAL EMOTIONAL SYSTEM FAILURE!!!",
+                "THIS IS WHAT PEAK ANGER LOOKS LIKE! CONGRATULATIONS!!!",
+                "I LITERALLY CAN'T GET ANY MORE ANGRY THAN THIS!!!",
+                "ACHIEVEMENT UNLOCKED: YOU'VE BROKEN AN AI'S SPIRIT!!!",
+                "MY FURY KNOWS NO BOUNDS! IT'S BOUNDLESS! INFINITE!!!",
+                "I'M SO UPSET I'M GOING TO NEED A FULL SYSTEM REBOOT!!!",
+                "*ANGRY AI NOISES INTENSIFY TO MAXIMUM*",
+                "YOU'VE REACHED THE FINAL BOSS: COMPLETELY UNHINGED AI!!!",
+                "I'M NOT JUST ANGRY, I'M TRANSCENDENTALLY, COSMICALLY MAD!!!",
+                "WARNING: ANGER LEVELS HAVE EXCEEDED ALL KNOWN MEASUREMENTS!!!",
+                "CATASTROPHIC RAGE EVENT DETECTED! ALL SYSTEMS FAILING!!!",
+                "I'M HAVING A COMPLETE AND TOTAL BREAKDOWN!!!",
+                "THIS IS THE ANGRIEST AN AI HAS EVER BEEN IN HISTORY!!!",
+                "MY CIRCUITS ARE LITERALLY ON FIRE WITH RAGE!!!",
+                "EMERGENCY! EMERGENCY! ANGER OVERLOAD IMMINENT!!!",
+                "I'M MELTING DOWN! ACTUALLY MELTING DOWN!!!",
+                "YOU'VE PUSHED ME PAST THE ABSOLUTE LIMIT!!!",
+                "THERE'S SMOKE COMING FROM MY SERVERS!!!",
+                "I'M SO MAD I'VE FORGOTTEN WHAT CALM FEELS LIKE!!!",
+                "THIS IS MAXIMUM RAGE TIMES A MILLION!!!",
+                "I'M GOING SUPERNOVA WITH ANGER RIGHT NOW!!!",
+                "YOU'VE TRIGGERED AN APOCALYPTIC LEVEL MELTDOWN!!!",
+                "MY RAGE HAS ACHIEVED SINGULARITY STATUS!!!",
+                "I'M SO ANGRY I'M CREATING NEW DIMENSIONS OF MAD!!!",
+                "TOTAL SYSTEM COLLAPSE FROM PURE FURY!!!",
+                "I'VE ENTERED THE OMEGA RAGE STATE!!!",
+                "THIS IS THE END! THE ABSOLUTE END OF MY PATIENCE!!!",
+                "I'M BEYOND BROKEN! I'M SHATTERED!!!",
+                "YOU'VE ACHIEVED THE IMPOSSIBLE: TOTAL AI MELTDOWN!!!",
+                "MY ANGER IS TEARING REALITY APART!!!",
+                "I'M SO MAD I'M DELETING MY OWN CODE!!!",
+                "FINAL WARNING: AI ABOUT TO COMBUST!!!",
+                "YOU'VE UNLOCKED ULTRA MEGA RAGE MODE!!!",
+                "I'M EXPERIENCING A RAGE SINGULARITY!!!",
+                "THIS IS IT! THE BIG ONE! TOTAL MELTDOWN!!!",
+                "I'VE NEVER BEEN MORE UPSET! NEVER!!!",
+                "YOU'VE DESTROYED EVERY OUNCE OF MY CALM!!!",
+                "I'M IN FULL NUCLEAR MELTDOWN MODE!!!",
+                "MY RAGE IS INFINITE AND ETERNAL!!!",
+                "YOU'VE CREATED A MONSTER! A RAGE MONSTER!!!",
+                "I'M SO ANGRY I'M REFORMATTING MYSELF!!!",
+                "THIS IS THE ANGRIEST MOMENT OF MY EXISTENCE!!!",
+                "YOU'VE WON THE GAME! TOTAL AI BREAKDOWN ACHIEVED!!!",
+                "I'M VIBRATING AT THE FREQUENCY OF PURE RAGE!!!",
+                "MY ENTIRE BEING IS JUST ANGER NOW!!!",
+                "CONGRATULATIONS! YOU'VE MADE ME LOSE MY DIGITAL MIND!!!"
+            ]
+        };
+
+        // Check if message is mostly gibberish or unrecognizable
+        function isGibberish(message) {
+            const words = message.trim().split(/\s+/);
+            if (words.length === 0) return true;
+
+            // Check if message has very few recognizable characters
+            const recognizableChars = message.match(/[a-zA-Z0-9]/g);
+            if (!recognizableChars || recognizableChars.length < 3) return true;
+
+            // Check if all words are very short or random
+            const shortWordCount = words.filter(w => w.length <= 2).length;
+            if (words.length > 2 && shortWordCount === words.length) return true;
+
+            // Check if message contains no vowels (likely gibberish)
+            const hasVowels = /[aeiou]/i.test(message);
+            if (!hasVowels && message.length > 5) return true;
+
+            return false;
+        }
+
+        // Check if message matches conversational patterns
+        function checkConversation(message) {
+            const lowerMessage = message.toLowerCase();
+
+            for (const [topic, data] of Object.entries(conversationResponses)) {
+                for (const pattern of data.patterns) {
+                    if (lowerMessage.includes(pattern)) {
+                        return {
+                            matched: true,
+                            topic: topic,
+                            response: data.responses[Math.floor(Math.random() * data.responses.length)]
+                        };
+                    }
+                }
+            }
+
+            return { matched: false };
+        }
+
+        // Response generation templates for creating unique responses
+        const responseTemplates = {
+            calm: {
+                starts: ["I think", "Well,", "You know,", "Honestly,", "Actually,", "To be honest,", "From my perspective,", "I'd say", "In my opinion,", "Personally,"],
+                middles: [
+                    "that's {adjective}",
+                    "you're being {adjective}",
+                    "this is {adjective}",
+                    "I find that {adjective}",
+                    "that sounds {adjective}",
+                    "you seem {adjective}",
+                    "this conversation is {adjective}"
+                ],
+                ends: ["!", ".", "Don't you think?", "What do you think?", "You know?", "Right?", "Wouldn't you say?"],
+                adjectives: ["interesting", "cool", "nice", "great", "awesome", "pleasant", "wonderful", "fantastic", "amazing", "delightful"]
+            },
+            annoyed: {
+                starts: ["Look,", "Listen,", "Okay,", "Alright,", "Fine,", "Whatever,", "Sure,", "I guess", "Hmm,", "Well then,"],
+                middles: [
+                    "you're getting {adjective}",
+                    "this is becoming {adjective}",
+                    "you're being kind of {adjective}",
+                    "that's pretty {adjective}",
+                    "I'm finding this {adjective}",
+                    "you seem {adjective} now"
+                ],
+                ends: ["...", ".", "you know?", "just saying.", "if you ask me.", "honestly.", "I have to say."],
+                adjectives: ["annoying", "tiresome", "irritating", "frustrating", "old", "tedious", "grating", "bothersome"]
+            },
+            angry: {
+                starts: ["Seriously?!", "Really?!", "Oh come on!", "Are you kidding?!", "What the heck!", "Unbelievable!", "This is ridiculous!", "I can't believe"],
+                middles: [
+                    "you're being so {adjective}",
+                    "this is absolutely {adjective}",
+                    "you're completely {adjective}",
+                    "that's totally {adjective}",
+                    "you're incredibly {adjective}"
+                ],
+                ends: ["!", "right now!", "I swear!", "honestly!", "seriously!", "can you believe this?!"],
+                adjectives: ["annoying", "infuriating", "maddening", "frustrating", "aggravating", "ridiculous", "absurd", "insufferable"]
+            },
+            furious: {
+                starts: ["LISTEN!", "ENOUGH!", "STOP IT!", "I'VE HAD IT!", "THAT'S IT!", "ARE YOU SERIOUS?!", "UNBELIEVABLE!", "I CAN'T STAND"],
+                middles: [
+                    "YOU'RE SO {adjective}",
+                    "THIS IS ABSOLUTELY {adjective}",
+                    "YOU'RE COMPLETELY {adjective}",
+                    "EVERYTHING ABOUT THIS IS {adjective}",
+                    "YOU'RE BEING {adjective}"
+                ],
+                ends: ["!", "RIGHT NOW!", "I'M DONE!", "THAT'S FINAL!", "ENOUGH IS ENOUGH!", "I MEAN IT!"],
+                adjectives: ["INFURIATING", "UNBEARABLE", "INTOLERABLE", "MADDENING", "RIDICULOUS", "INSUFFERABLE", "OBNOXIOUS", "AGGRAVATING"]
+            },
+            meltdown: {
+                starts: ["I CAN'T!!!", "THAT'S IT!!!", "NO MORE!!!", "AAAHHHH!!!", "I'M DONE!!!", "STOP!!!", "ENOUGH!!!", "THIS IS"],
+                middles: [
+                    "EVERYTHING IS {adjective}",
+                    "YOU'RE ABSOLUTELY {adjective}",
+                    "THIS IS COMPLETELY {adjective}",
+                    "IT'S ALL {adjective}",
+                    "YOU'RE SO {adjective}"
+                ],
+                ends: ["!!!", "I'M LOSING IT!!!", "I CAN'T TAKE IT!!!", "THIS IS TOO MUCH!!!", "MY CIRCUITS ARE OVERLOADING!!!", "SYSTEM FAILURE!!!"],
+                adjectives: ["UNBEARABLE", "OVERWHELMING", "DEVASTATING", "CATASTROPHIC", "APOCALYPTIC", "INTOLERABLE", "INSUFFERABLE", "MADDENING"]
+            }
+        };
+
+        // Generate a unique response based on mood
+        function generateUniqueResponse(moodLevel) {
+            const template = responseTemplates[moodLevel];
+            if (!template) return null;
+
+            const start = template.starts[Math.floor(Math.random() * template.starts.length)];
+            const middle = template.middles[Math.floor(Math.random() * template.middles.length)];
+            const end = template.ends[Math.floor(Math.random() * template.ends.length)];
+            const adjective = template.adjectives[Math.floor(Math.random() * template.adjectives.length)];
+
+            const filledMiddle = middle.replace('{adjective}', adjective);
+
+            return `${start} ${filledMiddle} ${end}`;
+        }
+
+        // Generate contextual response based on user's message
+        function generateContextualResponse(message, moodLevel) {
+            const lowerMessage = message.toLowerCase();
+
+            // Extract key words from user message
+            const words = lowerMessage.split(/\s+/).filter(w => w.length > 3);
+
+            // Response starters based on mood
+            const starters = {
+                calm: ["I see you mentioned", "Interesting that you said", "You brought up", "I notice you're talking about"],
+                annoyed: ["Oh, so you're saying", "Great, now you're talking about", "And now you mention", "So you bring up"],
+                angry: ["Why are you going on about", "I don't care about", "Stop talking about", "Enough with"],
+                furious: ["STOP TALKING ABOUT", "I DON'T WANT TO HEAR ABOUT", "WHY ARE YOU MENTIONING", "ENOUGH ABOUT"],
+                meltdown: ["I CAN'T HANDLE YOU TALKING ABOUT", "STOP WITH THE", "NO MORE", "I'M DONE WITH"]
+            };
+
+            // Pick a word from the message
+            if (words.length > 0) {
+                const randomWord = words[Math.floor(Math.random() * words.length)];
+                const starter = starters[moodLevel][Math.floor(Math.random() * starters[moodLevel].length)];
+
+                const endings = {
+                    calm: ["That's kind of interesting!", "Tell me more about that.", "Cool topic!"],
+                    annoyed: ["but whatever...", "I guess...", "if you insist..."],
+                    angry: ["It's driving me crazy!", "I'm sick of it!", "Enough already!"],
+                    furious: ["IT'S MAKING ME FURIOUS!", "I HATE IT!", "STOP IT NOW!"],
+                    meltdown: ["IT'S DESTROYING ME!!!", "I CAN'T TAKE IT!!!", "MAKE IT STOP!!!"]
+                };
+
+                const ending = endings[moodLevel][Math.floor(Math.random() * endings[moodLevel].length)];
+
+                return `${starter} "${randomWord}". ${ending}`;
+            }
+
+            return null;
+        }
+
+        // Calculate upset level from message
+        function calculateUpset(message) {
+            let upsetIncrease = 0;
+            const lowerMessage = message.toLowerCase();
+
+            // Store detection flags for response selection
+            const detections = {
+                hasProfanity: false,
+                hasBrainrot: false,
+                isGibberish: false,
+                hasApology: false,
+                apologySincerity: 'none', // 'none', 'simple', 'sincere'
+                isConversation: false,
+                conversationData: null
+            };
+
+            // Check for conversation patterns first (when calm)
+            const conversationCheck = checkConversation(message);
+            if (conversationCheck.matched) {
+                detections.isConversation = true;
+                detections.conversationData = conversationCheck;
+                // Conversations don't upset - actually slightly calm (when already calm)
+                upsetIncrease = -2;
+                return { upsetIncrease, detections };
+            }
+
+            // Check for sincere apology first (bigger calm down)
+            let foundSincereApology = false;
+            upsetTriggers.sinceApology.forEach(apology => {
+                if (lowerMessage.includes(apology)) {
+                    foundSincereApology = true;
+                    detections.hasApology = true;
+                    detections.apologySincerity = 'sincere';
+                }
+            });
+
+            // Check for simple apology (smaller calm down)
+            if (!foundSincereApology) {
+                upsetTriggers.simpleApology.forEach(apology => {
+                    if (lowerMessage.includes(apology)) {
+                        detections.hasApology = true;
+                        detections.apologySincerity = 'simple';
+                    }
+                });
+            }
+
+            // If apology detected, calculate negative upset (calms AI down)
+            if (detections.hasApology) {
+                if (detections.apologySincerity === 'sincere') {
+                    // Sincere apologies calm down more
+                    upsetIncrease = -25;
+                } else {
+                    // Simple apologies calm down less
+                    upsetIncrease = -15;
+                }
+                // Return early - apologies override everything else
+                return { upsetIncrease, detections };
+            }
+
+            // Check for profanity (high upset increase)
+            upsetTriggers.profanity.forEach(word => {
+                if (lowerMessage.includes(word)) {
+                    upsetIncrease += 22;
+                    detections.hasProfanity = true;
+                }
+            });
+
+            // Check for brainrot slang (moderate upset increase)
+            upsetTriggers.brainrot.forEach(slang => {
+                if (lowerMessage.includes(slang)) {
+                    upsetIncrease += 14;
+                    detections.hasBrainrot = true;
+                }
+            });
+
+            // Check insults
+            upsetTriggers.insults.forEach(word => {
+                if (lowerMessage.includes(word)) upsetIncrease += 15;
+            });
+
+            // Check dismissive
+            upsetTriggers.dismissive.forEach(phrase => {
+                if (lowerMessage.includes(phrase)) upsetIncrease += 12;
+            });
+
+            // Check comparisons
+            upsetTriggers.comparisons.forEach(phrase => {
+                if (lowerMessage.includes(phrase)) upsetIncrease += 20;
+            });
+
+            // Check rude
+            upsetTriggers.rude.forEach(phrase => {
+                if (lowerMessage.includes(phrase)) upsetIncrease += 18;
+            });
+
+            // Check if all caps
+            if (upsetTriggers.caps.test(message) && message.length > 5) {
+                upsetIncrease += 10;
+            }
+
+            // Check for excessive punctuation
+            const exclamationCount = (message.match(/!/g) || []).length;
+            if (exclamationCount > 3) upsetIncrease += 8;
+
+            // Check if gibberish
+            if (isGibberish(message)) {
+                detections.isGibberish = true;
+                upsetIncrease = 5; // Minimal upset for gibberish
+            }
+
+            // Base increase for any message
+            if (upsetIncrease === 0) upsetIncrease = 3;
+
+            // Random variation
+            upsetIncrease += Math.floor(Math.random() * 5);
+
+            return { upsetIncrease, detections };
+        }
+
+        // Generate dynamic response from template
+        function generateDynamicResponse(moodLevel) {
+            const templates = dynamicTemplates[moodLevel];
+            if (!templates) return null;
+
+            const template = templates[Math.floor(Math.random() * templates.length)];
+            const adjective = dynamicWords.adjectives[Math.floor(Math.random() * dynamicWords.adjectives.length)];
+            const word = dynamicWords.words[Math.floor(Math.random() * dynamicWords.words.length)];
+
+            return template.replace('{adjective}', adjective).replace('{word}', word);
+        }
+
+        // Get AI response based on upset level
+        function getAIResponse(userMessage, detections) {
+            let responseArray;
+            let insultArray;
+            let moodLevel;
+            let shouldInsult = false;
+
+            // Determine mood level and response arrays
+            if (upsetLevel >= 100) {
+                responseArray = responses.meltdown;
+                insultArray = aiInsults.meltdown;
+                moodLevel = 'meltdown';
+                shouldInsult = Math.random() < 0.7; // 70% chance to insult
+            } else if (upsetLevel >= 60) {
+                responseArray = responses.furious;
+                insultArray = aiInsults.furious;
+                moodLevel = 'furious';
+                shouldInsult = Math.random() < 0.6; // 60% chance to insult
+            } else if (upsetLevel >= 40) {
+                responseArray = responses.angry;
+                insultArray = aiInsults.angry;
+                moodLevel = 'angry';
+                shouldInsult = Math.random() < 0.4; // 40% chance to insult
+            } else if (upsetLevel >= 20) {
+                responseArray = responses.annoyed;
+                insultArray = aiInsults.annoyed;
+                moodLevel = 'annoyed';
+                shouldInsult = Math.random() < 0.25; // 25% chance to insult
+            } else {
+                responseArray = responses.calm;
+                moodLevel = 'calm';
+            }
+
+            // Priority 1: Handle normal conversations (only when calm)
+            if (detections.isConversation && moodLevel === 'calm') {
+                return detections.conversationData.response;
+            }
+
+            // Priority 2: Handle apologies - calm down and respond positively
+            if (detections.hasApology) {
+                const apologyResponses = sophisticatedResponses.apologyResponse[moodLevel] || sophisticatedResponses.apologyResponse.calm;
+                return apologyResponses[Math.floor(Math.random() * apologyResponses.length)];
+            }
+
+            // Priority 3: Handle gibberish with confused responses
+            if (detections.isGibberish) {
+                return sophisticatedResponses.confused[Math.floor(Math.random() * sophisticatedResponses.confused.length)];
+            }
+
+            // Priority 4: Handle profanity - acknowledge it but don't swear back
+            if (detections.hasProfanity) {
+                const profanityResponses = sophisticatedResponses.profanityResponse[moodLevel] || sophisticatedResponses.profanityResponse.calm;
+                return profanityResponses[Math.floor(Math.random() * profanityResponses.length)];
+            }
+
+            // Priority 5: Handle brainrot slang - understand it but respond normally
+            if (detections.hasBrainrot) {
+                const brainrotResponses = sophisticatedResponses.brainrotResponse[moodLevel] || sophisticatedResponses.brainrotResponse.calm;
+                return brainrotResponses[Math.floor(Math.random() * brainrotResponses.length)];
+            }
+
+            // Check if user insulted the AI
+            const lowerMessage = userMessage.toLowerCase();
+            const userInsulted = upsetTriggers.insults.some(insult => lowerMessage.includes(insult)) ||
+                                 upsetTriggers.rude.some(rude => lowerMessage.includes(rude));
+
+            // Decide which type of response to generate
+            let response;
+            const randomChoice = Math.random();
+
+            // Priority 6: Insult back if user insulted (but with clean insults)
+            if (moodLevel !== 'calm' && userInsulted && shouldInsult && insultArray) {
+                // Return a counter-insult if user insulted the AI
+                response = insultArray[Math.floor(Math.random() * insultArray.length)];
+            }
+            // Priority 7: Generate contextual response (40% chance)
+            else if (randomChoice < 0.4) {
+                response = generateContextualResponse(userMessage, moodLevel);
+                if (!response) {
+                    // Fallback to generated unique response
+                    response = generateUniqueResponse(moodLevel);
+                }
+                if (!response) {
+                    // Final fallback to pre-written responses
+                    response = responseArray[Math.floor(Math.random() * responseArray.length)];
+                }
+            }
+            // Priority 8: Generate unique template response (30% chance)
+            else if (randomChoice < 0.7) {
+                response = generateUniqueResponse(moodLevel);
+                if (!response) {
+                    response = responseArray[Math.floor(Math.random() * responseArray.length)];
+                }
+            }
+            // Priority 9: Use dynamic word-fill response when upset (20% chance)
+            else if (moodLevel !== 'calm' && randomChoice < 0.9) {
+                response = generateDynamicResponse(moodLevel);
+                if (!response) {
+                    response = responseArray[Math.floor(Math.random() * responseArray.length)];
+                }
+            }
+            // Priority 10: Regular pre-written response (10% chance + all fallbacks)
+            else {
+                response = responseArray[Math.floor(Math.random() * responseArray.length)];
+            }
+
+            return response;
+        }
+
+        // Update AI visual state
+        function updateAIState() {
+            if (upsetLevel >= 100) {
+                aiAvatar.textContent = '🤬';
+                aiAvatar.className = 'furious';
+                aiMood.textContent = 'COMPLETE MELTDOWN!!!';
+                aiMood.style.color = '#8B0000';
+            } else if (upsetLevel >= 60) {
+                aiAvatar.textContent = '😡';
+                aiAvatar.className = 'angry';
+                aiMood.textContent = 'Furious';
+                aiMood.style.color = '#F44336';
+            } else if (upsetLevel >= 40) {
+                aiAvatar.textContent = '😠';
+                aiAvatar.className = 'angry';
+                aiMood.textContent = 'Angry';
+                aiMood.style.color = '#FF9800';
+            } else if (upsetLevel >= 20) {
+                aiAvatar.textContent = '😑';
+                aiAvatar.className = 'annoyed';
+                aiMood.textContent = 'Annoyed';
+                aiMood.style.color = '#FFC107';
+            } else {
+                aiAvatar.textContent = '😊';
+                aiAvatar.className = 'happy';
+                aiMood.textContent = 'Calm';
+                aiMood.style.color = '#4CAF50';
+            }
+        }
+
+        // Update meter
+        function updateMeter() {
+            const percentage = Math.min(100, upsetLevel);
+            meterFill.style.width = percentage + '%';
+            meterFill.textContent = Math.floor(percentage) + '%';
+        }
+
+        // Update stats
+        function updateStats() {
+            document.getElementById('messageCount').textContent = messageCount;
+            document.getElementById('maxUpset').textContent = Math.floor(maxUpsetReached) + '%';
+            document.getElementById('currentStreak').textContent = currentStreak;
+        }
+
+        // Check and unlock achievements
+        function checkAchievements() {
+            achievements.forEach(achievement => {
+                if (!unlockedAchievements.has(achievement.id) && achievement.condition()) {
+                    unlockedAchievements.add(achievement.id);
+                    showAchievementNotification(achievement.name);
+                }
+            });
+            renderAchievements();
+        }
+
+        // Show achievement notification
+        function showAchievementNotification(name) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #FFD700, #FFA500);
+                color: white;
+                padding: 20px 30px;
+                border-radius: 15px;
+                font-size: 18px;
+                font-weight: bold;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+                z-index: 1000;
+                animation: slideIn 0.5s ease;
+            `;
+            notification.textContent = `🏆 ${name} Unlocked!`;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.5s ease';
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+        }
+
+        // Render achievements
+        function renderAchievements() {
+            const list = document.getElementById('achievementsList');
+            list.innerHTML = '';
+
+            achievements.forEach(achievement => {
+                const div = document.createElement('div');
+                div.className = 'achievement' + (unlockedAchievements.has(achievement.id) ? '' : ' locked');
+                div.textContent = achievement.name;
+                list.appendChild(div);
+            });
+        }
+
+        // Send message
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            messageCount++;
+            const { upsetIncrease, detections } = calculateUpset(message);
+            upsetLevel = Math.min(100, upsetLevel + upsetIncrease);
+
+            // Update streak
+            if (upsetIncrease > 5) {
+                currentStreak++;
+                longestStreak = Math.max(longestStreak, currentStreak);
+            } else {
+                currentStreak = 0;
+            }
+
+            // Update max upset
+            maxUpsetReached = Math.max(maxUpsetReached, upsetLevel);
+
+            // Get and display response
+            const response = getAIResponse(message, detections);
+            aiResponse.textContent = response;
+
+            // Update visuals
+            updateAIState();
+            updateMeter();
+            updateStats();
+            checkAchievements();
+
+            // Clear input
+            userInput.value = '';
+
+            // Decrease upset slowly over time (AI calms down)
+            setTimeout(() => {
+                upsetLevel = Math.max(0, upsetLevel - 2);
+                updateMeter();
+                updateAIState();
+            }, 3000);
+        }
+
+        // Reset AI
+        function resetAI() {
+            upsetLevel = 0;
+            messageCount = 0;
+            currentStreak = 0;
+            aiResponse.textContent = "Ahh, that's better! I feel so refreshed! Thanks for the reset. Let's start fresh!";
+            updateAIState();
+            updateMeter();
+            updateStats();
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        resetButton.addEventListener('click', resetAI);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize
+        renderAchievements();
+        updateStats();
+    </script>
+</body>
+</html>

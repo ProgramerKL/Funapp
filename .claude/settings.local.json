@@ -28,7 +28,16 @@
       "WebFetch(domain:api.weather.gc.ca)",
       "WebFetch(domain:weather.gc.ca)",
       "WebFetch(domain:www.accuweather.com)",
-      "WebFetch(domain:api.open-meteo.com)"
+      "WebFetch(domain:api.open-meteo.com)",
+      "Bash(for file in geometrydash.html tower_defense_fixed.html weather.html pokemon.html vex-calculator.html cyberpunk-pong.html whackamole.html)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(done)",
+      "Bash(for:*)",
+      "Bash(do if [ -f \"$file\" ])",
+      "Bash(then echo \"=== $file ===\")",
+      "Bash(fi)",
+      "Bash(pkill:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

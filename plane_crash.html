@@ -1,0 +1,3500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sky Destroyer - Plane Crash Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 50%, #90EE90 100%);
+        }
+
+        #gameCanvas {
+            display: block;
+            background: linear-gradient(180deg, #87CEEB 0%, #B0E0E6 50%, #98FB98 100%);
+            cursor: default;
+        }
+
+        .ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px 25px;
+            border-radius: 15px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .fuel-bar-container {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 5px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .fuel-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4444 0%, #ffaa00 50%, #00ff00 100%);
+            border-radius: 15px;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+        }
+
+        .fuel-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+        }
+
+        .ability-cooldown-container {
+            position: absolute;
+            bottom: 140px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 35px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 17px;
+            padding: 4px;
+            border: 3px solid rgba(138, 43, 226, 0.5);
+        }
+
+        .ability-cooldown-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #8a2be2 0%, #da70d6 50%, #ee82ee 100%);
+            border-radius: 14px;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.8);
+        }
+
+        .ability-cooldown-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .health-bar-container {
+            position: absolute;
+            bottom: 85px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 5px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .health-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000 0%, #ff6600 50%, #00ff00 100%);
+            border-radius: 15px;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+        }
+
+        .health-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+        }
+
+        .game-over {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 50px;
+            border-radius: 30px;
+            text-align: center;
+            color: white;
+            display: none;
+            pointer-events: auto;
+            border: 4px solid #FFD700;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+        }
+
+        .game-over.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .game-over h1 {
+            font-size: 60px;
+            margin-bottom: 20px;
+            color: #FFD700;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+        }
+
+        .game-over p {
+            font-size: 28px;
+            margin: 15px 0;
+        }
+
+        .restart-btn {
+            margin-top: 30px;
+            padding: 20px 50px;
+            font-size: 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .instructions {
+            position: absolute;
+            top: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px 30px;
+            border-radius: 15px;
+            color: white;
+            font-size: 18px;
+            text-align: center;
+            animation: fadeOut 8s ease forwards;
+        }
+
+        @keyframes fadeOut {
+            0%, 80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .controls-hint {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            text-align: center;
+            animation: fadeOut 8s ease forwards;
+        }
+
+        .combo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 72px;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+            animation: comboPopup 1s ease;
+            pointer-events: none;
+            display: none;
+        }
+
+        .combo.show {
+            display: block;
+        }
+
+        @keyframes comboPopup {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.3);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0;
+            }
+        }
+
+        .shop-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            padding: 15px 30px;
+            border-radius: 10px;
+            color: #000;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 3px solid #FFE87C;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
+            transition: all 0.3s ease;
+            pointer-events: auto;
+            z-index: 100;
+        }
+
+        .shop-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.7);
+        }
+
+        .shop-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            pointer-events: auto;
+            z-index: 200;
+            overflow-y: auto;
+        }
+
+        .shop-overlay.show {
+            display: block;
+        }
+
+        .shop-container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 30px;
+        }
+
+        .shop-header {
+            text-align: center;
+            color: #FFD700;
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+        }
+
+        .money-display {
+            text-align: center;
+            color: #00FF00;
+            font-size: 32px;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .plane-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .plane-card {
+            background: rgba(30, 30, 30, 0.95);
+            border: 3px solid #555;
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .plane-card:hover {
+            transform: translateY(-5px);
+            border-color: #FFD700;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+        }
+
+        .plane-card.selected {
+            border-color: #00FF00;
+            background: rgba(0, 100, 0, 0.3);
+        }
+
+        .plane-card.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .plane-card.locked:hover {
+            transform: none;
+            border-color: #555;
+            box-shadow: none;
+        }
+
+        .plane-title {
+            font-size: 28px;
+            color: #FFD700;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .plane-description {
+            color: #CCC;
+            font-size: 14px;
+            margin-bottom: 15px;
+            text-align: center;
+            min-height: 40px;
+        }
+
+        .plane-stats {
+            color: #FFF;
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .plane-stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .plane-ability {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            color: #FFD700;
+            font-size: 14px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .plane-price {
+            text-align: center;
+            font-size: 24px;
+            color: #00FF00;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .buy-button, .select-button {
+            width: 100%;
+            padding: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .buy-button {
+            background: linear-gradient(135deg, #00FF00 0%, #00AA00 100%);
+            color: #000;
+        }
+
+        .buy-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 255, 0, 0.5);
+        }
+
+        .buy-button:disabled {
+            background: #555;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        .buy-button:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .select-button {
+            background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+            color: #FFF;
+        }
+
+        .select-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.5);
+        }
+
+        .close-shop {
+            display: block;
+            margin: 20px auto;
+            padding: 15px 40px;
+            font-size: 20px;
+            background: linear-gradient(135deg, #FF4444 0%, #CC0000 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .close-shop:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(255, 68, 68, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+
+    <div class="ui-overlay">
+        <button class="shop-button" onclick="toggleShop()">💰 SHOP ($<span id="moneyDisplay">0</span>)</button>
+
+        <div class="hud">
+            <div class="stat-box">
+                <span>✈️ Speed: <span id="speed">0</span> mph</span>
+            </div>
+            <div class="stat-box">
+                <span>📏 Distance: <span id="distance">0</span>m</span>
+            </div>
+            <div class="stat-box">
+                <span>🏢 Destroyed: <span id="destroyed">0</span></span>
+            </div>
+            <div class="stat-box">
+                <span>💰 Score: <span id="score">0</span></span>
+            </div>
+        </div>
+
+        <div style="position: absolute; top: 120px; left: 20px; display: flex; flex-direction: column; gap: 10px;">
+            <div class="stat-box" style="font-size: 18px;">
+                <span>🚀 Missiles: <span id="missiles">20</span></span>
+            </div>
+            <div class="stat-box" style="font-size: 18px;">
+                <span>🔫 Ammo: <span id="ammo">500</span></span>
+            </div>
+            <div class="stat-box" style="font-size: 18px;">
+                <span>📏 Altitude: <span id="altitude">0</span>m</span>
+            </div>
+        </div>
+
+        <div id="stallWarning" style="position: absolute; top: 200px; left: 50%; transform: translateX(-50%);
+             background: rgba(255, 0, 0, 0.9); padding: 20px 40px; border-radius: 15px;
+             color: white; font-size: 32px; font-weight: bold; display: none;
+             border: 4px solid #FF0000; animation: pulse 0.5s infinite;">
+            ⚠️ STALL WARNING ⚠️
+        </div>
+
+        <style>
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.5; }
+            }
+        </style>
+
+        <div class="instructions">
+            Use Arrow Keys to control plane • Destroy towers • Don't run out of fuel!
+        </div>
+
+        <div class="controls-hint">
+            ⬆️ Pitch Up  ⬇️ Pitch Down  ⬅️ Air Brake  ➡️ Thrust  |  Q: Missile  SPACE: Machine Gun  C: Special Ability
+        </div>
+
+        <div class="health-bar-container">
+            <div class="health-bar" id="healthBar"></div>
+            <div class="health-text">HEALTH: <span id="healthText">100</span>%</div>
+        </div>
+
+        <div class="ability-cooldown-container">
+            <div class="ability-cooldown-bar" id="abilityCooldownBar"></div>
+            <div class="ability-cooldown-text" id="abilityCooldownText">⚡ SPECIAL ABILITY: READY</div>
+        </div>
+
+        <div class="fuel-bar-container">
+            <div class="fuel-bar" id="fuelBar"></div>
+            <div class="fuel-text">FUEL: <span id="fuelText">100</span>%</div>
+        </div>
+
+        <div class="combo" id="combo"></div>
+    </div>
+
+    <div class="game-over" id="gameOver">
+        <h1>💥 GAME OVER 💥</h1>
+        <p>Towers Destroyed: <span id="finalDestroyed">0</span></p>
+        <p>Final Score: <span id="finalScore">0</span></p>
+        <p id="highScoreText"></p>
+        <button class="restart-btn" onclick="restartGame()">🔄 Play Again</button>
+    </div>
+
+    <div class="shop-overlay" id="shopOverlay">
+        <div class="shop-container">
+            <h1 class="shop-header">✈️ AIRCRAFT HANGAR ✈️</h1>
+            <div class="money-display">💵 Balance: $<span id="shopMoney">0</span></div>
+            <div class="plane-grid" id="planeGrid"></div>
+            <button class="close-shop" onclick="toggleShop()">Close Shop</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Game state
+        let gameRunning = true;
+        let score = 0;
+        let towersDestroyed = 0;
+        let fuel = 100; // Fuel starts at 100, no refills
+        let health = 100; // Plane health
+        let combo = 0;
+        let lastDestroyTime = 0;
+        let worldOffset = 0; // Track how far the world has scrolled
+        let nextTowerSpawn = 0; // X position for next tower spawn
+        let money = 999999; // Currency for buying planes (infinite for testing)
+        let currentPlaneType = 'fighter'; // Current plane being used
+
+        // Plane types with unique stats and abilities
+        const planeTypes = {
+            fighter: {
+                name: '🛩️ Fighter Jet',
+                cost: 0,
+                unlocked: true,
+                maxHealth: 100,
+                maxSpeed: 500,
+                minSpeed: 150,
+                cruiseSpeed: 250,
+                thrust: 400,
+                missiles: 20,
+                ammo: 500,
+                ability: 'balanced',
+                abilityName: 'Balanced Combat',
+                abilityCooldown: 0,
+                color: '#8B9197',
+                description: 'Standard fighter with balanced stats'
+            },
+            bomber: {
+                name: '✈️ Heavy Bomber',
+                cost: 5000,
+                unlocked: false,
+                maxHealth: 200,
+                maxSpeed: 400,
+                minSpeed: 120,
+                cruiseSpeed: 200,
+                thrust: 300,
+                missiles: 50,
+                ammo: 200,
+                ability: 'carpet_bomb',
+                abilityName: 'Carpet Bomb',
+                abilityCooldown: 15000,
+                color: '#5C6B5A',
+                description: 'Heavy armor, more missiles, slow. Special: Drop carpet bombs (C key)'
+            },
+            stealth: {
+                name: '🦅 Stealth Fighter',
+                cost: 8000,
+                unlocked: false,
+                maxHealth: 80,
+                maxSpeed: 600,
+                minSpeed: 180,
+                cruiseSpeed: 300,
+                thrust: 500,
+                missiles: 30,
+                ammo: 400,
+                ability: 'cloak',
+                abilityName: 'Stealth Cloak',
+                abilityCooldown: 20000,
+                color: '#2C2C2C',
+                description: 'Fast and agile. Special: Become invisible for 5s (C key)'
+            },
+            gunship: {
+                name: '🚁 AC-130 Gunship',
+                cost: 12000,
+                unlocked: false,
+                maxHealth: 250,
+                maxSpeed: 350,
+                minSpeed: 100,
+                cruiseSpeed: 180,
+                thrust: 250,
+                missiles: 15,
+                ammo: 2000,
+                ability: 'minigun',
+                abilityName: 'Minigun Barrage',
+                abilityCooldown: 10000,
+                color: '#6B7B69',
+                description: 'Slow tank with massive firepower. Special: Rapid-fire minigun (C key)'
+            },
+            experimental: {
+                name: '🚀 X-Fighter',
+                cost: 20000,
+                unlocked: false,
+                maxHealth: 150,
+                maxSpeed: 800,
+                minSpeed: 200,
+                cruiseSpeed: 400,
+                thrust: 700,
+                missiles: 40,
+                ammo: 1000,
+                ability: 'emp',
+                abilityName: 'EMP Blast',
+                abilityCooldown: 25000,
+                color: '#4A90E2',
+                description: 'Experimental aircraft. Special: EMP destroys all on-screen enemies (C key)'
+            },
+            apache: {
+                name: '🚁 AH-64 Apache',
+                cost: 15000,
+                unlocked: false,
+                maxHealth: 180,
+                maxSpeed: 450,
+                minSpeed: 80,
+                cruiseSpeed: 220,
+                thrust: 320,
+                missiles: 60,
+                ammo: 800,
+                ability: 'hellfire',
+                abilityName: 'Hellfire Missiles',
+                abilityCooldown: 12000,
+                color: '#3D5A3D',
+                description: 'Attack helicopter. Special: Launch 5 powerful Hellfire missiles (C key)'
+            },
+            f22raptor: {
+                name: '🦅 F-22 Raptor',
+                cost: 25000,
+                unlocked: false,
+                maxHealth: 120,
+                maxSpeed: 900,
+                minSpeed: 220,
+                cruiseSpeed: 450,
+                thrust: 800,
+                missiles: 35,
+                ammo: 600,
+                ability: 'sidewinder_swarm',
+                abilityName: 'Sidewinder Swarm',
+                abilityCooldown: 18000,
+                color: '#5A6A7A',
+                description: 'Elite fighter jet. Special: Launch 8 heat-seeking missiles in all directions (C key)'
+            },
+            drone: {
+                name: '🛸 Reaper Drone',
+                cost: 10000,
+                unlocked: false,
+                maxHealth: 60,
+                maxSpeed: 380,
+                minSpeed: 90,
+                cruiseSpeed: 190,
+                thrust: 280,
+                missiles: 25,
+                ammo: 1500,
+                ability: 'auto_target',
+                abilityName: 'Auto-Target System',
+                abilityCooldown: 20000,
+                color: '#4A4A52',
+                description: 'Unmanned drone. Special: Auto-fire at all enemies for 8 seconds (C key)'
+            },
+            b2spirit: {
+                name: '✈️ B-2 Spirit',
+                cost: 30000,
+                unlocked: false,
+                maxHealth: 300,
+                maxSpeed: 420,
+                minSpeed: 140,
+                cruiseSpeed: 240,
+                thrust: 320,
+                missiles: 80,
+                ammo: 300,
+                ability: 'nuke',
+                abilityName: 'Tactical Nuke',
+                abilityCooldown: 30000,
+                color: '#2A2A2A',
+                description: 'Stealth bomber. Special: Drop devastating nuclear bomb (C key)'
+            },
+            vtol: {
+                name: '🛩️ V-22 Osprey',
+                cost: 18000,
+                unlocked: false,
+                maxHealth: 160,
+                maxSpeed: 520,
+                minSpeed: 0,
+                cruiseSpeed: 260,
+                thrust: 450,
+                missiles: 30,
+                ammo: 900,
+                ability: 'hover',
+                abilityName: 'Hover Mode',
+                abilityCooldown: 15000,
+                color: '#6A7A6A',
+                description: 'VTOL aircraft. Special: Hover in place + shield for 6 seconds (C key)'
+            },
+            a10warthog: {
+                name: '⚡ A-10 Warthog',
+                cost: 22000,
+                unlocked: false,
+                maxHealth: 280,
+                maxSpeed: 400,
+                minSpeed: 110,
+                cruiseSpeed: 200,
+                thrust: 300,
+                missiles: 25,
+                ammo: 3000,
+                ability: 'brrt',
+                abilityName: 'GAU-8 Cannon',
+                abilityCooldown: 10000,
+                color: '#5C6C5C',
+                description: 'Tank killer. Special: BRRRRT - devastating cannon barrage (C key)'
+            },
+            sr71: {
+                name: '🚀 SR-71 Blackbird',
+                cost: 35000,
+                unlocked: false,
+                maxHealth: 90,
+                maxSpeed: 1200,
+                minSpeed: 300,
+                cruiseSpeed: 600,
+                thrust: 1000,
+                missiles: 20,
+                ammo: 400,
+                ability: 'recon_drone',
+                abilityName: 'Recon Drone',
+                abilityCooldown: 20000,
+                color: '#1A1A1A',
+                description: 'Reconnaissance jet. Special: Deploy drone that reveals and marks all enemies (C key)'
+            },
+            su57: {
+                name: '⚡ Su-57 Felon',
+                cost: 28000,
+                unlocked: false,
+                maxHealth: 140,
+                maxSpeed: 850,
+                minSpeed: 210,
+                cruiseSpeed: 420,
+                thrust: 750,
+                missiles: 45,
+                ammo: 700,
+                ability: 'plasma_shield',
+                abilityName: 'Plasma Shield',
+                abilityCooldown: 16000,
+                color: '#3A4A5A',
+                description: 'Russian 5th-gen fighter. Special: Energy shield reflects projectiles (C key)'
+            },
+            harrier: {
+                name: '🛩️ AV-8B Harrier',
+                cost: 16000,
+                unlocked: false,
+                maxHealth: 130,
+                maxSpeed: 480,
+                minSpeed: 0,
+                cruiseSpeed: 240,
+                thrust: 480,
+                missiles: 28,
+                ammo: 650,
+                ability: 'vtol_strike',
+                abilityName: 'VTOL Strike',
+                abilityCooldown: 14000,
+                color: '#5A6A7A',
+                description: 'Jump jet. Special: Vertical takeoff + precision strike mode (C key)'
+            },
+            nighthawk: {
+                name: '🦇 F-117 Nighthawk',
+                cost: 26000,
+                unlocked: false,
+                maxHealth: 95,
+                maxSpeed: 550,
+                minSpeed: 170,
+                cruiseSpeed: 280,
+                thrust: 420,
+                missiles: 24,
+                ammo: 350,
+                ability: 'laser_designator',
+                abilityName: 'Laser Designator',
+                abilityCooldown: 18000,
+                color: '#1C1C1C',
+                description: 'Stealth attack aircraft. Special: Mark targets for devastating strikes (C key)'
+            },
+            thunderbolt: {
+                name: '⚔️ P-47 Thunderbolt',
+                cost: 8500,
+                unlocked: false,
+                maxHealth: 190,
+                maxSpeed: 420,
+                minSpeed: 130,
+                cruiseSpeed: 220,
+                thrust: 350,
+                missiles: 12,
+                ammo: 2500,
+                ability: 'dive_bomb',
+                abilityName: 'Dive Bomber',
+                abilityCooldown: 13000,
+                color: '#6A7A5A',
+                description: 'WWII fighter. Special: Devastating dive bomb attack (C key)'
+            },
+            javelin: {
+                name: '🔱 XB-70 Valkyrie',
+                cost: 40000,
+                unlocked: false,
+                maxHealth: 220,
+                maxSpeed: 1100,
+                minSpeed: 280,
+                cruiseSpeed: 550,
+                thrust: 950,
+                missiles: 55,
+                ammo: 500,
+                ability: 'sonic_boom',
+                abilityName: 'Sonic Boom',
+                abilityCooldown: 22000,
+                color: '#E0E0E0',
+                description: 'Experimental bomber. Special: Shockwave destroys nearby enemies (C key)'
+            }
+        };
+
+        // Ability state
+        let abilityActive = false;
+        let abilityLastUsed = 0;
+        let abilityCloakEndTime = 0;
+        let abilityMinigunEndTime = 0;
+        let abilityAutoTargetEndTime = 0;
+        let abilityHoverEndTime = 0;
+        let abilityBrrtEndTime = 0;
+        let abilityPlasmaShieldEndTime = 0;
+        let nukeProjectiles = [];
+        let reconDrones = []; // Array of active recon drones
+
+        // Plane object (now fixed in screen space) - Realistic physics
+        const plane = {
+            x: 200, // Fixed position on screen
+            y: canvas.height / 2,
+            width: 60,
+            height: 40,
+            vx: 250, // Velocity X - horizontal speed
+            vy: 0,   // Velocity Y - vertical speed
+            angle: 0,
+
+            // Realistic flight parameters
+            minSpeed: 150,    // Stall speed
+            maxSpeed: 500,    // Maximum speed
+            cruiseSpeed: 250, // Optimal fuel efficiency
+
+            // Physics
+            thrust: 400,      // Engine power
+            drag: 0.98,       // Air resistance
+            gravity: 50,      // Gravity pull
+            lift: 0,          // Lift force
+
+            // Control
+            pitchRate: 2.5,   // How fast plane pitches up/down
+            rollRate: 3.0,    // How fast plane rolls
+
+            trail: [],
+            worldX: 200,      // Actual position in world space
+            altitude: canvas.height / 2  // Altitude from ground
+        };
+
+        // Keyboard controls
+        const keys = {
+            ArrowUp: false,
+            ArrowDown: false,
+            ArrowLeft: false,
+            ArrowRight: false,
+            q: false,
+            Q: false,
+            e: false,
+            E: false,
+            ' ': false,  // Space bar
+            c: false,
+            C: false
+        };
+
+        // Weapons system
+        const weapons = {
+            missiles: {
+                count: 20,
+                maxCount: 20,
+                cooldown: 1000,
+                lastFire: 0
+            },
+            machineGun: {
+                ammo: 500,
+                maxAmmo: 500,
+                cooldown: 100,
+                lastFire: 0
+            }
+        };
+
+        // Player projectiles
+        let playerProjectiles = [];
+
+        // Muzzle flash effects
+        let muzzleFlashes = [];
+
+        // Keyboard event listeners
+        window.addEventListener('keydown', (e) => {
+            if (keys.hasOwnProperty(e.key)) {
+                e.preventDefault();
+                keys[e.key] = true;
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (keys.hasOwnProperty(e.key)) {
+                e.preventDefault();
+                keys[e.key] = false;
+            }
+        });
+
+        // Towers array
+        let towers = [];
+        const towerTypes = [
+            { color: '#8B4513', height: 150, width: 40, points: 100, type: 'building' },
+            { color: '#A0522D', height: 200, width: 50, points: 150, type: 'building' },
+            { color: '#654321', height: 250, width: 60, points: 200, type: 'building' },
+            { color: '#5C4033', height: 300, width: 70, points: 250, type: 'building' }
+        ];
+
+        // Anti-air defense types
+        const aaDefenseTypes = [
+            // Stationary defenses (current damage)
+            {
+                name: 'SAM Site',
+                color: '#2F4F2F',
+                height: 80,
+                width: 60,
+                points: 500,
+                type: 'sam',
+                fireRate: 2000, // Fire every 2 seconds
+                damage: 15,
+                projectileSpeed: 400,
+                range: 400,
+                category: 'stationary'
+            },
+            {
+                name: 'Flak Cannon',
+                color: '#556B2F',
+                height: 100,
+                width: 70,
+                points: 300,
+                type: 'flak',
+                fireRate: 1500,
+                damage: 10,
+                projectileSpeed: 500,
+                range: 350,
+                category: 'stationary'
+            },
+            {
+                name: 'Machine Gun',
+                color: '#6B8E23',
+                height: 60,
+                width: 50,
+                points: 200,
+                type: 'machinegun',
+                fireRate: 500,
+                damage: 5,
+                projectileSpeed: 600,
+                range: 300,
+                category: 'stationary'
+            },
+            // Mobile AA guns on cars (second most damage)
+            {
+                name: 'AA Truck',
+                color: '#4A4A4A',
+                height: 40,
+                width: 70,
+                points: 400,
+                type: 'mobile_aa',
+                fireRate: 800,
+                damage: 8, // Second most damage
+                projectileSpeed: 550,
+                range: 350,
+                category: 'mobile',
+                speed: 50 // Moves left/right
+            },
+            // Soldiers with machine guns (least damage, spawns on buildings)
+            {
+                name: 'Soldier',
+                color: '#8B7355',
+                height: 20,
+                width: 15,
+                points: 100,
+                type: 'soldier',
+                fireRate: 400,
+                damage: 2, // Least damage
+                projectileSpeed: 500,
+                range: 250,
+                category: 'soldier'
+            },
+            // Advanced Air Defenses
+            {
+                name: 'Patriot Missile',
+                color: '#1C4C1C',
+                height: 120,
+                width: 80,
+                points: 800,
+                type: 'patriot',
+                fireRate: 3000, // Slower but powerful
+                damage: 25, // High damage
+                projectileSpeed: 700,
+                range: 500,
+                category: 'stationary'
+            },
+            {
+                name: 'Laser Defense',
+                color: '#4169E1',
+                height: 90,
+                width: 65,
+                points: 1000,
+                type: 'laser',
+                fireRate: 300, // Very fast
+                damage: 3, // Continuous damage
+                projectileSpeed: 1200, // Extremely fast
+                range: 450,
+                category: 'stationary'
+            },
+            {
+                name: 'Railgun',
+                color: '#483D8B',
+                height: 110,
+                width: 75,
+                points: 900,
+                type: 'railgun',
+                fireRate: 2500,
+                damage: 20,
+                projectileSpeed: 1000, // Very fast projectile
+                range: 550, // Long range
+                category: 'stationary'
+            },
+            {
+                name: 'Radar Jammer',
+                color: '#FF6347',
+                height: 70,
+                width: 55,
+                points: 600,
+                type: 'jammer',
+                fireRate: 5000, // Pulses every 5 seconds
+                damage: 0, // No direct damage, interferes with controls
+                projectileSpeed: 0,
+                range: 400,
+                category: 'stationary'
+            },
+            {
+                name: 'AA Hovercraft',
+                color: '#708090',
+                height: 45,
+                width: 80,
+                points: 550,
+                type: 'hovercraft',
+                fireRate: 700,
+                damage: 12,
+                projectileSpeed: 600,
+                range: 380,
+                category: 'mobile',
+                speed: 80 // Faster than AA Truck
+            }
+        ];
+
+        // Cloud array for infinite scrolling
+        let clouds = [];
+
+        // Particles for explosions
+        let particles = [];
+
+        // Enemy projectiles array
+        let enemyProjectiles = [];
+
+        // Initialize towers for start of game
+        function generateInitialTowers() {
+            towers = [];
+            nextTowerSpawn = canvas.width;
+
+            // Generate initial towers to fill the screen
+            for (let i = 0; i < 10; i++) {
+                spawnTower(i * 150 + 100);
+            }
+        }
+
+        // Spawn a single tower at a specific world X position
+        function spawnTower(worldX) {
+            // 40% chance to spawn anti-air defense instead of building
+            const rand = Math.random();
+
+            if (rand < 0.4) {
+                // Spawn AA defense
+                const aaTypes = aaDefenseTypes.filter(type => type.category !== 'soldier');
+                const type = aaTypes[Math.floor(Math.random() * aaTypes.length)];
+                const y = canvas.height - type.height;
+
+                const tower = {
+                    worldX: worldX,
+                    x: worldX - worldOffset,
+                    y: y,
+                    width: type.width,
+                    height: type.height,
+                    color: type.color,
+                    points: type.points,
+                    destroyed: false,
+                    defenseType: type.type,
+                    fireRate: type.fireRate,
+                    damage: type.damage,
+                    projectileSpeed: type.projectileSpeed,
+                    range: type.range,
+                    lastFireTime: 0,
+                    isAADefense: true,
+                    category: type.category
+                };
+
+                // Add mobile-specific properties
+                if (type.category === 'mobile') {
+                    tower.speed = type.speed;
+                    tower.moveDirection = Math.random() > 0.5 ? 1 : -1;
+                    tower.moveRange = { min: worldX - 100, max: worldX + 100 };
+                }
+
+                towers.push(tower);
+            } else {
+                // Spawn building
+                const type = towerTypes[Math.floor(Math.random() * towerTypes.length)];
+                const y = canvas.height - type.height;
+
+                // Generate fixed window pattern for this tower
+                const windows = [];
+                for (let i = 0; i < type.height; i += 30) {
+                    for (let j = 0; j < type.width; j += 15) {
+                        if (Math.random() > 0.5) {
+                            windows.push({ x: j + 5, y: i + 5 });
+                        }
+                    }
+                }
+
+                towers.push({
+                    worldX: worldX,
+                    x: worldX - worldOffset,
+                    y: y,
+                    width: type.width,
+                    height: type.height,
+                    color: type.color,
+                    points: type.points,
+                    destroyed: false,
+                    windows: windows,
+                    isAADefense: false
+                });
+
+                // 50% chance to spawn soldiers on top of this building
+                if (Math.random() < 0.5) {
+                    const numSoldiers = Math.floor(Math.random() * 2) + 1; // 1-2 soldiers
+                    for (let i = 0; i < numSoldiers; i++) {
+                        const soldierType = aaDefenseTypes.find(t => t.type === 'soldier');
+                        const soldierX = worldX + (i * 25) + 10;
+                        const soldierY = y - soldierType.height;
+
+                        towers.push({
+                            worldX: soldierX,
+                            x: soldierX - worldOffset,
+                            y: soldierY,
+                            width: soldierType.width,
+                            height: soldierType.height,
+                            color: soldierType.color,
+                            points: soldierType.points,
+                            destroyed: false,
+                            defenseType: soldierType.type,
+                            fireRate: soldierType.fireRate,
+                            damage: soldierType.damage,
+                            projectileSpeed: soldierType.projectileSpeed,
+                            range: soldierType.range,
+                            lastFireTime: 0,
+                            isAADefense: true,
+                            category: 'soldier',
+                            parentBuilding: { worldX: worldX, height: type.height }
+                        });
+                    }
+                }
+            }
+        }
+
+        // Generate clouds for infinite scrolling
+        function generateInitialClouds() {
+            clouds = [];
+            for (let i = 0; i < 15; i++) {
+                clouds.push({
+                    worldX: Math.random() * canvas.width * 2,
+                    y: 60 + Math.random() * 100,
+                    size: 30 + Math.random() * 20
+                });
+            }
+        }
+
+
+        // Create explosion particles
+        function createExplosion(x, y, color) {
+            const numParticles = 40;
+            for (let i = 0; i < numParticles; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 8 + 2;
+                const colorVariants = [color, '#FFA500', '#FF6347', '#FFD700', '#FF4500'];
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed - 2,
+                    size: Math.random() * 12 + 4,
+                    color: colorVariants[Math.floor(Math.random() * colorVariants.length)],
+                    life: 1
+                });
+            }
+        }
+
+        // Fire anti-air projectile at plane
+        function fireAAProjectile(tower) {
+            const startX = tower.x + tower.width / 2;
+            const startY = tower.y + tower.height / 2;
+            const targetX = plane.x + plane.width / 2;
+            const targetY = plane.y + plane.height / 2;
+
+            const dx = targetX - startX;
+            const dy = targetY - startY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            const vx = (dx / distance) * tower.projectileSpeed;
+            const vy = (dy / distance) * tower.projectileSpeed;
+
+            enemyProjectiles.push({
+                x: startX,
+                y: startY,
+                vx: vx,
+                vy: vy,
+                damage: tower.damage,
+                type: tower.defenseType,
+                size: tower.defenseType === 'machinegun' ? 4 : 8
+            });
+        }
+
+        // Fire homing missile at nearest AA defense
+        function fireMissile() {
+            const now = Date.now();
+            if (weapons.missiles.count <= 0) return;
+            if (now - weapons.missiles.lastFire < weapons.missiles.cooldown) return;
+
+            // Find nearest AA defense
+            let nearestAA = null;
+            let nearestDist = Infinity;
+
+            towers.forEach(tower => {
+                if (tower.isAADefense && !tower.destroyed) {
+                    const dx = tower.x + tower.width / 2 - plane.x;
+                    const dy = tower.y + tower.height / 2 - plane.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < nearestDist) {
+                        nearestDist = dist;
+                        nearestAA = tower;
+                    }
+                }
+            });
+
+            if (!nearestAA) return; // No AA defenses to target
+
+            weapons.missiles.count--;
+            weapons.missiles.lastFire = now;
+
+            // Add muzzle flash
+            muzzleFlashes.push({
+                x: plane.x + plane.width / 2,
+                y: plane.y,
+                size: 20,
+                life: 0.3,
+                color: '#FFD700'
+            });
+
+            // Fire from plane position
+            playerProjectiles.push({
+                x: plane.x + plane.width / 2,
+                y: plane.y,
+                vx: 0,
+                vy: 0,
+                speed: 500,
+                damage: 100,
+                type: 'missile',
+                target: nearestAA,
+                tracking: true,
+                trail: []
+            });
+        }
+
+        // Fire machine gun
+        function fireMachineGun() {
+            const now = Date.now();
+            if (weapons.machineGun.ammo <= 0) return;
+            if (now - weapons.machineGun.lastFire < weapons.machineGun.cooldown) return;
+
+            weapons.machineGun.ammo--;
+            weapons.machineGun.lastFire = now;
+
+            // Fire straight ahead from plane nose
+            const angle = plane.angle;
+            const speed = 800;
+            const fireX = plane.x + plane.width / 2 + Math.cos(angle) * 30;
+            const fireY = plane.y + plane.height / 2 + Math.sin(angle) * 30;
+
+            // Add muzzle flash
+            muzzleFlashes.push({
+                x: fireX,
+                y: fireY,
+                size: 12,
+                life: 0.15,
+                color: '#FFFF00'
+            });
+
+            playerProjectiles.push({
+                x: fireX,
+                y: fireY,
+                vx: Math.cos(angle) * speed + plane.vx,
+                vy: Math.sin(angle) * speed + plane.vy,
+                damage: 10,
+                type: 'bullet',
+                tracking: false,
+                trail: []
+            });
+        }
+
+        // Check collision between plane and tower
+        function checkCollision(plane, tower) {
+            if (tower.destroyed) return false;
+
+            // Simple AABB collision
+            return plane.x < tower.x + tower.width &&
+                   plane.x + plane.width > tower.x &&
+                   plane.y < tower.y + tower.height &&
+                   plane.y + plane.height > tower.y;
+        }
+
+        // Update game state
+        function update(deltaTime) {
+            if (!gameRunning) return;
+
+            // ===== REALISTIC FLIGHT PHYSICS =====
+
+            // Calculate current speed
+            const currentSpeed = Math.sqrt(plane.vx * plane.vx + plane.vy * plane.vy);
+
+            // Handle keyboard input - pitch and thrust
+            let pitchInput = 0;
+            let thrustInput = 0;
+
+            if (keys.ArrowUp) {
+                pitchInput = -1; // Pitch up (nose up)
+            }
+            if (keys.ArrowDown) {
+                pitchInput = 1; // Pitch down (nose down)
+            }
+            if (keys.ArrowRight) {
+                thrustInput = 1; // Increase thrust
+            }
+            if (keys.ArrowLeft) {
+                thrustInput = -1; // Decrease thrust (air brake)
+            }
+
+            // Handle keyboard input - weapons
+            if (keys.q || keys.Q) {
+                fireMissile();
+            }
+            if (keys[' ']) {
+                fireMachineGun();
+            }
+            if (keys.c || keys.C) {
+                activateAbility();
+            }
+
+            // Minigun ability - rapid fire
+            const currentTime = Date.now();
+            if (currentTime < abilityMinigunEndTime) {
+                if (currentTime - weapons.machineGun.lastFire > 30 && weapons.machineGun.ammo > 0) {
+                    fireMachineGun();
+                }
+            }
+
+            // BRRT ability - even faster cannon
+            if (currentTime < abilityBrrtEndTime) {
+                if (currentTime - weapons.machineGun.lastFire > 15 && weapons.machineGun.ammo > 0) {
+                    fireMachineGun();
+                }
+            }
+
+            // Auto-target ability - fire at all enemies
+            if (currentTime < abilityAutoTargetEndTime) {
+                if (currentTime - weapons.missiles.lastFire > 500) {
+                    // Fire at random enemy
+                    const activeEnemies = towers.filter(t => !t.destroyed && t.isAADefense && t.x > 0 && t.x < canvas.width);
+                    if (activeEnemies.length > 0 && weapons.missiles.count > 0) {
+                        const target = activeEnemies[Math.floor(Math.random() * activeEnemies.length)];
+                        weapons.missiles.count--;
+                        weapons.missiles.lastFire = currentTime;
+                        playerProjectiles.push({
+                            x: plane.x + plane.width / 2,
+                            y: plane.y,
+                            vx: 0,
+                            vy: 0,
+                            speed: 700,
+                            damage: 100,
+                            type: 'missile',
+                            target: target,
+                            tracking: true,
+                            trail: []
+                        });
+                    }
+                }
+            }
+
+            // Update angle based on pitch input
+            plane.angle += pitchInput * plane.pitchRate * deltaTime;
+
+            // Limit pitch angle to realistic values (-45° to +45°)
+            const maxPitch = Math.PI / 4;
+            plane.angle = Math.max(-maxPitch, Math.min(maxPitch, plane.angle));
+
+            // Apply thrust in direction of plane angle
+            let thrustForce = plane.thrust * (1 + thrustInput * 0.5);
+
+            plane.vx += Math.cos(plane.angle) * thrustForce * deltaTime;
+            plane.vy += Math.sin(plane.angle) * thrustForce * deltaTime;
+
+            // Hover ability - stop movement
+            if (currentTime < abilityHoverEndTime) {
+                plane.vx *= 0.9;
+                plane.vy *= 0.9;
+            }
+
+            // Apply gravity (always pulls down)
+            plane.vy += plane.gravity * deltaTime;
+
+            // Apply lift based on speed and angle (high speed = more lift)
+            const speedFactor = currentSpeed / plane.cruiseSpeed;
+            const liftForce = speedFactor * speedFactor * 40;
+
+            // Lift opposes gravity when flying level or nose up
+            if (plane.angle < 0) {
+                plane.vy -= liftForce * deltaTime * Math.abs(Math.cos(plane.angle));
+            }
+
+            // Apply air drag (reduces speed over time)
+            plane.vx *= plane.drag;
+            plane.vy *= plane.drag;
+
+            // Check for stall condition
+            if (currentSpeed < plane.minSpeed) {
+                // Stall! Lose lift and drop
+                plane.vy += plane.gravity * 2 * deltaTime;
+
+                // Warning: flash screen or shake if stalling
+                if (Math.random() > 0.7) {
+                    plane.angle += (Math.random() - 0.5) * 0.2;
+                }
+            }
+
+            // Limit maximum speed
+            const speed = Math.sqrt(plane.vx * plane.vx + plane.vy * plane.vy);
+            if (speed > plane.maxSpeed) {
+                plane.vx = (plane.vx / speed) * plane.maxSpeed;
+                plane.vy = (plane.vy / speed) * plane.maxSpeed;
+            }
+
+            // Update world position (plane moves in world space)
+            plane.worldX += plane.vx * deltaTime;
+
+            // Update world offset (camera follows plane)
+            worldOffset = plane.worldX - plane.x;
+
+            // Update plane Y position and altitude
+            plane.y += plane.vy * deltaTime;
+            plane.altitude = canvas.height - plane.y;
+
+            // Ground collision - CRASH!
+            if (plane.y > canvas.height - plane.height - 20) {
+                plane.y = canvas.height - plane.height - 20;
+
+                // High speed crash = damage
+                if (Math.abs(plane.vy) > 100) {
+                    health -= Math.abs(plane.vy) * 0.5;
+                    createExplosion(plane.x + plane.width/2, plane.y + plane.height/2, '#FF6B35');
+                }
+
+                // Bounce or stop
+                plane.vy = -plane.vy * 0.3;
+                plane.vx *= 0.7;
+
+                if (health <= 0) {
+                    gameOver();
+                }
+            }
+
+            // Sky limit
+            if (plane.y < 20) {
+                plane.y = 20;
+                plane.vy = Math.abs(plane.vy) * 0.5;
+            }
+
+            // Add trail
+            plane.trail.push({ x: plane.x + plane.width / 2, y: plane.y + plane.height / 2 });
+            if (plane.trail.length > 30) {
+                plane.trail.shift();
+            }
+
+            // Update tower positions based on world offset
+            towers.forEach(tower => {
+                tower.x = tower.worldX - worldOffset;
+
+                // Update mobile AA movement
+                if (tower.category === 'mobile' && !tower.destroyed) {
+                    tower.worldX += tower.moveDirection * tower.speed * deltaTime;
+
+                    // Reverse direction if out of movement range
+                    if (tower.worldX <= tower.moveRange.min || tower.worldX >= tower.moveRange.max) {
+                        tower.moveDirection *= -1;
+                    }
+                }
+            });
+
+            // Remove towers that are far off screen to the left
+            towers = towers.filter(tower => tower.x > -500);
+
+            // Spawn new towers as needed
+            while (nextTowerSpawn < worldOffset + canvas.width + 500) {
+                spawnTower(nextTowerSpawn);
+                nextTowerSpawn += 100 + Math.random() * 150; // Random spacing
+            }
+
+            // Update cloud positions
+            clouds.forEach(cloud => {
+                cloud.x = cloud.worldX - worldOffset * 0.5; // Parallax effect
+            });
+
+            // Remove clouds that are far off screen and respawn them ahead
+            clouds = clouds.filter(cloud => {
+                if (cloud.x < -200) {
+                    cloud.worldX = worldOffset * 0.5 + canvas.width + Math.random() * 200;
+                    cloud.y = 60 + Math.random() * 100;
+                    return true;
+                }
+                return true;
+            });
+
+            // Realistic fuel consumption based on speed and thrust
+            // Cruise speed = most efficient, high speed or low speed = less efficient
+            const speedRatio = currentSpeed / plane.cruiseSpeed;
+            const thrustRatio = Math.abs(thrustInput);
+
+            // Base consumption + speed penalty + thrust penalty
+            let fuelConsumption = 0.008; // Base idle consumption
+            fuelConsumption += Math.abs(speedRatio - 1) * 0.015; // Penalty for non-optimal speed
+            fuelConsumption += thrustRatio * 0.025; // Extra fuel when using thrust
+
+            // Afterburner when max speed
+            if (currentSpeed > plane.maxSpeed * 0.9) {
+                fuelConsumption += 0.03;
+            }
+
+            fuel -= fuelConsumption;
+            fuel = Math.max(0, fuel);
+
+            // Update fuel display
+            document.getElementById('fuelBar').style.width = fuel + '%';
+            document.getElementById('fuelText').textContent = Math.floor(fuel);
+
+            // Update health display
+            document.getElementById('healthBar').style.width = Math.max(0, health) + '%';
+            document.getElementById('healthText').textContent = Math.floor(Math.max(0, health));
+
+            // Check for game over
+            if (fuel <= 0 || health <= 0) {
+                gameOver();
+            }
+
+            // AA Defense shooting logic (unless cloaked, hovering, or shielded)
+            const now = Date.now();
+            const isCloaked = now < abilityCloakEndTime;
+            const isHovering = now < abilityHoverEndTime;
+            const isPlasmaShielded = now < abilityPlasmaShieldEndTime;
+            const isInvulnerable = isCloaked || isHovering || isPlasmaShielded;
+
+            if (!isInvulnerable) {
+                towers.forEach(tower => {
+                    if (tower.isAADefense && !tower.destroyed) {
+                        // Check if plane is in range
+                        const dx = plane.x - (tower.x + tower.width / 2);
+                        const dy = plane.y - (tower.y + tower.height / 2);
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+
+                        if (distance < tower.range && now - tower.lastFireTime > tower.fireRate) {
+                            // Fire at plane
+                            tower.lastFireTime = now;
+                            fireAAProjectile(tower);
+                        }
+                    }
+                });
+            }
+
+            // Update enemy projectiles
+            enemyProjectiles = enemyProjectiles.filter(proj => {
+                proj.x += proj.vx * deltaTime;
+                proj.y += proj.vy * deltaTime;
+
+                // Check if hit plane
+                const dx = proj.x - (plane.x + plane.width / 2);
+                const dy = proj.y - (plane.y + plane.height / 2);
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < 30) {
+                    // Check if plasma shield is active
+                    if (isPlasmaShielded) {
+                        // Reflect the projectile back!
+                        proj.vx = -proj.vx * 1.5;
+                        proj.vy = -proj.vy * 1.5;
+                        proj.reflected = true; // Mark as reflected
+                        createExplosion(proj.x, proj.y, '#4169E1');
+                        // Don't remove, let it fly back
+                        return true;
+                    }
+
+                    // Hit!
+                    health -= proj.damage;
+                    createExplosion(proj.x, proj.y, '#FF4500');
+
+                    // Check if plane destroyed
+                    if (health <= 0) {
+                        gameOver();
+                    }
+                    return false; // Remove projectile
+                }
+
+                // If reflected, check if it hits any tower
+                if (proj.reflected) {
+                    for (let tower of towers) {
+                        if (!tower.destroyed) {
+                            const tdx = proj.x - (tower.x + tower.width / 2);
+                            const tdy = proj.y - (tower.y + tower.height / 2);
+                            const tdist = Math.sqrt(tdx * tdx + tdy * tdy);
+
+                            if (tdist < tower.width / 2 + 10) {
+                                // Hit tower!
+                                tower.destroyed = true;
+                                towersDestroyed++;
+                                score += tower.points;
+                                money += Math.floor(tower.points / 2);
+                                createExplosion(tower.x + tower.width / 2, tower.y + tower.height / 2, tower.color);
+
+                                // Destroy soldiers on buildings
+                                if (!tower.isAADefense && tower.parentBuilding === undefined) {
+                                    towers.forEach(otherTower => {
+                                        if (otherTower.category === 'soldier' && otherTower.parentBuilding) {
+                                            if (Math.abs(otherTower.parentBuilding.worldX - tower.worldX) < 10) {
+                                                if (!otherTower.destroyed) {
+                                                    otherTower.destroyed = true;
+                                                    towersDestroyed++;
+                                                    score += otherTower.points;
+                                                    money += Math.floor(otherTower.points / 2);
+                                                    createExplosion(otherTower.x + otherTower.width / 2, otherTower.y + otherTower.height / 2, otherTower.color);
+                                                }
+                                            }
+                                        }
+                                    });
+                                }
+
+                                updateUI();
+                                return false; // Remove projectile
+                            }
+                        }
+                    }
+                }
+
+                // Remove if off screen
+                if (proj.x < 0 || proj.x > canvas.width || proj.y < 0 || proj.y > canvas.height) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            // Update player projectiles
+            playerProjectiles = playerProjectiles.filter(proj => {
+                if (proj.tracking && proj.target) {
+                    // Homing missile - track target
+                    if (!proj.target.destroyed) {
+                        const targetX = proj.target.x + proj.target.width / 2;
+                        const targetY = proj.target.y + proj.target.height / 2;
+
+                        const dx = targetX - proj.x;
+                        const dy = targetY - proj.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+
+                        if (distance > 0) {
+                            proj.vx = (dx / distance) * proj.speed;
+                            proj.vy = (dy / distance) * proj.speed;
+                        }
+                    }
+                }
+
+                // Add to trail
+                proj.trail.push({ x: proj.x, y: proj.y });
+                if (proj.trail.length > (proj.type === 'missile' ? 15 : 5)) {
+                    proj.trail.shift();
+                }
+
+                // Move projectile
+                proj.x += proj.vx * deltaTime;
+                proj.y += proj.vy * deltaTime;
+
+                // Check collision with towers
+                let hit = false;
+                towers.forEach(tower => {
+                    if (tower.destroyed) return;
+
+                    const dx = proj.x - (tower.x + tower.width / 2);
+                    const dy = proj.y - (tower.y + tower.height / 2);
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < tower.width / 2 + 10) {
+                        // Hit tower!
+                        tower.destroyed = true;
+                        towersDestroyed++;
+
+                        // If this is a building, destroy soldiers on top of it
+                        if (!tower.isAADefense && tower.parentBuilding === undefined) {
+                            towers.forEach(otherTower => {
+                                if (otherTower.category === 'soldier' && otherTower.parentBuilding) {
+                                    // Check if soldier is on this building
+                                    if (Math.abs(otherTower.parentBuilding.worldX - tower.worldX) < 10) {
+                                        if (!otherTower.destroyed) {
+                                            otherTower.destroyed = true;
+                                            towersDestroyed++;
+                                            score += otherTower.points;
+                                            money += Math.floor(otherTower.points / 2);
+                                            createExplosion(otherTower.x + otherTower.width / 2, otherTower.y + otherTower.height / 2, otherTower.color);
+                                        }
+                                    }
+                                }
+                            });
+                        }
+
+                        // Award points and money
+                        const currentTime = Date.now();
+                        if (currentTime - lastDestroyTime < 1000) {
+                            combo++;
+                        } else {
+                            combo = 1;
+                        }
+                        lastDestroyTime = currentTime;
+
+                        if (combo > 1) {
+                            showCombo(combo);
+                        }
+
+                        const comboMultiplier = combo;
+                        const points = tower.points * comboMultiplier;
+                        score += points;
+
+                        // Award money based on tower type
+                        const moneyEarned = Math.floor(tower.points / 2);
+                        money += moneyEarned;
+
+                        // Create explosion
+                        createExplosion(tower.x + tower.width / 2, tower.y + tower.height / 2, tower.color);
+
+                        updateUI();
+                        hit = true;
+                    }
+                });
+
+                // Remove if hit or off screen
+                if (hit) return false;
+                if (proj.x < -100 || proj.x > canvas.width + 100 || proj.y < -100 || proj.y > canvas.height + 100) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            // Check collisions with towers (ramming)
+            towers.forEach(tower => {
+                if (checkCollision(plane, tower)) {
+                    tower.destroyed = true;
+                    towersDestroyed++;
+
+                    // If this is a building, destroy soldiers on top of it
+                    if (!tower.isAADefense && tower.parentBuilding === undefined) {
+                        towers.forEach(otherTower => {
+                            if (otherTower.category === 'soldier' && otherTower.parentBuilding) {
+                                // Check if soldier is on this building
+                                if (Math.abs(otherTower.parentBuilding.worldX - tower.worldX) < 10) {
+                                    if (!otherTower.destroyed) {
+                                        otherTower.destroyed = true;
+                                        towersDestroyed++;
+                                        score += otherTower.points;
+                                        money += Math.floor(otherTower.points / 2);
+                                        createExplosion(otherTower.x + otherTower.width / 2, otherTower.y + otherTower.height / 2, otherTower.color);
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    // Only take damage from AA defenses, not buildings!
+                    if (tower.isAADefense) {
+                        health -= 20;
+                    }
+
+                    // Combo system
+                    const currentTime = Date.now();
+                    if (currentTime - lastDestroyTime < 1000) {
+                        combo++;
+                    } else {
+                        combo = 1;
+                    }
+                    lastDestroyTime = currentTime;
+
+                    // Show combo
+                    if (combo > 1) {
+                        showCombo(combo);
+                    }
+
+                    const comboMultiplier = combo;
+                    const points = tower.points * comboMultiplier;
+                    score += points;
+
+                    // Award money
+                    const moneyEarned = Math.floor(tower.points / 2);
+                    money += moneyEarned;
+
+                    // Create explosion
+                    createExplosion(tower.x + tower.width / 2, tower.y + tower.height / 2, tower.color);
+
+                    updateUI();
+
+                    // Check if plane destroyed from collision
+                    if (health <= 0) {
+                        gameOver();
+                    }
+                }
+            });
+
+            // Update particles
+            particles = particles.filter(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.2; // Gravity
+                p.life -= 0.02;
+                return p.life > 0;
+            });
+
+            // Update muzzle flashes
+            muzzleFlashes = muzzleFlashes.filter(flash => {
+                flash.life -= deltaTime * 5; // Fast fade
+                flash.size += deltaTime * 30; // Expand
+                return flash.life > 0;
+            });
+
+            // Update nuke projectiles
+            nukeProjectiles = nukeProjectiles.filter(nuke => {
+                nuke.x += nuke.vx * deltaTime;
+                nuke.y += nuke.vy * deltaTime;
+                nuke.vy += 100 * deltaTime; // Gravity
+
+                const nukePresentTime = Date.now();
+
+                // Check if armed and hit ground
+                if (nukePresentTime > nuke.armTime && nuke.y > canvas.height - 100) {
+                    // NUCLEAR EXPLOSION - destroy everything in huge radius
+                    const blastRadius = 500;
+                    towers.forEach(tower => {
+                        const dx = tower.x + tower.width / 2 - nuke.x;
+                        const dy = tower.y + tower.height / 2 - nuke.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+
+                        if (distance < blastRadius && !tower.destroyed) {
+                            tower.destroyed = true;
+                            towersDestroyed++;
+                            score += tower.points * 2; // Double points!
+                            money += tower.points; // Double money!
+                            createExplosion(tower.x + tower.width / 2, tower.y + tower.height / 2, tower.color);
+
+                            // Destroy soldiers on buildings
+                            if (!tower.isAADefense && tower.parentBuilding === undefined) {
+                                towers.forEach(otherTower => {
+                                    if (otherTower.category === 'soldier' && otherTower.parentBuilding) {
+                                        if (Math.abs(otherTower.parentBuilding.worldX - tower.worldX) < 10) {
+                                            if (!otherTower.destroyed) {
+                                                otherTower.destroyed = true;
+                                                towersDestroyed++;
+                                                score += otherTower.points * 2;
+                                                money += otherTower.points;
+                                                createExplosion(otherTower.x + otherTower.width / 2, otherTower.y + otherTower.height / 2, otherTower.color);
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                    // Giant explosion effect
+                    for (let i = 0; i < 200; i++) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const speed = Math.random() * 20 + 10;
+                        particles.push({
+                            x: nuke.x,
+                            y: canvas.height - 50,
+                            vx: Math.cos(angle) * speed,
+                            vy: Math.sin(angle) * speed - 10,
+                            size: Math.random() * 20 + 10,
+                            color: ['#FF6B35', '#F7931E', '#FDC830', '#FFFFFF'][Math.floor(Math.random() * 4)],
+                            life: 1
+                        });
+                    }
+
+                    updateUI();
+                    return false; // Remove nuke
+                }
+
+                // Remove if off screen
+                if (nuke.y > canvas.height + 100) return false;
+                return true;
+            });
+
+            // Update recon drones
+            reconDrones = reconDrones.filter(drone => {
+                // Check lifetime
+                if (currentTime > drone.lifetime) return false;
+
+                // Circular patrol pattern
+                drone.angle += deltaTime * 3; // Rotate around center
+                drone.x = drone.centerX - worldOffset + Math.cos(drone.angle) * drone.patrolRadius;
+                drone.y = drone.centerY + Math.sin(drone.angle) * drone.patrolRadius;
+
+                // Fire at nearby enemies
+                if (currentTime - drone.lastFireTime > drone.fireRate) {
+                    // Find nearest AA defense
+                    let nearestAA = null;
+                    let nearestDist = Infinity;
+
+                    towers.forEach(tower => {
+                        if (tower.isAADefense && !tower.destroyed) {
+                            const dx = tower.x + tower.width / 2 - drone.x;
+                            const dy = tower.y + tower.height / 2 - drone.y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+
+                            if (dist < 400 && dist < nearestDist) {
+                                nearestDist = dist;
+                                nearestAA = tower;
+                            }
+                        }
+                    });
+
+                    if (nearestAA) {
+                        playerProjectiles.push({
+                            x: drone.x,
+                            y: drone.y,
+                            vx: 0,
+                            vy: 0,
+                            speed: 450,
+                            damage: 80,
+                            type: 'missile',
+                            target: nearestAA,
+                            tracking: true,
+                            trail: []
+                        });
+                        drone.lastFireTime = currentTime;
+                    }
+                }
+
+                return true;
+            });
+
+            // Update speed display (reuse currentSpeed from above)
+            const displaySpeed = Math.floor((currentSpeed / 400) * 500);
+            document.getElementById('speed').textContent = displaySpeed;
+
+            // Update distance display
+            const distance = Math.floor(plane.worldX / 10);
+            document.getElementById('distance').textContent = distance;
+
+            // Update ability cooldown display
+            const abilityCooldownBar = document.getElementById('abilityCooldownBar');
+            const abilityCooldownText = document.getElementById('abilityCooldownText');
+
+            if (abilityCooldownBar && abilityCooldownText) {
+                const planeData = planeTypes[currentPlaneType];
+                const now = Date.now();
+                const timeSinceAbility = now - abilityLastUsed;
+                const cooldownRemaining = Math.max(0, planeData.abilityCooldown - timeSinceAbility);
+                const cooldownPercent = (cooldownRemaining / planeData.abilityCooldown) * 100;
+                const readyPercent = 100 - cooldownPercent;
+
+                abilityCooldownBar.style.width = readyPercent + '%';
+
+                if (cooldownRemaining > 0) {
+                    const secondsLeft = Math.ceil(cooldownRemaining / 1000);
+                    abilityCooldownText.textContent = `⏳ COOLDOWN: ${secondsLeft}s`;
+                } else {
+                    abilityCooldownText.textContent = '⚡ SPECIAL ABILITY: READY (Press C)';
+                }
+            }
+        }
+
+        // Show combo popup
+        function showCombo(comboCount) {
+            const comboElement = document.getElementById('combo');
+            comboElement.textContent = `${comboCount}x COMBO!`;
+            comboElement.classList.remove('show');
+            void comboElement.offsetWidth; // Trigger reflow
+            comboElement.classList.add('show');
+
+            setTimeout(() => {
+                comboElement.classList.remove('show');
+            }, 1000);
+        }
+
+        // Draw game
+        function draw() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw sky gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#87CEEB');
+            gradient.addColorStop(0.5, '#B0E0E6');
+            gradient.addColorStop(1, '#98FB98');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw clouds
+            drawClouds();
+
+            // Draw ground line
+            ctx.strokeStyle = '#654321';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height - 5);
+            ctx.lineTo(canvas.width, canvas.height - 5);
+            ctx.stroke();
+
+            // Draw towers and defenses
+            towers.forEach(tower => {
+                if (!tower.destroyed) {
+                    if (tower.isAADefense) {
+                        // ===== REALISTIC AA DEFENSE STRUCTURES =====
+
+                        // Base platform shadow
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                        ctx.fillRect(tower.x + 3, tower.y + tower.height - 8, tower.width + 3, 11);
+
+                        // Concrete base
+                        const gradient = ctx.createLinearGradient(tower.x, tower.y, tower.x, tower.y + tower.height);
+                        gradient.addColorStop(0, '#5A6268');
+                        gradient.addColorStop(1, '#3A4045');
+                        ctx.fillStyle = gradient;
+                        ctx.fillRect(tower.x, tower.y + tower.height - 8, tower.width, 8);
+
+                        if (tower.defenseType === 'sam') {
+                            // SAM Site - Missile launcher platform
+                            ctx.fillStyle = '#3C4A3D';
+                            ctx.fillRect(tower.x, tower.y, tower.width, tower.height - 8);
+
+                            // Launch platform
+                            ctx.fillStyle = '#4A5F4B';
+                            ctx.fillRect(tower.x + 5, tower.y + 10, tower.width - 10, tower.height - 25);
+
+                            // Missile tubes (4 missiles)
+                            for (let i = 0; i < 2; i++) {
+                                for (let j = 0; j < 2; j++) {
+                                    const mx = tower.x + 12 + i * 20;
+                                    const my = tower.y + 15 + j * 20;
+
+                                    // Missile body
+                                    ctx.fillStyle = '#E8E8E8';
+                                    ctx.fillRect(mx, my, 10, 25);
+
+                                    // Missile tip
+                                    ctx.fillStyle = '#C41E3A';
+                                    ctx.beginPath();
+                                    ctx.moveTo(mx + 5, my);
+                                    ctx.lineTo(mx, my + 8);
+                                    ctx.lineTo(mx + 10, my + 8);
+                                    ctx.closePath();
+                                    ctx.fill();
+
+                                    // Fins
+                                    ctx.fillStyle = '#A0A0A0';
+                                    ctx.fillRect(mx - 2, my + 20, 2, 5);
+                                    ctx.fillRect(mx + 10, my + 20, 2, 5);
+                                }
+                            }
+
+                            // Radar dish
+                            ctx.strokeStyle = '#2C3E2F';
+                            ctx.lineWidth = 2;
+                            ctx.beginPath();
+                            ctx.arc(tower.x + tower.width / 2, tower.y + 5, 8, 0, Math.PI * 2);
+                            ctx.stroke();
+
+                        } else if (tower.defenseType === 'flak') {
+                            // Flak Cannon - Artillery style
+                            ctx.fillStyle = '#4A5049';
+                            ctx.fillRect(tower.x, tower.y, tower.width, tower.height - 8);
+
+                            // Gun mount
+                            ctx.fillStyle = '#2F3532';
+                            ctx.fillRect(tower.x + tower.width / 2 - 12, tower.y + 20, 24, 30);
+
+                            // Gun barrel
+                            ctx.fillStyle = '#1A1D1B';
+                            ctx.fillRect(tower.x + tower.width / 2 - 6, tower.y - 15, 12, 40);
+
+                            // Barrel tip
+                            ctx.fillStyle = '#0F1110';
+                            ctx.fillRect(tower.x + tower.width / 2 - 7, tower.y - 15, 14, 5);
+
+                            // Muzzle
+                            ctx.fillStyle = '#000';
+                            ctx.fillRect(tower.x + tower.width / 2 - 8, tower.y - 18, 16, 3);
+
+                            // Side armor plates
+                            ctx.fillStyle = '#3A423D';
+                            ctx.fillRect(tower.x + 5, tower.y + 25, 8, 25);
+                            ctx.fillRect(tower.x + tower.width - 13, tower.y + 25, 8, 25);
+
+                        } else if (tower.defenseType === 'machinegun') {
+                            // Machine Gun Nest
+                            ctx.fillStyle = '#5C6B5A';
+                            ctx.fillRect(tower.x, tower.y + 15, tower.width, tower.height - 23);
+
+                            // Sandbags
+                            ctx.fillStyle = '#8B7355';
+                            for (let i = 0; i < 3; i++) {
+                                ctx.beginPath();
+                                ctx.ellipse(tower.x + 10 + i * 12, tower.y + tower.height - 15, 8, 6, 0, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+
+                            // Machine gun body
+                            ctx.fillStyle = '#2C2C2C';
+                            ctx.fillRect(tower.x + tower.width / 2 - 5, tower.y + 20, 10, 15);
+
+                            // Barrel
+                            ctx.fillStyle = '#1A1A1A';
+                            ctx.fillRect(tower.x + tower.width / 2 - 3, tower.y + 5, 6, 20);
+
+                            // Ammo belt
+                            ctx.strokeStyle = '#DAA520';
+                            ctx.lineWidth = 2;
+                            ctx.beginPath();
+                            ctx.moveTo(tower.x + tower.width / 2 + 8, tower.y + 25);
+                            ctx.lineTo(tower.x + tower.width / 2 + 12, tower.y + 30);
+                            ctx.stroke();
+
+                        } else if (tower.defenseType === 'mobile_aa') {
+                            // Mobile AA Gun on Truck
+
+                            // Shadow
+                            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                            ctx.fillRect(tower.x + 3, tower.y + tower.height - 5, tower.width + 3, 8);
+
+                            // Truck body
+                            ctx.fillStyle = '#4A4A4A';
+                            ctx.fillRect(tower.x, tower.y + tower.height - 15, tower.width, 15);
+
+                            // Truck cab
+                            ctx.fillStyle = '#3A3A3A';
+                            ctx.fillRect(tower.x + 5, tower.y + tower.height - 25, 20, 10);
+
+                            // Windshield
+                            ctx.fillStyle = '#87CEEB';
+                            ctx.fillRect(tower.x + 7, tower.y + tower.height - 23, 6, 6);
+
+                            // Wheels
+                            ctx.fillStyle = '#1A1A1A';
+                            ctx.beginPath();
+                            ctx.arc(tower.x + 15, tower.y + tower.height - 5, 5, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.beginPath();
+                            ctx.arc(tower.x + 55, tower.y + tower.height - 5, 5, 0, Math.PI * 2);
+                            ctx.fill();
+
+                            // Wheel rims
+                            ctx.fillStyle = '#6B6B6B';
+                            ctx.beginPath();
+                            ctx.arc(tower.x + 15, tower.y + tower.height - 5, 3, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.beginPath();
+                            ctx.arc(tower.x + 55, tower.y + tower.height - 5, 3, 0, Math.PI * 2);
+                            ctx.fill();
+
+                            // AA Gun mount
+                            ctx.fillStyle = '#2C2C2C';
+                            ctx.fillRect(tower.x + tower.width / 2 - 8, tower.y + 5, 16, 20);
+
+                            // AA Gun barrel
+                            ctx.fillStyle = '#1A1A1A';
+                            ctx.fillRect(tower.x + tower.width / 2 - 4, tower.y - 10, 8, 18);
+
+                            // Barrel tip
+                            ctx.fillStyle = '#FF6600';
+                            ctx.fillRect(tower.x + tower.width / 2 - 5, tower.y - 12, 10, 2);
+
+                            // Ammo feed
+                            ctx.strokeStyle = '#DAA520';
+                            ctx.lineWidth = 2;
+                            ctx.beginPath();
+                            ctx.moveTo(tower.x + tower.width / 2 + 10, tower.y + 10);
+                            ctx.lineTo(tower.x + tower.width / 2 + 15, tower.y + 15);
+                            ctx.stroke();
+
+                        } else if (tower.defenseType === 'soldier') {
+                            // Soldier with machine gun
+
+                            // Body (uniform)
+                            ctx.fillStyle = '#4A5F4B';
+                            ctx.fillRect(tower.x + 3, tower.y + 8, 9, 10);
+
+                            // Head (helmet)
+                            ctx.fillStyle = '#3A4A3B';
+                            ctx.beginPath();
+                            ctx.arc(tower.x + tower.width / 2, tower.y + 4, 4, 0, Math.PI * 2);
+                            ctx.fill();
+
+                            // Face
+                            ctx.fillStyle = '#FDBCB4';
+                            ctx.beginPath();
+                            ctx.arc(tower.x + tower.width / 2, tower.y + 5, 2.5, 0, Math.PI * 2);
+                            ctx.fill();
+
+                            // Legs
+                            ctx.strokeStyle = '#3A4A3B';
+                            ctx.lineWidth = 2;
+                            ctx.beginPath();
+                            ctx.moveTo(tower.x + 5, tower.y + 18);
+                            ctx.lineTo(tower.x + 5, tower.y + tower.height);
+                            ctx.stroke();
+                            ctx.beginPath();
+                            ctx.moveTo(tower.x + 10, tower.y + 18);
+                            ctx.lineTo(tower.x + 10, tower.y + tower.height);
+                            ctx.stroke();
+
+                            // Machine gun
+                            ctx.fillStyle = '#2C2C2C';
+                            ctx.fillRect(tower.x + 10, tower.y + 10, 8, 2);
+
+                            // Muzzle flash when firing
+                            if (Date.now() - tower.lastFireTime < 100) {
+                                ctx.fillStyle = '#FFFF00';
+                                ctx.shadowBlur = 10;
+                                ctx.shadowColor = '#FFFF00';
+                                ctx.beginPath();
+                                ctx.arc(tower.x + 18, tower.y + 11, 3, 0, Math.PI * 2);
+                                ctx.fill();
+                                ctx.shadowBlur = 0;
+                            }
+                        }
+
+                        // Danger markings
+                        ctx.fillStyle = '#FFCC00';
+                        ctx.fillRect(tower.x, tower.y + tower.height - 10, 5, 2);
+                        ctx.fillRect(tower.x + tower.width - 5, tower.y + tower.height - 10, 5, 2);
+
+                        // Warning symbol
+                        ctx.fillStyle = '#FF0000';
+                        ctx.font = 'bold 16px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('⚠', tower.x + tower.width / 2, tower.y + tower.height - 2);
+
+                    } else {
+                        // ===== REALISTIC BUILDING STRUCTURES =====
+
+                        // Building shadow
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+                        ctx.fillRect(tower.x + 4, tower.y + 4, tower.width, tower.height);
+
+                        // Side wall (3D effect)
+                        const sideGradient = ctx.createLinearGradient(tower.x + tower.width, tower.y, tower.x + tower.width + 8, tower.y);
+                        sideGradient.addColorStop(0, tower.color);
+                        sideGradient.addColorStop(1, '#000000');
+                        ctx.fillStyle = sideGradient;
+                        ctx.beginPath();
+                        ctx.moveTo(tower.x + tower.width, tower.y + 5);
+                        ctx.lineTo(tower.x + tower.width + 8, tower.y);
+                        ctx.lineTo(tower.x + tower.width + 8, tower.y + tower.height);
+                        ctx.lineTo(tower.x + tower.width, tower.y + tower.height);
+                        ctx.closePath();
+                        ctx.fill();
+
+                        // Main building front with gradient
+                        const buildingGradient = ctx.createLinearGradient(tower.x, tower.y, tower.x + tower.width, tower.y);
+                        buildingGradient.addColorStop(0, tower.color);
+                        buildingGradient.addColorStop(0.5, adjustBrightness(tower.color, 20));
+                        buildingGradient.addColorStop(1, tower.color);
+                        ctx.fillStyle = buildingGradient;
+                        ctx.fillRect(tower.x, tower.y, tower.width, tower.height);
+
+                        // Windows with realistic lighting
+                        tower.windows.forEach(win => {
+                            // Window frame
+                            ctx.fillStyle = '#2C2C2C';
+                            ctx.fillRect(tower.x + win.x - 1, tower.y + win.y - 1, 10, 10);
+
+                            // Glass with reflection
+                            const isLit = Math.random() > 0.3;
+                            ctx.fillStyle = isLit ? '#FFE87C' : '#4A6FA5';
+                            ctx.fillRect(tower.x + win.x, tower.y + win.y, 8, 8);
+
+                            // Reflection effect
+                            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                            ctx.fillRect(tower.x + win.x, tower.y + win.y, 3, 3);
+                        });
+
+                        // Building details
+                        ctx.strokeStyle = '#000000';
+                        ctx.lineWidth = 1;
+
+                        // Horizontal lines (floors)
+                        for (let i = 30; i < tower.height; i += 30) {
+                            ctx.beginPath();
+                            ctx.moveTo(tower.x, tower.y + i);
+                            ctx.lineTo(tower.x + tower.width, tower.y + i);
+                            ctx.stroke();
+                        }
+
+                        // Rooftop details
+                        ctx.fillStyle = '#6C757D';
+                        ctx.fillRect(tower.x + 5, tower.y, tower.width - 10, 5);
+
+                        // Antenna
+                        ctx.strokeStyle = '#C0C0C0';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(tower.x + tower.width / 2, tower.y);
+                        ctx.lineTo(tower.x + tower.width / 2, tower.y - 15);
+                        ctx.stroke();
+
+                        // Antenna top
+                        ctx.fillStyle = '#FF0000';
+                        ctx.beginPath();
+                        ctx.arc(tower.x + tower.width / 2, tower.y - 15, 3, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        // Building outline
+                        ctx.strokeStyle = '#000';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(tower.x, tower.y, tower.width, tower.height);
+                    }
+                }
+            });
+
+            // Helper function for color adjustment
+            function adjustBrightness(color, amount) {
+                const num = parseInt(color.replace('#', ''), 16);
+                const r = Math.min(255, Math.max(0, (num >> 16) + amount));
+                const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amount));
+                const b = Math.min(255, Math.max(0, (num & 0x0000FF) + amount));
+                return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+            }
+
+            // Draw enemy projectiles
+            enemyProjectiles.forEach(proj => {
+                ctx.save();
+                if (proj.type === 'sam') {
+                    // SAM missile - pointed
+                    ctx.fillStyle = '#ff0000';
+                    ctx.beginPath();
+                    ctx.arc(proj.x, proj.y, proj.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#ffff00';
+                    ctx.beginPath();
+                    ctx.arc(proj.x - 3, proj.y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (proj.type === 'flak') {
+                    // Flak burst
+                    ctx.fillStyle = '#ff6600';
+                    ctx.beginPath();
+                    ctx.arc(proj.x, proj.y, proj.size, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    // Machine gun bullets
+                    ctx.fillStyle = '#ffff00';
+                    ctx.fillRect(proj.x - 2, proj.y - 2, 4, 4);
+                }
+                ctx.restore();
+            });
+
+            // Draw player projectiles with trails
+            playerProjectiles.forEach(proj => {
+                ctx.save();
+                if (proj.type === 'missile') {
+                    // Draw missile smoke trail
+                    ctx.strokeStyle = 'rgba(200, 200, 200, 0.6)';
+                    ctx.lineWidth = 6;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    proj.trail.forEach((point, index) => {
+                        if (index === 0) {
+                            ctx.moveTo(point.x, point.y);
+                        } else {
+                            ctx.lineTo(point.x, point.y);
+                        }
+                    });
+                    ctx.stroke();
+
+                    // Missile exhaust flame
+                    const angle = Math.atan2(proj.vy, proj.vx);
+                    ctx.translate(proj.x, proj.y);
+                    ctx.rotate(angle);
+
+                    // Bright exhaust
+                    ctx.fillStyle = '#FFD700';
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = '#FFA500';
+                    ctx.beginPath();
+                    ctx.arc(-10, 0, 8, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#FF6B35';
+                    ctx.beginPath();
+                    ctx.arc(-6, 0, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+
+                    // Missile body - larger and more visible
+                    ctx.fillStyle = '#E8E8E8';
+                    ctx.fillRect(-8, -4, 18, 8);
+
+                    // Missile nose cone
+                    ctx.fillStyle = '#C41E3A';
+                    ctx.beginPath();
+                    ctx.moveTo(10, 0);
+                    ctx.lineTo(5, -4);
+                    ctx.lineTo(5, 4);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Fins
+                    ctx.fillStyle = '#A0A0A0';
+                    ctx.fillRect(-8, -6, 4, 2);
+                    ctx.fillRect(-8, 4, 4, 2);
+
+                    // Body details
+                    ctx.strokeStyle = '#B0B0B0';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(-8, -4);
+                    ctx.lineTo(5, -4);
+                    ctx.moveTo(-8, 4);
+                    ctx.lineTo(5, 4);
+                    ctx.stroke();
+
+                } else if (proj.type === 'bullet') {
+                    // Draw bullet tracer trail
+                    ctx.strokeStyle = 'rgba(0, 255, 0, 0.8)';
+                    ctx.lineWidth = 3;
+                    ctx.lineCap = 'round';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#00FF00';
+                    ctx.beginPath();
+                    proj.trail.forEach((point, index) => {
+                        if (index === 0) {
+                            ctx.moveTo(point.x, point.y);
+                        } else {
+                            ctx.lineTo(point.x, point.y);
+                        }
+                    });
+                    ctx.stroke();
+
+                    // Bullet head - much larger and glowing
+                    ctx.fillStyle = '#00FF00';
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = '#00FF00';
+                    ctx.beginPath();
+                    ctx.arc(proj.x, proj.y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Bright center
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.beginPath();
+                    ctx.arc(proj.x, proj.y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                } else if (proj.type === 'bomb') {
+                    // Draw bomb (carpet bomb ability)
+                    ctx.fillStyle = '#1A1A1A';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#000000';
+
+                    // Bomb body
+                    ctx.beginPath();
+                    ctx.ellipse(proj.x, proj.y, 8, 12, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Fins
+                    ctx.fillStyle = '#6B6B6B';
+                    ctx.fillRect(proj.x - 6, proj.y + 8, 3, 6);
+                    ctx.fillRect(proj.x + 3, proj.y + 8, 3, 6);
+
+                    // Yellow stripe
+                    ctx.fillStyle = '#FFD700';
+                    ctx.fillRect(proj.x - 8, proj.y - 2, 16, 4);
+
+                    ctx.shadowBlur = 0;
+                }
+                ctx.restore();
+            });
+
+            // Draw muzzle flashes
+            muzzleFlashes.forEach(flash => {
+                ctx.save();
+                ctx.globalAlpha = flash.life;
+                ctx.fillStyle = flash.color;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = flash.color;
+                ctx.beginPath();
+                ctx.arc(flash.x, flash.y, flash.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Bright center
+                ctx.fillStyle = '#FFFFFF';
+                ctx.beginPath();
+                ctx.arc(flash.x, flash.y, flash.size / 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+
+            // Draw particles
+            particles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+
+            // Draw recon drones
+            reconDrones.forEach(drone => {
+                ctx.save();
+                // Drone body
+                ctx.fillStyle = '#2A2A2A';
+                ctx.strokeStyle = '#4A4A4A';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(drone.x, drone.y, 15, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // Drone propellers (4 rotors)
+                const rotorOffset = 12;
+                ctx.fillStyle = '#1A1A1A';
+                for (let i = 0; i < 4; i++) {
+                    const angle = (Math.PI * 2 * i) / 4;
+                    const rx = drone.x + Math.cos(angle) * rotorOffset;
+                    const ry = drone.y + Math.sin(angle) * rotorOffset;
+                    ctx.beginPath();
+                    ctx.arc(rx, ry, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Red scanning light
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.6)';
+                ctx.beginPath();
+                ctx.arc(drone.x, drone.y, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Targeting lines to show it's attacking
+                const droneCurrentTime = Date.now();
+                if (droneCurrentTime - drone.lastFireTime < 200) {
+                    // Find the target it just fired at
+                    let target = null;
+                    let nearestDist = Infinity;
+                    towers.forEach(tower => {
+                        if (tower.isAADefense && !tower.destroyed) {
+                            const dx = tower.x + tower.width / 2 - drone.x;
+                            const dy = tower.y + tower.height / 2 - drone.y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            if (dist < nearestDist && dist < 400) {
+                                nearestDist = dist;
+                                target = tower;
+                            }
+                        }
+                    });
+
+                    if (target) {
+                        ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+                        ctx.lineWidth = 2;
+                        ctx.setLineDash([5, 5]);
+                        ctx.beginPath();
+                        ctx.moveTo(drone.x, drone.y);
+                        ctx.lineTo(target.x + target.width / 2, target.y + target.height / 2);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    }
+                }
+
+                ctx.restore();
+            });
+
+            // Draw plane trail (smoke)
+            ctx.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            plane.trail.forEach((point, index) => {
+                if (index === 0) {
+                    ctx.moveTo(point.x, point.y);
+                } else {
+                    ctx.lineTo(point.x, point.y);
+                }
+            });
+            ctx.stroke();
+
+            // Draw nuke projectiles
+            nukeProjectiles.forEach(nuke => {
+                ctx.save();
+                // Giant bomb
+                ctx.fillStyle = '#2A2A2A';
+                ctx.beginPath();
+                ctx.ellipse(nuke.x, nuke.y, 20, 30, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Fins
+                ctx.fillStyle = '#6B6B6B';
+                ctx.fillRect(nuke.x - 15, nuke.y + 20, 8, 15);
+                ctx.fillRect(nuke.x + 7, nuke.y + 20, 8, 15);
+
+                // Yellow stripes
+                ctx.fillStyle = '#FFD700';
+                ctx.fillRect(nuke.x - 20, nuke.y - 10, 40, 5);
+                ctx.fillRect(nuke.x - 20, nuke.y + 5, 40, 5);
+
+                // Radiation symbol
+                ctx.fillStyle = '#FF0000';
+                ctx.font = 'bold 20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('☢', nuke.x, nuke.y + 5);
+
+                ctx.restore();
+            });
+
+            // Draw realistic military aircraft
+            ctx.save();
+
+            // Apply cloak transparency
+            const timeNow = Date.now();
+            const isCloakedNow = timeNow < abilityCloakEndTime;
+            const isHoveringNow = timeNow < abilityHoverEndTime;
+            const isPlasmaShieldedNow = timeNow < abilityPlasmaShieldEndTime;
+
+            if (isCloakedNow) {
+                ctx.globalAlpha = 0.3;
+            }
+
+            // Hover shield effect
+            if (isHoveringNow) {
+                ctx.fillStyle = 'rgba(0, 255, 0, 0.2)';
+                ctx.strokeStyle = 'rgba(0, 255, 0, 0.8)';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(plane.x + plane.width / 2, plane.y + plane.height / 2, 45, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            // Plasma shield effect
+            if (isPlasmaShieldedNow) {
+                const pulseTime = timeNow % 1000;
+                const pulse = Math.sin(pulseTime / 1000 * Math.PI * 2) * 0.3 + 0.7;
+
+                // Outer glow
+                ctx.fillStyle = `rgba(65, 105, 225, ${0.15 * pulse})`;
+                ctx.strokeStyle = `rgba(65, 105, 225, ${0.9 * pulse})`;
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.arc(plane.x + plane.width / 2, plane.y + plane.height / 2, 50, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // Inner energy ring
+                ctx.strokeStyle = `rgba(138, 43, 226, ${0.8 * pulse})`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(plane.x + plane.width / 2, plane.y + plane.height / 2, 40, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Energy particles
+                for (let i = 0; i < 8; i++) {
+                    const angle = (Math.PI * 2 * i) / 8 + timeNow / 1000;
+                    const px = plane.x + plane.width / 2 + Math.cos(angle) * 45;
+                    const py = plane.y + plane.height / 2 + Math.sin(angle) * 45;
+                    ctx.fillStyle = `rgba(138, 43, 226, ${pulse})`;
+                    ctx.beginPath();
+                    ctx.arc(px, py, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            ctx.translate(plane.x + plane.width / 2, plane.y + plane.height / 2);
+            ctx.rotate(plane.angle);
+
+            const w = plane.width;
+            const h = plane.height;
+
+            // Get current plane color
+            const planeColor = planeTypes[currentPlaneType].color;
+
+            // Main fuselage shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.beginPath();
+            ctx.ellipse(2, 2, w/2 + 2, h/2 + 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Main wings (swept back fighter jet style)
+            ctx.fillStyle = '#6B7280';
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 2;
+
+            // Left wing
+            ctx.beginPath();
+            ctx.moveTo(-5, 0);
+            ctx.lineTo(-20, -35);
+            ctx.lineTo(-10, -37);
+            ctx.lineTo(5, -5);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Right wing
+            ctx.beginPath();
+            ctx.moveTo(-5, 0);
+            ctx.lineTo(-20, 35);
+            ctx.lineTo(-10, 37);
+            ctx.lineTo(5, 5);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Tail stabilizers
+            ctx.fillStyle = '#6B7280';
+
+            // Vertical stabilizer
+            ctx.beginPath();
+            ctx.moveTo(-w/2 + 5, 0);
+            ctx.lineTo(-w/2 - 5, 0);
+            ctx.lineTo(-w/2 - 8, -15);
+            ctx.lineTo(-w/2 + 2, -13);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Horizontal stabilizers
+            ctx.beginPath();
+            ctx.moveTo(-w/2 + 5, 0);
+            ctx.lineTo(-w/2 - 3, -12);
+            ctx.lineTo(-w/2, -12);
+            ctx.lineTo(-w/2 + 8, 0);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(-w/2 + 5, 0);
+            ctx.lineTo(-w/2 - 3, 12);
+            ctx.lineTo(-w/2, 12);
+            ctx.lineTo(-w/2 + 8, 0);
+            ctx.closePath();
+            ctx.fill();
+
+            // Main fuselage (fighter jet body)
+            ctx.fillStyle = planeColor;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, w/2, h/2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#4B5563';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            // Nose cone (pointed)
+            ctx.fillStyle = '#9CA3AF';
+            ctx.beginPath();
+            ctx.moveTo(w/2 - 5, 0);
+            ctx.lineTo(w/2 + 12, -3);
+            ctx.lineTo(w/2 + 15, 0);
+            ctx.lineTo(w/2 + 12, 3);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = '#6B7280';
+            ctx.stroke();
+
+            // Cockpit canopy
+            ctx.fillStyle = 'rgba(30, 58, 138, 0.7)';
+            ctx.strokeStyle = '#1E3A8A';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.ellipse(5, 0, 12, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Cockpit highlight
+            ctx.fillStyle = 'rgba(147, 197, 253, 0.4)';
+            ctx.beginPath();
+            ctx.ellipse(8, -3, 6, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Engine intakes (side details)
+            ctx.fillStyle = '#374151';
+            ctx.fillRect(-8, -6, 3, 2);
+            ctx.fillRect(-8, 4, 3, 2);
+
+            // Panel lines for detail
+            ctx.strokeStyle = '#6B7280';
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(-w/2 + 5, -h/2 + 2);
+            ctx.lineTo(w/2 - 5, -h/2 + 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(-w/2 + 5, h/2 - 2);
+            ctx.lineTo(w/2 - 5, h/2 - 2);
+            ctx.stroke();
+
+            // Jet engines (dual exhaust)
+            const planeSpeed = Math.sqrt(plane.vx * plane.vx + plane.vy * plane.vy);
+            if (planeSpeed > 50) {
+                // Left engine exhaust
+                ctx.fillStyle = '#FF6B35';
+                ctx.beginPath();
+                ctx.arc(-w/2 - 2, -8, 4, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#FFA500';
+                ctx.beginPath();
+                ctx.arc(-w/2 - 6, -8, 6, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#FFD700';
+                ctx.beginPath();
+                ctx.arc(-w/2 - 11, -8, 4, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Right engine exhaust
+                ctx.fillStyle = '#FF6B35';
+                ctx.beginPath();
+                ctx.arc(-w/2 - 2, 8, 4, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#FFA500';
+                ctx.beginPath();
+                ctx.arc(-w/2 - 6, 8, 6, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#FFD700';
+                ctx.beginPath();
+                ctx.arc(-w/2 - 11, 8, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Missiles/weapons pods (optional detail)
+            ctx.fillStyle = '#4B5563';
+            ctx.fillRect(-15, -25, 8, 3);
+            ctx.fillRect(-15, 22, 8, 3);
+
+            ctx.restore();
+        }
+
+        // Draw clouds with parallax scrolling
+        function drawClouds() {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+
+            clouds.forEach(cloud => {
+                ctx.beginPath();
+                ctx.arc(cloud.x, cloud.y, cloud.size, 0, Math.PI * 2);
+                ctx.arc(cloud.x + cloud.size * 0.8, cloud.y, cloud.size * 1.2, 0, Math.PI * 2);
+                ctx.arc(cloud.x + cloud.size * 1.6, cloud.y, cloud.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        // Update UI
+        function updateUI() {
+            document.getElementById('destroyed').textContent = towersDestroyed;
+            document.getElementById('score').textContent = score;
+            document.getElementById('missiles').textContent = weapons.missiles.count;
+            document.getElementById('ammo').textContent = weapons.machineGun.ammo;
+            document.getElementById('moneyDisplay').textContent = money;
+
+            // Update altitude display
+            document.getElementById('altitude').textContent = Math.floor(plane.altitude);
+
+            // Show/hide stall warning
+            const currentSpeed = Math.sqrt(plane.vx * plane.vx + plane.vy * plane.vy);
+            if (currentSpeed < plane.minSpeed) {
+                document.getElementById('stallWarning').style.display = 'block';
+            } else {
+                document.getElementById('stallWarning').style.display = 'none';
+            }
+        }
+
+        // Game over
+        function gameOver() {
+            gameRunning = false;
+            document.getElementById('finalDestroyed').textContent = towersDestroyed;
+            document.getElementById('finalScore').textContent = score;
+
+            // High score
+            const highScore = localStorage.getItem('planeGameHighScore') || 0;
+            if (score > highScore) {
+                localStorage.setItem('planeGameHighScore', score);
+                document.getElementById('highScoreText').textContent = '🎉 NEW HIGH SCORE! 🎉';
+                document.getElementById('highScoreText').style.color = '#FFD700';
+            } else {
+                document.getElementById('highScoreText').textContent = `High Score: ${highScore}`;
+            }
+
+            document.getElementById('gameOver').classList.add('show');
+        }
+
+        // Restart game
+        function restartGame() {
+            gameRunning = true;
+            score = 0;
+            towersDestroyed = 0;
+            combo = 0;
+            particles = [];
+            enemyProjectiles = [];
+            playerProjectiles = [];
+            worldOffset = 0;
+            plane.x = 200;
+            plane.y = canvas.height / 2;
+            plane.vx = 200;
+            plane.vy = 0;
+            plane.worldX = 200;
+            plane.trail = [];
+
+            // Reset all ability states
+            abilityActive = false;
+            abilityLastUsed = 0;
+            abilityCloakEndTime = 0;
+            abilityMinigunEndTime = 0;
+            abilityAutoTargetEndTime = 0;
+            abilityHoverEndTime = 0;
+            abilityBrrtEndTime = 0;
+            abilityPlasmaShieldEndTime = 0;
+            nukeProjectiles = [];
+            reconDrones = [];
+            muzzleFlashes = [];
+
+            // Apply current plane stats
+            applyPlaneStats();
+
+            generateInitialTowers();
+            generateInitialClouds();
+            updateUI();
+            document.getElementById('gameOver').classList.remove('show');
+        }
+
+        // Apply plane stats based on current plane type
+        function applyPlaneStats() {
+            const planeData = planeTypes[currentPlaneType];
+
+            health = planeData.maxHealth;
+            fuel = 100;
+            plane.maxSpeed = planeData.maxSpeed;
+            plane.minSpeed = planeData.minSpeed;
+            plane.cruiseSpeed = planeData.cruiseSpeed;
+            plane.thrust = planeData.thrust;
+
+            weapons.missiles.count = planeData.missiles;
+            weapons.missiles.maxCount = planeData.missiles;
+            weapons.machineGun.ammo = planeData.ammo;
+            weapons.machineGun.maxAmmo = planeData.ammo;
+            weapons.missiles.lastFire = 0;
+            weapons.machineGun.lastFire = 0;
+        }
+
+        // Toggle shop
+        function toggleShop() {
+            const shopOverlay = document.getElementById('shopOverlay');
+            const isShowing = shopOverlay.classList.contains('show');
+
+            if (isShowing) {
+                shopOverlay.classList.remove('show');
+                gameRunning = true;
+            } else {
+                shopOverlay.classList.add('show');
+                gameRunning = false;
+                renderShop();
+            }
+        }
+
+        // Render shop
+        function renderShop() {
+            document.getElementById('shopMoney').textContent = money;
+
+            const planeGrid = document.getElementById('planeGrid');
+            planeGrid.innerHTML = '';
+
+            Object.keys(planeTypes).forEach(planeKey => {
+                const planeData = planeTypes[planeKey];
+                const isSelected = currentPlaneType === planeKey;
+                const isLocked = !planeData.unlocked;
+
+                const card = document.createElement('div');
+                card.className = `plane-card ${isSelected ? 'selected' : ''} ${isLocked ? 'locked' : ''}`;
+
+                card.innerHTML = `
+                    <div class="plane-title">${planeData.name}</div>
+                    <div class="plane-description">${planeData.description}</div>
+                    <div class="plane-stats">
+                        <div class="plane-stat"><span>💚 Health:</span><span>${planeData.maxHealth}</span></div>
+                        <div class="plane-stat"><span>⚡ Max Speed:</span><span>${planeData.maxSpeed}</span></div>
+                        <div class="plane-stat"><span>🚀 Missiles:</span><span>${planeData.missiles}</span></div>
+                        <div class="plane-stat"><span>🔫 Ammo:</span><span>${planeData.ammo}</span></div>
+                    </div>
+                    <div class="plane-ability">⭐ ${planeData.abilityName}</div>
+                    ${isLocked ? `
+                        <div class="plane-price">$${planeData.cost}</div>
+                        <button class="buy-button" onclick="buyPlane('${planeKey}')" ${money < planeData.cost ? 'disabled' : ''}>
+                            ${money < planeData.cost ? 'Not Enough Money' : 'Buy Aircraft'}
+                        </button>
+                    ` : isSelected ? `
+                        <button class="select-button" style="background: #00AA00;">✓ Currently Selected</button>
+                    ` : `
+                        <button class="select-button" onclick="selectPlane('${planeKey}')">Select Aircraft</button>
+                    `}
+                `;
+
+                planeGrid.appendChild(card);
+            });
+        }
+
+        // Buy plane
+        function buyPlane(planeKey) {
+            const planeData = planeTypes[planeKey];
+
+            if (money >= planeData.cost && !planeData.unlocked) {
+                money -= planeData.cost;
+                planeData.unlocked = true;
+                currentPlaneType = planeKey;
+                applyPlaneStats();
+                renderShop();
+                updateUI();
+            }
+        }
+
+        // Select plane
+        function selectPlane(planeKey) {
+            if (planeTypes[planeKey].unlocked) {
+                currentPlaneType = planeKey;
+                applyPlaneStats();
+                renderShop();
+                updateUI();
+            }
+        }
+
+        // Activate ability
+        function activateAbility() {
+            const planeData = planeTypes[currentPlaneType];
+            const now = Date.now();
+
+            // Check cooldown
+            if (now - abilityLastUsed < planeData.abilityCooldown) {
+                return; // Still on cooldown
+            }
+
+            abilityLastUsed = now;
+
+            switch (planeData.ability) {
+                case 'carpet_bomb':
+                    // Drop 10 bombs in a line
+                    for (let i = 0; i < 10; i++) {
+                        setTimeout(() => {
+                            if (!gameRunning) return; // Don't fire if game is over
+
+                            playerProjectiles.push({
+                                x: plane.x,
+                                y: plane.y + plane.height,
+                                vx: 0,
+                                vy: 300,
+                                damage: 150,
+                                type: 'bomb',
+                                tracking: false,
+                                trail: []
+                            });
+                        }, i * 100);
+                    }
+                    break;
+
+                case 'cloak':
+                    // Become invisible for 5 seconds
+                    abilityCloakEndTime = now + 5000;
+                    break;
+
+                case 'minigun':
+                    // Activate minigun for 5 seconds
+                    abilityMinigunEndTime = now + 5000;
+                    break;
+
+                case 'emp':
+                    // Destroy all on-screen enemies
+                    towers.forEach(tower => {
+                        if (!tower.destroyed && tower.x > 0 && tower.x < canvas.width) {
+                            tower.destroyed = true;
+                            towersDestroyed++;
+                            score += tower.points;
+                            money += Math.floor(tower.points / 2);
+                            createExplosion(tower.x + tower.width / 2, tower.y + tower.height / 2, tower.color);
+
+                            // If this is a building, destroy soldiers on top of it
+                            if (!tower.isAADefense && tower.parentBuilding === undefined) {
+                                towers.forEach(otherTower => {
+                                    if (otherTower.category === 'soldier' && otherTower.parentBuilding) {
+                                        // Check if soldier is on this building
+                                        if (Math.abs(otherTower.parentBuilding.worldX - tower.worldX) < 10) {
+                                            if (!otherTower.destroyed) {
+                                                otherTower.destroyed = true;
+                                                towersDestroyed++;
+                                                score += otherTower.points;
+                                                money += Math.floor(otherTower.points / 2);
+                                                createExplosion(otherTower.x + otherTower.width / 2, otherTower.y + otherTower.height / 2, otherTower.color);
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    // Clear all enemy projectiles
+                    enemyProjectiles = [];
+                    updateUI();
+                    break;
+
+                case 'hellfire':
+                    // Launch 5 powerful Hellfire missiles
+                    for (let i = 0; i < 5; i++) {
+                        setTimeout(() => {
+                            if (!gameRunning) return; // Don't fire if game is over
+
+                            // Find nearest AA defense
+                            let nearestAA = null;
+                            let nearestDist = Infinity;
+
+                            towers.forEach(tower => {
+                                if (tower.isAADefense && !tower.destroyed) {
+                                    const dx = tower.x + tower.width / 2 - plane.x;
+                                    const dy = tower.y + tower.height / 2 - plane.y;
+                                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                                    if (dist < nearestDist) {
+                                        nearestDist = dist;
+                                        nearestAA = tower;
+                                    }
+                                }
+                            });
+
+                            if (nearestAA) {
+                                playerProjectiles.push({
+                                    x: plane.x + plane.width / 2,
+                                    y: plane.y,
+                                    vx: 0,
+                                    vy: 0,
+                                    speed: 600,
+                                    damage: 200,
+                                    type: 'missile',
+                                    target: nearestAA,
+                                    tracking: true,
+                                    trail: []
+                                });
+                            }
+                        }, i * 200);
+                    }
+                    break;
+
+                case 'auto_target':
+                    // Auto-fire at all enemies
+                    abilityAutoTargetEndTime = now + 8000;
+                    break;
+
+                case 'nuke':
+                    // Drop nuclear bomb
+                    nukeProjectiles.push({
+                        x: plane.x,
+                        y: plane.y + plane.height,
+                        vx: plane.vx * 0.5,
+                        vy: 200,
+                        armed: false,
+                        armTime: now + 1000
+                    });
+                    break;
+
+                case 'hover':
+                    // Hover mode with shield
+                    abilityHoverEndTime = now + 6000;
+                    break;
+
+                case 'brrt':
+                    // GAU-8 Cannon barrage
+                    abilityBrrtEndTime = now + 4000;
+                    break;
+
+                case 'sidewinder_swarm':
+                    // Launch 8 heat-seeking missiles in all directions
+                    for (let i = 0; i < 8; i++) {
+                        const angle = (Math.PI * 2 * i) / 8;
+
+                        // Find nearest enemy in general direction
+                        let nearestTarget = null;
+                        let nearestDist = Infinity;
+
+                        towers.forEach(tower => {
+                            if (!tower.destroyed && tower.isAADefense) {
+                                const dx = tower.x + tower.width / 2 - plane.x;
+                                const dy = tower.y + tower.height / 2 - plane.y;
+                                const dist = Math.sqrt(dx * dx + dy * dy);
+                                const targetAngle = Math.atan2(dy, dx);
+                                const angleDiff = Math.abs(targetAngle - angle);
+
+                                // Prefer targets in the general direction
+                                if (dist < nearestDist && angleDiff < Math.PI / 2) {
+                                    nearestDist = dist;
+                                    nearestTarget = tower;
+                                }
+                            }
+                        });
+
+                        playerProjectiles.push({
+                            x: plane.x + plane.width / 2,
+                            y: plane.y + plane.height / 2,
+                            vx: Math.cos(angle) * 400,
+                            vy: Math.sin(angle) * 400,
+                            speed: 500,
+                            damage: 120,
+                            type: 'missile',
+                            target: nearestTarget,
+                            tracking: nearestTarget !== null,
+                            trail: []
+                        });
+                    }
+                    break;
+
+                case 'recon_drone':
+                    // Deploy recon drone that attacks enemies
+                    reconDrones.push({
+                        x: plane.x + plane.width / 2,
+                        y: plane.y,
+                        vx: 0,
+                        vy: -100,
+                        lifetime: now + 15000, // 15 seconds
+                        lastFireTime: 0,
+                        fireRate: 500,
+                        patrolRadius: 200,
+                        centerX: plane.x + plane.width / 2 + worldOffset,
+                        centerY: plane.y - 150,
+                        angle: 0
+                    });
+                    break;
+
+                case 'plasma_shield':
+                    // Energy shield that reflects projectiles
+                    abilityPlasmaShieldEndTime = now + 8000;
+                    break;
+
+                case 'vtol_strike':
+                    // Vertical strike with precision missiles
+                    for (let i = 0; i < 6; i++) {
+                        setTimeout(() => {
+                            if (!gameRunning) return; // Don't fire if game is over
+
+                            let target = null;
+                            let highestValue = 0;
+
+                            towers.forEach(tower => {
+                                if (!tower.destroyed && tower.points > highestValue) {
+                                    highestValue = tower.points;
+                                    target = tower;
+                                }
+                            });
+
+                            if (target) {
+                                // Capture current position
+                                const targetX = target.x + target.width / 2;
+                                playerProjectiles.push({
+                                    x: targetX,
+                                    y: -50,
+                                    vx: 0,
+                                    vy: 800,
+                                    damage: 180,
+                                    type: 'missile',
+                                    tracking: false,
+                                    trail: []
+                                });
+                            }
+                        }, i * 300);
+                    }
+                    break;
+
+                case 'laser_designator':
+                    // Mark targets for devastating strikes
+                    const targets = [];
+                    towers.forEach(tower => {
+                        if (tower.isAADefense && !tower.destroyed && tower.x > 0 && tower.x < canvas.width) {
+                            // Capture target position immediately
+                            targets.push({
+                                x: tower.x + tower.width / 2,
+                                y: tower.y + tower.height / 2
+                            });
+                        }
+                    });
+
+                    targets.slice(0, 4).forEach((target, i) => {
+                        setTimeout(() => {
+                            if (!gameRunning) return; // Don't fire if game is over
+
+                            // Create laser beam effect then explosion
+                            playerProjectiles.push({
+                                x: target.x,
+                                y: 0,
+                                vx: 0,
+                                vy: 2000,
+                                damage: 250,
+                                type: 'laser',
+                                tracking: false,
+                                trail: []
+                            });
+                        }, i * 500);
+                    });
+                    break;
+
+                case 'dive_bomb':
+                    // Devastating dive bomb attack
+                    for (let i = 0; i < 3; i++) {
+                        setTimeout(() => {
+                            if (!gameRunning) return; // Don't fire if game is over
+
+                            playerProjectiles.push({
+                                x: plane.x,
+                                y: plane.y + plane.height,
+                                vx: plane.vx * 0.8,
+                                vy: 400,
+                                damage: 300,
+                                type: 'bomb',
+                                tracking: false,
+                                trail: [],
+                                explosionRadius: 150
+                            });
+                        }, i * 200);
+                    }
+                    break;
+
+                case 'sonic_boom':
+                    // Shockwave destroys nearby enemies
+                    const shockwaveRadius = 300;
+                    towers.forEach(tower => {
+                        if (!tower.destroyed) {
+                            const dx = tower.x + tower.width / 2 - plane.x;
+                            const dy = tower.y + tower.height / 2 - plane.y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+
+                            if (dist < shockwaveRadius) {
+                                tower.destroyed = true;
+                                towersDestroyed++;
+                                score += tower.points;
+                                money += Math.floor(tower.points / 2);
+                                createExplosion(tower.x + tower.width / 2, tower.y + tower.height / 2, tower.color);
+
+                                // Destroy soldiers on buildings
+                                if (!tower.isAADefense && tower.parentBuilding === undefined) {
+                                    towers.forEach(otherTower => {
+                                        if (otherTower.category === 'soldier' && otherTower.parentBuilding) {
+                                            if (Math.abs(otherTower.parentBuilding.worldX - tower.worldX) < 10) {
+                                                if (!otherTower.destroyed) {
+                                                    otherTower.destroyed = true;
+                                                    towersDestroyed++;
+                                                    score += otherTower.points;
+                                                    money += Math.floor(otherTower.points / 2);
+                                                    createExplosion(otherTower.x + otherTower.width / 2, otherTower.y + otherTower.height / 2, otherTower.color);
+                                                }
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    });
+                    updateUI();
+                    break;
+            }
+        }
+
+        // Game loop
+        let lastTime = 0;
+        function gameLoop(currentTime) {
+            const deltaTime = Math.min((currentTime - lastTime) / 1000, 0.1);
+            lastTime = currentTime;
+
+            update(deltaTime);
+            draw();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Initialize game
+        generateInitialTowers();
+        generateInitialClouds();
+        updateUI();
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
