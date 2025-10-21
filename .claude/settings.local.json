@@ -37,7 +37,15 @@
       "Bash(then echo \"=== $file ===\")",
       "Bash(fi)",
       "Bash(pkill:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(git -C Geometrydash status)",
+      "Bash(git -C Geometrydash add prd.md)",
+      "Bash(git -C Geometrydash commit -m \"$(cat <<''EOF''\nAdd Geometry Dash product requirements document\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git -C .. add Geometrydash)",
+      "Bash(git -C .. commit -m \"$(cat <<''EOF''\nUpdate Geometrydash submodule with PRD documentation\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git -C .. status)",
+      "Bash(git -C .. add .claude/settings.local.json)",
+      "Bash(git -C .. commit -m \"$(cat <<''EOF''\nUpdate Claude Code local settings\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []
