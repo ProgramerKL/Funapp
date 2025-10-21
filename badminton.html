@@ -628,9 +628,38 @@
             font-weight: bold;
             color: #2E8B57;
         }
+
+        /* Back to Gallery Button */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(145deg, #2E8B57, #3CB371);
+            border: 3px solid #fff;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            z-index: 10000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-button:hover {
+            background: linear-gradient(145deg, #3CB371, #2E8B57);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
     </style>
 </head>
 <body>
+    <!-- Back to Gallery Button -->
+    <a href="index.html" class="back-button">🏠 Back to Gallery</a>
+
     <div id="header">
         <h1>🏸 Badminton Championship 🏸</h1>
         <div id="scoreboard">
