@@ -2764,26 +2764,75 @@
                     ballState.rotationSpeed = 5; // Moderate spin
                     showMessage('VOLLEY! 🤲', 800);
                 } else {
-                    // Auto hit for AI teammates - ensure high arc to clear net
+                    // Auto hit for AI teammates - use varied hit types
                     const power = 12;
                     if (hitter === 'player2' || hitter === 'player3' || hitter === 'player4') {
-                        // AI teammates use smart hitting based on distance from net
+                        // AI teammates use smart hitting based on ball height and distance
                         const distFromNet = Math.abs(ballState.x - netX);
+                        const ballHeight = ballState.y;
 
-                        if (distFromNet < 150) {
-                            // Close to net - use very high arc
-                            ballState.vx = power * 0.7;
-                            ballState.vy = power * 1.5; // Extra high arc
-                        } else if (distFromNet < 250) {
-                            // Medium distance - balanced hit
-                            ballState.vx = power * 0.9;
-                            ballState.vy = power * 1.2; // High arc
+                        // Decide hit type based on ball height and situation
+                        const hitChoice = Math.random();
+
+                        if (ballHeight < 40) {
+                            // Low ball - use bump (60% chance) or volley (40% chance)
+                            if (hitChoice < 0.6) {
+                                // Bump - high defensive arc
+                                ballState.vx = power * 0.6;
+                                ballState.vy = power * 1.7;
+                                ballState.vz = (Math.random() - 0.5) * 1;
+                                ballState.rotationSpeed = 3;
+                            } else {
+                                // Volley
+                                ballState.vx = power * 0.7;
+                                ballState.vy = power * 1.3;
+                                ballState.vz = (Math.random() - 0.5) * 1;
+                                ballState.rotationSpeed = 5;
+                            }
+                        } else if (ballHeight > 100 && distFromNet < 200 && canSpike) {
+                            // High ball near net - spike opportunity (70% chance)
+                            if (hitChoice < 0.7) {
+                                // Spike
+                                ballState.vx = power * 1.1;
+                                ballState.vy = power * 0.5;
+                                ballState.vz = (Math.random() - 0.5) * 2;
+                                ballState.rotationSpeed = 12;
+                            } else {
+                                // Volley (controlled)
+                                ballState.vx = power * 0.8;
+                                ballState.vy = power * 1.2;
+                                ballState.vz = (Math.random() - 0.5) * 1;
+                                ballState.rotationSpeed = 5;
+                            }
                         } else {
-                            // Far from net - more power needed
-                            ballState.vx = power * 1.0;
-                            ballState.vy = power * 1.3; // High arc with more forward power
+                            // Medium height - mix of bump (30%), volley (50%), spike (20%)
+                            if (hitChoice < 0.3) {
+                                // Bump
+                                ballState.vx = power * 0.6;
+                                ballState.vy = power * 1.6;
+                                ballState.vz = (Math.random() - 0.5) * 1;
+                                ballState.rotationSpeed = 3;
+                            } else if (hitChoice < 0.8) {
+                                // Volley (most common for medium balls)
+                                ballState.vx = power * 0.8;
+                                ballState.vy = power * 1.3;
+                                ballState.vz = (Math.random() - 0.5) * 1;
+                                ballState.rotationSpeed = 5;
+                            } else if (canSpike) {
+                                // Spike
+                                ballState.vx = power * 1.0;
+                                ballState.vy = power * 0.6;
+                                ballState.vz = (Math.random() - 0.5) * 2;
+                                ballState.rotationSpeed = 12;
+                            } else {
+                                // Too low to spike - volley instead
+                                ballState.vx = power * 0.8;
+                                ballState.vy = power * 1.3;
+                                ballState.vz = (Math.random() - 0.5) * 1;
+                                ballState.rotationSpeed = 5;
+                            }
                         }
-                        ballState.vz = (Math.random() - 0.5) * 1.5;
+                        // No message for AI teammate hits
                     } else {
                         // Player manual hit
                         ballState.vx = power * 0.8;
@@ -2802,7 +2851,7 @@
                 // Reset scored flag when ball is hit
                 ballState.scored = false;
             } else if (hitter === 'cpu' || hitter === 'cpu2' || hitter === 'cpu3' || hitter === 'cpu4') {
-                // CPU hit toward player with HIGH arc to avoid net
+                // CPU hit toward player with varied hit types
                 const aiSettings = getAISettings(gameState.opponentDifficulty, true);
                 const power = 12;
 
@@ -2811,33 +2860,84 @@
                 const minSpikeHeight = netHeight + 20;
                 const canSpike = ballState.y >= minSpikeHeight;
 
-                // Calculate distance to net to determine arc height - improved logic
+                // Calculate distance to net and ball height
                 const distToNet = Math.abs(ballState.x - netX);
+                const ballHeight = ballState.y;
+
+                // Decide hit type based on ball height and situation
+                const hitChoice = Math.random();
 
                 let horizontalPower, verticalPower;
 
-                // If ball is too low, force higher arc regardless of distance
-                if (!canSpike) {
-                    // Ball too low - must use very high arc
-                    horizontalPower = power * 0.6;
-                    verticalPower = power * 1.8; // Extra high to clear net safely
-                } else if (distToNet < 150) {
-                    // Very close to net - use extra high arc and less horizontal speed
-                    horizontalPower = power * 0.6;
-                    verticalPower = power * 1.6;
-                } else if (distToNet < 250) {
-                    // Medium distance from net - balanced approach
-                    horizontalPower = power * 0.8;
-                    verticalPower = power * 1.3;
+                // AI chooses hit type based on ball height
+                if (ballHeight < 40) {
+                    // Low ball - use bump (70% chance) or volley (30% chance)
+                    if (hitChoice < 0.7) {
+                        // Bump - high defensive arc
+                        horizontalPower = power * 0.6;
+                        verticalPower = power * 1.8;
+                        ballState.rotationSpeed = 3;
+                    } else {
+                        // Volley
+                        horizontalPower = power * 0.7;
+                        verticalPower = power * 1.4;
+                        ballState.rotationSpeed = 5;
+                    }
+                } else if (ballHeight > 100 && distToNet < 200 && canSpike) {
+                    // High ball near net - spike opportunity (80% chance on harder difficulties)
+                    const spikeChance = aiSettings.accuracy; // Higher difficulty = more spikes
+                    if (hitChoice < spikeChance) {
+                        // Spike - aggressive attack
+                        horizontalPower = power * 1.2;
+                        verticalPower = power * 0.5;
+                        ballState.rotationSpeed = 15;
+                    } else {
+                        // Volley (controlled placement)
+                        horizontalPower = power * 0.8;
+                        verticalPower = power * 1.3;
+                        ballState.rotationSpeed = 5;
+                    }
                 } else {
-                    // Far from net - need more power to reach
-                    horizontalPower = power * 1.0;
-                    verticalPower = power * 1.4;
+                    // Medium height - mix based on distance
+                    if (!canSpike) {
+                        // Too low to spike - must use high arc
+                        horizontalPower = power * 0.6;
+                        verticalPower = power * 1.8;
+                        ballState.rotationSpeed = 5;
+                    } else if (distToNet < 150) {
+                        // Close to net - bump (40%) or volley (60%)
+                        if (hitChoice < 0.4) {
+                            horizontalPower = power * 0.6;
+                            verticalPower = power * 1.7;
+                            ballState.rotationSpeed = 3;
+                        } else {
+                            horizontalPower = power * 0.7;
+                            verticalPower = power * 1.5;
+                            ballState.rotationSpeed = 5;
+                        }
+                    } else if (distToNet < 250) {
+                        // Medium distance - volley (60%) or spike (40%)
+                        if (hitChoice < 0.6) {
+                            horizontalPower = power * 0.8;
+                            verticalPower = power * 1.3;
+                            ballState.rotationSpeed = 5;
+                        } else {
+                            horizontalPower = power * 1.0;
+                            verticalPower = power * 0.7;
+                            ballState.rotationSpeed = 12;
+                        }
+                    } else {
+                        // Far from net - need more power
+                        horizontalPower = power * 1.0;
+                        verticalPower = power * 1.4;
+                        ballState.rotationSpeed = 8;
+                    }
                 }
 
                 ballState.vx = -horizontalPower * aiSettings.accuracy; // Left toward player
-                ballState.vy = verticalPower; // Higher arc to clear net
+                ballState.vy = verticalPower; // Arc to clear net
                 ballState.vz = (Math.random() - 0.5) * 1.5;
+                // No message for CPU hits
 
                 // Track who hit the ball (team and individual)
                 gameState.lastHitBy = 'cpu';
