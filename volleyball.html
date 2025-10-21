@@ -2724,7 +2724,12 @@
                 // Use player's chosen hit type
                 const hitType = playerState.hitType || 'auto';
 
-                if (hitType === 'spike') {
+                // Check if ball is high enough to spike over the net
+                const netHeight = 120;
+                const minSpikeHeight = netHeight + 20; // Ball must be at least 20 units above net
+                const canSpike = ballState.y >= minSpikeHeight;
+
+                if (hitType === 'spike' && canSpike) {
                     // Spike - hard hit toward opponent with topspin
                     // User player gets enhanced spike power
                     const power = (hitter === 'player') ? 16 : 12;
@@ -2734,6 +2739,14 @@
                     ballState.vz = (Math.random() - 0.5) * 2;
                     ballState.rotationSpeed = 15; // Fast forward spin
                     showMessage((hitter === 'player') ? 'POWER SPIKE! 💥' : 'SPIKE! 🔥', 800);
+                } else if (hitType === 'spike' && !canSpike) {
+                    // Ball too low to spike - automatically convert to volley
+                    const power = 11;
+                    ballState.vx = power * 0.8;
+                    ballState.vy = power * 1.2; // Higher arc to clear net safely
+                    ballState.vz = (Math.random() - 0.5) * 1;
+                    ballState.rotationSpeed = 5;
+                    showMessage('TOO LOW! VOLLEY! ⬆️', 800);
                 } else if (hitType === 'bump') {
                     // Bump (Q key) - high defensive arc with minimal spin
                     const power = 10;
@@ -2793,12 +2806,22 @@
                 const aiSettings = getAISettings(gameState.opponentDifficulty, true);
                 const power = 12;
 
+                // Check if ball is high enough to spike
+                const netHeight = 120;
+                const minSpikeHeight = netHeight + 20;
+                const canSpike = ballState.y >= minSpikeHeight;
+
                 // Calculate distance to net to determine arc height - improved logic
                 const distToNet = Math.abs(ballState.x - netX);
 
                 let horizontalPower, verticalPower;
 
-                if (distToNet < 150) {
+                // If ball is too low, force higher arc regardless of distance
+                if (!canSpike) {
+                    // Ball too low - must use very high arc
+                    horizontalPower = power * 0.6;
+                    verticalPower = power * 1.8; // Extra high to clear net safely
+                } else if (distToNet < 150) {
                     // Very close to net - use extra high arc and less horizontal speed
                     horizontalPower = power * 0.6;
                     verticalPower = power * 1.6;
