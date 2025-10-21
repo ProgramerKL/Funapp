@@ -670,9 +670,39 @@
                 background: var(--neon-pink);
             }
         }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 0, 128, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--neon-pink);
+            color: var(--neon-pink);
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            z-index: 2001;
+            box-shadow: 0 0 15px rgba(255, 0, 128, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 0, 128, 0.4);
+            box-shadow: 0 0 25px rgba(255, 0, 128, 0.6);
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
+    <!-- Back to Portfolio Button -->
+    <a href="index.html" class="back-button">🏠 BACK</a>
+
     <!-- Floating particles -->
     <div class="particles"></div>
     

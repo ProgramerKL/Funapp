@@ -1,0 +1,3174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏐 Beach Volleyball Championship 🏐</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(180deg, #87CEEB 0%, #F4A460 70%, #DEB887 100%);
+            background-attachment: fixed;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Audience stands */
+        .audience-section {
+            position: fixed;
+            bottom: 30%;
+            display: flex;
+            gap: 3px;
+            z-index: 0;
+        }
+
+        .audience-section.left {
+            left: 5%;
+        }
+
+        .audience-section.right {
+            right: 5%;
+        }
+
+        .spectator {
+            width: 25px;
+            height: 35px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: cheer 2s ease-in-out infinite;
+        }
+
+        .spectator-head {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-bottom: 2px;
+        }
+
+        .spectator-body {
+            width: 18px;
+            height: 23px;
+            border-radius: 3px;
+        }
+
+        @keyframes cheer {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-5px) scale(1.05); }
+        }
+
+        /* Bleachers */
+        .bleachers {
+            position: fixed;
+            bottom: 30%;
+            height: 80px;
+            background: linear-gradient(135deg, #8B4513, #A0522D);
+            border: 2px solid #654321;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            z-index: 0;
+        }
+
+        .bleachers.left {
+            left: 3%;
+            width: 200px;
+            transform: perspective(400px) rotateY(10deg);
+        }
+
+        .bleachers.right {
+            right: 3%;
+            width: 200px;
+            transform: perspective(400px) rotateY(-10deg);
+        }
+
+        .bleacher-row {
+            position: absolute;
+            width: 100%;
+            height: 20px;
+            background: linear-gradient(to right, #A0522D, #8B4513);
+            border-bottom: 1px solid #654321;
+        }
+
+        /* Beach umbrellas */
+        .umbrella {
+            position: fixed;
+            bottom: 25%;
+            z-index: 1;
+        }
+
+        .umbrella-top {
+            width: 80px;
+            height: 40px;
+            border-radius: 50% 50% 0 0;
+            position: relative;
+            filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.3));
+        }
+
+        .umbrella-pole {
+            width: 4px;
+            height: 60px;
+            background: #8B4513;
+            margin: 0 auto;
+            position: relative;
+            top: -5px;
+        }
+
+        /* Banners */
+        .banner {
+            position: fixed;
+            top: 15%;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 3px solid #FFD700;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 18px;
+            color: #333;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1;
+            animation: wave 3s ease-in-out infinite;
+        }
+
+        .banner.left {
+            left: 10%;
+        }
+
+        .banner.right {
+            right: 10%;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+        }
+
+        /* Cheering animation on score */
+        .spectator.celebrating {
+            animation: celebrate 0.5s ease-in-out 3;
+        }
+
+        @keyframes celebrate {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-10px) rotate(-10deg); }
+            75% { transform: translateY(-10px) rotate(10deg); }
+        }
+
+        /* Sun */
+        .sun {
+            position: fixed;
+            top: 50px;
+            right: 100px;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #FFD700, #FFA500);
+            border-radius: 50%;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.8);
+            z-index: 1;
+        }
+
+        /* Clouds */
+        .cloud {
+            position: fixed;
+            background: white;
+            border-radius: 100px;
+            opacity: 0.7;
+            z-index: 1;
+        }
+
+        #header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-bottom: 3px solid rgba(255, 255, 255, 0.5);
+        }
+
+        #header h1 {
+            font-size: 48px;
+            color: #fff;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+        }
+
+        #scoreboard {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .team-score {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px 40px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .team-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .team-score.player {
+            border: 4px solid #4169E1;
+        }
+
+        .team-score.opponent {
+            border: 4px solid #DC143C;
+        }
+
+        .score {
+            font-size: 64px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .serving {
+            color: #FFD700;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        #gameContainer {
+            flex: 1;
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        #court {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: linear-gradient(180deg, #87CEEB 0%, #87CEEB 70%, #DEB887 70%, #D2B48C 100%);
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            overflow: hidden;
+        }
+
+        /* Court lines - side view */
+        .court-line {
+            position: absolute;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Ground line */
+        .baseline {
+            bottom: 30%;
+            left: 0;
+            width: 100%;
+            height: 3px;
+        }
+
+        /* Side boundaries (vertical lines marking court edges) */
+        .sideline {
+            width: 3px;
+            height: 70%;
+            bottom: 0;
+        }
+
+        .sideline.left {
+            left: 10%;
+        }
+
+        .sideline.right {
+            right: 10%;
+        }
+
+        /* Serve lines (baselines where players must serve from) */
+        .serve-line {
+            position: absolute;
+            width: 3px;
+            height: 70%;
+            bottom: 0;
+            background: rgba(255, 215, 0, 0.6);
+            box-shadow: 0 0 5px rgba(255, 215, 0, 0.8);
+        }
+
+        .serve-line.left {
+            left: calc(10% + 20px);
+        }
+
+        .serve-line.right {
+            right: calc(10% + 20px);
+        }
+
+        /* Center line removed for side view */
+        .center-line {
+            display: none;
+        }
+
+        /* Net - side view (vertical line from ground up) */
+        #net {
+            position: absolute;
+            left: 50%;
+            bottom: 30%;
+            width: 4px;
+            height: 20%;
+            background: white;
+            transform: translateX(-50%);
+            z-index: 5;
+        }
+
+        #netTop {
+            position: absolute;
+            left: 50%;
+            bottom: 50%;
+            width: 10px;
+            height: 10px;
+            background: #FFD700;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            z-index: 6;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        }
+
+        #netMesh {
+            position: absolute;
+            left: 50%;
+            bottom: 30%;
+            width: 2px;
+            height: 20%;
+            transform: translateX(-50%);
+            z-index: 4;
+            opacity: 0.5;
+            background-image:
+                repeating-linear-gradient(0deg, white, white 1px, transparent 1px, transparent 8px);
+        }
+
+        /* Ball - Realistic Volleyball Design */
+        #ball {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: #FAFAFA; /* Base white color */
+            border-radius: 50%;
+            box-shadow:
+                0 5px 15px rgba(0, 0, 0, 0.4),
+                inset -3px -3px 8px rgba(0, 0, 0, 0.1),
+                inset 3px 3px 8px rgba(255, 255, 255, 0.8);
+            z-index: 10;
+            transition: all 0.05s linear;
+            overflow: hidden;
+        }
+
+        /* Volleyball panel patterns */
+        #ball::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background:
+                /* Yellow panels */
+                conic-gradient(from 0deg at 50% 50%,
+                    transparent 0deg,
+                    transparent 30deg,
+                    #FFD700 30deg,
+                    #FFC700 75deg,
+                    transparent 75deg,
+                    transparent 105deg,
+                    #FFD700 105deg,
+                    #FFC700 150deg,
+                    transparent 150deg,
+                    transparent 180deg,
+                    #4A9EFF 180deg,
+                    #3A8EEF 225deg,
+                    transparent 225deg,
+                    transparent 255deg,
+                    #4A9EFF 255deg,
+                    #3A8EEF 300deg,
+                    transparent 300deg,
+                    transparent 360deg
+                );
+            opacity: 0.9;
+        }
+
+        /* Volleyball seam lines */
+        #ball::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background:
+                /* Curved seam lines */
+                radial-gradient(ellipse 80% 100% at 25% 50%, transparent 48%, #888 49%, #888 51%, transparent 52%),
+                radial-gradient(ellipse 80% 100% at 75% 50%, transparent 48%, #888 49%, #888 51%, transparent 52%),
+                radial-gradient(ellipse 100% 80% at 50% 25%, transparent 48%, #888 49%, #888 51%, transparent 52%),
+                radial-gradient(ellipse 100% 80% at 50% 75%, transparent 48%, #888 49%, #888 51%, transparent 52%);
+            opacity: 0.4;
+        }
+
+        #ballShadow {
+            position: absolute;
+            width: 40px;
+            height: 15px;
+            background: radial-gradient(ellipse, rgba(0, 0, 0, 0.3), transparent);
+            border-radius: 50%;
+            z-index: 3;
+            transition: all 0.05s linear;
+        }
+
+        /* Players */
+        .player {
+            position: absolute;
+            width: 60px;
+            height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 8;
+            transition: all 0.15s;
+        }
+
+        .player-head {
+            width: 30px;
+            height: 30px;
+            background: #FFD4A3;
+            border-radius: 50%;
+            border: 2px solid #333;
+            margin-bottom: 5px;
+        }
+
+        .player-body {
+            width: 40px;
+            height: 50px;
+            border-radius: 5px;
+        }
+
+        .player.user .player-body {
+            background: linear-gradient(135deg, #4169E1, #1E90FF);
+        }
+
+        /* Actual user-controlled player - special styling */
+        #userPlayer .player-body {
+            background: linear-gradient(135deg, #FFD700, #FFA500) !important;
+            border: 3px solid #fff;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+
+        #userPlayer .player-head {
+            background: #FFDAB9;
+            border: 3px solid #fff;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+        }
+
+        .player.cpu .player-body {
+            background: linear-gradient(135deg, #DC143C, #FF6347);
+        }
+
+        .player-shadow {
+            position: absolute;
+            width: 50px;
+            height: 15px;
+            background: radial-gradient(ellipse, rgba(0, 0, 0, 0.3), transparent);
+            border-radius: 50%;
+            bottom: -10px;
+        }
+
+        /* Power meter */
+        #powerMeter {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 20;
+            display: none;
+        }
+
+        #powerMeter.active {
+            display: block;
+        }
+
+        #powerBarContainer {
+            width: 100%;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        #powerBar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #FFD700, #FF6347);
+            transition: width 0.05s linear;
+            border-radius: 15px;
+        }
+
+        .power-label {
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* Controls */
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            z-index: 20;
+            min-width: 220px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        #controls.hidden {
+            transform: translateX(-120%);
+        }
+
+        #toggleControls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(65, 105, 225, 0.95);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            z-index: 19;
+            transition: all 0.3s;
+        }
+
+        #toggleControls:hover {
+            background: rgba(30, 144, 255, 0.95);
+            transform: scale(1.05);
+        }
+
+        #toggleControls.controls-visible {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #controls h3 {
+            margin-bottom: 12px;
+            color: #333;
+            font-size: 18px;
+        }
+
+        #controls div {
+            margin: 5px 0;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .control-tip {
+            color: #4169E1;
+            font-weight: bold;
+            font-size: 12px;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .key {
+            display: inline-block;
+            background: #4169E1;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 0 3px;
+        }
+
+        /* Player size adjustments for side view */
+        .player {
+            width: 50px;
+            height: 70px;
+            transition: transform 0.1s ease-out;
+        }
+
+        .player.hitting {
+            animation: hitPulse 0.3s ease-out;
+        }
+
+        @keyframes hitPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .player.jump-serving {
+            animation: jumpServeGlow 0.5s ease-in-out infinite;
+        }
+
+        @keyframes jumpServeGlow {
+            0%, 100% {
+                filter: brightness(1) drop-shadow(0 0 0px rgba(255, 215, 0, 0));
+            }
+            50% {
+                filter: brightness(1.3) drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+            }
+        }
+
+        .player-head {
+            width: 25px;
+            height: 25px;
+        }
+
+        .player-body {
+            width: 35px;
+            height: 45px;
+        }
+
+        /* Game Over Modal */
+        #gameOverModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        #gameOverModal.show {
+            display: flex;
+        }
+
+        #gameOverContent {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 50px;
+            border-radius: 20px;
+            text-align: center;
+            border: 3px solid #FFD700;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+        }
+
+        #gameOverContent h2 {
+            font-size: 56px;
+            color: #FFD700;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+        }
+
+        #gameOverContent p {
+            font-size: 24px;
+            color: white;
+            margin: 15px 0;
+        }
+
+        .restart-button {
+            padding: 15px 40px;
+            font-size: 20px;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.5);
+            transition: all 0.3s;
+        }
+
+        .restart-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(255, 107, 107, 0.8);
+        }
+
+        #message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 15;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        #message.show {
+            opacity: 1;
+        }
+
+        /* Touch counter */
+        #touchCounter {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 18px;
+            z-index: 15;
+            display: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        #touchCounter.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        /* Side labels */
+        .side-label {
+            position: absolute;
+            bottom: 55%;
+            font-size: 24px;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.7);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .side-label.left {
+            left: 15%;
+        }
+
+        .side-label.right {
+            right: 15%;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateX(-50%) translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .touch-dot {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            margin: 0 4px;
+            background: #4CAF50;
+            transition: all 0.2s;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.8);
+        }
+
+        .touch-dot.used {
+            background: #444;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sun -->
+    <div class="sun"></div>
+
+    <!-- Clouds -->
+    <script>
+        for (let i = 0; i < 5; i++) {
+            const cloud = document.createElement('div');
+            cloud.className = 'cloud';
+            cloud.style.width = Math.random() * 100 + 80 + 'px';
+            cloud.style.height = Math.random() * 30 + 40 + 'px';
+            cloud.style.top = Math.random() * 200 + 'px';
+            cloud.style.left = Math.random() * 100 + '%';
+            document.body.appendChild(cloud);
+        }
+    </script>
+
+    <!-- Bleachers -->
+    <div class="bleachers left">
+        <div class="bleacher-row" style="bottom: 0;"></div>
+        <div class="bleacher-row" style="bottom: 20px;"></div>
+        <div class="bleacher-row" style="bottom: 40px;"></div>
+        <div class="bleacher-row" style="bottom: 60px;"></div>
+    </div>
+    <div class="bleachers right">
+        <div class="bleacher-row" style="bottom: 0;"></div>
+        <div class="bleacher-row" style="bottom: 20px;"></div>
+        <div class="bleacher-row" style="bottom: 40px;"></div>
+        <div class="bleacher-row" style="bottom: 60px;"></div>
+    </div>
+
+    <!-- Audience Left Side -->
+    <div class="audience-section left" id="audienceLeft"></div>
+
+    <!-- Audience Right Side -->
+    <div class="audience-section right" id="audienceRight"></div>
+
+    <!-- Beach Umbrellas -->
+    <div class="umbrella" style="left: 15%; bottom: 22%;">
+        <div class="umbrella-top" style="background: linear-gradient(135deg, #FF6B6B, #FF8E53);"></div>
+        <div class="umbrella-pole"></div>
+    </div>
+    <div class="umbrella" style="right: 15%; bottom: 22%;">
+        <div class="umbrella-top" style="background: linear-gradient(135deg, #4ECDC4, #44A08D);"></div>
+        <div class="umbrella-pole"></div>
+    </div>
+
+    <!-- Banners -->
+    <div class="banner left">🏐 BEACH VOLLEYBALL 🏐</div>
+    <div class="banner right">⭐ CHAMPIONSHIP ⭐</div>
+
+    <script>
+        // Generate audience
+        const audienceColors = [
+            { head: '#FFD4A3', body: '#FF6B6B' },
+            { head: '#FFD4A3', body: '#4169E1' },
+            { head: '#FFD4A3', body: '#FFD700' },
+            { head: '#FFD4A3', body: '#4CAF50' },
+            { head: '#FFD4A3', body: '#9C27B0' },
+            { head: '#FFD4A3', body: '#FF9800' },
+            { head: '#D4A574', body: '#E91E63' },
+            { head: '#C68642', body: '#00BCD4' }
+        ];
+
+        function createSpectator(colors) {
+            const spectator = document.createElement('div');
+            spectator.className = 'spectator';
+            spectator.style.animationDelay = Math.random() * 2 + 's';
+
+            const head = document.createElement('div');
+            head.className = 'spectator-head';
+            head.style.background = colors.head;
+
+            const body = document.createElement('div');
+            body.className = 'spectator-body';
+            body.style.background = colors.body;
+
+            spectator.appendChild(head);
+            spectator.appendChild(body);
+
+            return spectator;
+        }
+
+        // Create left audience
+        const audienceLeft = document.getElementById('audienceLeft');
+        for (let i = 0; i < 8; i++) {
+            const colors = audienceColors[Math.floor(Math.random() * audienceColors.length)];
+            audienceLeft.appendChild(createSpectator(colors));
+        }
+
+        // Create right audience
+        const audienceRight = document.getElementById('audienceRight');
+        for (let i = 0; i < 8; i++) {
+            const colors = audienceColors[Math.floor(Math.random() * audienceColors.length)];
+            audienceRight.appendChild(createSpectator(colors));
+        }
+    </script>
+
+    <div id="header">
+        <h1>🏐 Beach Volleyball - Infinite Play 🏐</h1>
+        <div id="scoreboard">
+            <div class="team-score player">
+                <div class="team-name">YOU</div>
+                <div class="score" id="playerScore">0</div>
+                <div class="serving" id="playerServing"></div>
+            </div>
+            <div style="font-size: 48px; color: white; font-weight: bold;">-</div>
+            <div class="team-score opponent">
+                <div class="team-name">OPPONENT</div>
+                <div class="score" id="opponentScore">0</div>
+                <div class="serving" id="opponentServing"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="gameContainer">
+        <div id="court">
+            <!-- Ground line -->
+            <div class="court-line baseline"></div>
+
+            <!-- Side boundaries -->
+            <div class="court-line sideline left"></div>
+            <div class="court-line sideline right"></div>
+
+            <!-- Serve lines (baselines) -->
+            <div class="serve-line left"></div>
+            <div class="serve-line right"></div>
+
+            <!-- Net -->
+            <div id="netMesh"></div>
+            <div id="net"></div>
+            <div id="netTop"></div>
+
+            <!-- Ball shadow -->
+            <div id="ballShadow"></div>
+
+            <!-- Ball -->
+            <div id="ball"></div>
+
+            <!-- Players -->
+            <div id="userPlayer" class="player user">
+                <div class="player-head"></div>
+                <div class="player-body"></div>
+                <div class="player-shadow"></div>
+            </div>
+
+            <div id="player2" class="player user">
+                <div class="player-head"></div>
+                <div class="player-body"></div>
+                <div class="player-shadow"></div>
+            </div>
+
+            <div id="cpuPlayer" class="player cpu">
+                <div class="player-head"></div>
+                <div class="player-body"></div>
+                <div class="player-shadow"></div>
+            </div>
+
+            <div id="cpu2Player" class="player cpu">
+                <div class="player-head"></div>
+                <div class="player-body"></div>
+                <div class="player-shadow"></div>
+            </div>
+
+            <div id="player3" class="player user">
+                <div class="player-head"></div>
+                <div class="player-body"></div>
+                <div class="player-shadow"></div>
+            </div>
+
+            <div id="cpu3Player" class="player cpu">
+                <div class="player-head"></div>
+                <div class="player-body"></div>
+                <div class="player-shadow"></div>
+            </div>
+
+            <div id="player4" class="player user">
+                <div class="player-head"></div>
+                <div class="player-body"></div>
+                <div class="player-shadow"></div>
+            </div>
+
+            <div id="cpu4Player" class="player cpu">
+                <div class="player-head"></div>
+                <div class="player-body"></div>
+                <div class="player-shadow"></div>
+            </div>
+
+            <!-- Message -->
+            <div id="message"></div>
+
+            <!-- Touch Counter -->
+            <div id="touchCounter">
+                Touches: <span id="touchDots"></span>
+            </div>
+
+            <!-- Side Labels -->
+            <div class="side-label left">YOUR SIDE 🔵</div>
+            <div class="side-label right">OPPONENT 🔴</div>
+        </div>
+
+        <!-- Power Meter -->
+        <div id="powerMeter">
+            <div class="power-label">POWER</div>
+            <div id="powerBarContainer">
+                <div id="powerBar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toggle Controls Button -->
+    <button id="toggleControls">📋 Show Controls</button>
+
+    <!-- Controls -->
+    <div id="controls">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="margin: 0;">🎮 Controls</h3>
+            <button onclick="toggleControlsPanel()" style="background: #DC143C; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">✕</button>
+        </div>
+        <div><span class="key">A</span> / <span class="key">D</span> - Move Left/Right</div>
+        <div><span class="key">W</span> / <span class="key">S</span> - Move Forward/Back (depth)</div>
+        <div><span class="key">SPACE</span> - Jump & Spike</div>
+        <div><span class="key">Q</span> - Bump (High Arc)</div>
+        <div><span class="key">E</span> - Volley/Set</div>
+        <div><span class="key">B</span> - Block at Net 🛡️</div>
+        <div style="margin-top: 8px; color: #FFD700; font-size: 12px; font-weight: bold;">⚠️ SERVE: Hold SPACE (normal) or Press P (jump serve)</div>
+        <div class="control-tip">🔥 SPACE = Spike Attack</div>
+        <div class="control-tip">⬆️ Q = Defensive Bump</div>
+        <div class="control-tip">🤲 E = Controlled Volley</div>
+        <div class="control-tip">🛡️ B = Block (doesn't count as touch!)</div>
+        <div class="control-tip">⚡ P = Jump Serve (powerful spike serve!)</div>
+        <div class="control-tip">⚠️ Max 3 touches per side!</div>
+
+        <div style="margin-top: 15px; border-top: 2px solid #4169E1; padding-top: 10px;">
+            <h4 style="color: #333; margin-bottom: 8px;">🔵 Teammates (Blue)</h4>
+            <select id="teammateDifficulty" style="width: 100%; padding: 5px; border-radius: 5px; border: 2px solid #4169E1;">
+                <option value="easy">Easy</option>
+                <option value="medium" selected>Medium</option>
+                <option value="hard">Hard</option>
+            </select>
+        </div>
+
+        <div style="margin-top: 10px;">
+            <h4 style="color: #333; margin-bottom: 8px;">🔴 Opponents (Red)</h4>
+            <select id="opponentDifficulty" style="width: 100%; padding: 5px; border-radius: 5px; border: 2px solid #DC143C;">
+                <option value="easy">Easy</option>
+                <option value="medium" selected>Medium</option>
+                <option value="hard">Hard</option>
+                <option value="impossible">Impossible</option>
+            </select>
+        </div>
+
+        <div style="margin-top: 15px; border-top: 2px solid #FFD700; padding-top: 10px;">
+            <h4 style="color: #333; margin-bottom: 8px;">🏐 First Serve</h4>
+            <select id="firstServe" style="width: 100%; padding: 5px; border-radius: 5px; border: 2px solid #FFD700;">
+                <option value="player" selected>Your Team Serves First</option>
+                <option value="opponent">Opponent Serves First</option>
+            </select>
+        </div>
+
+        <div style="margin-top: 10px;">
+            <h4 style="color: #333; margin-bottom: 8px;">👤 Your Team Server</h4>
+            <select id="playerTeamServer" style="width: 100%; padding: 5px; border-radius: 5px; border: 2px solid #4169E1;">
+                <option value="user" selected>You Serve</option>
+                <option value="ai">AI Teammate Serves</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Game Mode Selection Modal -->
+    <div id="gameModeModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); display: flex; justify-content: center; align-items: center; z-index: 10000;">
+        <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);">
+            <h2 style="color: white; font-size: 36px; margin-bottom: 30px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">🏐 Choose Game Mode 🏐</h2>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <button onclick="startGame('tournament')" style="background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; border: none; padding: 20px 40px; font-size: 24px; font-weight: bold; border-radius: 15px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: transform 0.2s;">
+                    🏆 Tournament Mode
+                    <div style="font-size: 14px; margin-top: 5px; opacity: 0.8;">First to 25 points wins!</div>
+                </button>
+                <button onclick="startGame('infinite')" style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: #000; border: none; padding: 20px 40px; font-size: 24px; font-weight: bold; border-radius: 15px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: transform 0.2s;">
+                    ♾️ Infinite Mode
+                    <div style="font-size: 14px; margin-top: 5px; opacity: 0.8;">Play forever - no score limit!</div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div id="gameOverModal">
+        <div id="gameOverContent">
+            <h2 id="gameOverTitle">🏆 VICTORY! 🏆</h2>
+            <p id="gameOverMessage">You won the match!</p>
+            <p id="finalScore"></p>
+            <button class="restart-button" onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        const court = document.getElementById('court');
+        const ball = document.getElementById('ball');
+        const ballShadow = document.getElementById('ballShadow');
+        const userPlayer = document.getElementById('userPlayer');
+        const player2 = document.getElementById('player2');
+        const player3 = document.getElementById('player3');
+        const player4 = document.getElementById('player4');
+        const cpuPlayer = document.getElementById('cpuPlayer');
+        const cpu2Player = document.getElementById('cpu2Player');
+        const cpu3Player = document.getElementById('cpu3Player');
+        const cpu4Player = document.getElementById('cpu4Player');
+        const powerMeter = document.getElementById('powerMeter');
+        const powerBar = document.getElementById('powerBar');
+
+        let gameState = {
+            playerScore: 0,
+            opponentScore: 0,
+            serving: 'player', // 'player' or 'opponent'
+            ballInPlay: false,
+            gameOver: false,
+            lastHitBy: null, // 'player' or 'cpu' - tracks who touched ball last
+            lastHitter: null, // Tracks specific player who hit last (for alternating rule)
+            teammateDifficulty: 'medium',
+            opponentDifficulty: 'medium',
+            touchCount: 0, // Number of touches on current side (max 3)
+            currentSide: null, // 'player' or 'cpu' - tracks which side has possession
+            playerTeamServer: 'user', // 'user' or 'ai' - who serves on player team
+            gameMode: null // 'tournament' or 'infinite'
+        };
+
+        // Predict where ball will land using physics simulation
+        function predictBallLanding() {
+            // Simulate ball trajectory until it hits the ground
+            let simX = ballState.x;
+            let simY = ballState.y;
+            let simZ = ballState.z;
+            let simVx = ballState.vx;
+            let simVy = ballState.vy;
+            let simVz = ballState.vz;
+
+            const maxIterations = 200; // Prevent infinite loops
+            let iterations = 0;
+
+            // Simulate until ball hits ground
+            while (simY > 0 && iterations < maxIterations) {
+                // Apply velocity
+                simX += simVx;
+                simY += simVy;
+                simZ += simVz;
+
+                // Apply gravity
+                simVy -= ballState.gravity;
+
+                // Apply air drag
+                const speed = Math.sqrt(simVx * simVx + simVy * simVy + simVz * simVz);
+                const dragForce = ballState.airDrag * speed * speed;
+                if (speed > 0) {
+                    simVx *= (1 - dragForce / speed);
+                    simVy *= (1 - dragForce / speed);
+                    simVz *= (1 - dragForce / speed);
+                }
+
+                iterations++;
+            }
+
+            return {
+                x: simX,
+                z: simZ,
+                iterations: iterations,
+                willLand: iterations < maxIterations
+            };
+        }
+
+        // Difficulty settings
+        function getAISettings(difficulty, isOpponent = false) {
+            const settings = {
+                easy: {
+                    speed: isOpponent ? 6 : 6,
+                    reactionDistance: 250,
+                    accuracy: 0.85,
+                    hitChance: 0.92,
+                    predictionFrames: 12,
+                    usePhysicsPrediction: false
+                },
+                medium: {
+                    speed: isOpponent ? 8 : 8,
+                    reactionDistance: 300,
+                    accuracy: 0.92,
+                    hitChance: 0.96,
+                    predictionFrames: 18,
+                    usePhysicsPrediction: true
+                },
+                hard: {
+                    speed: isOpponent ? 10 : 10,
+                    reactionDistance: 350,
+                    accuracy: 0.98,
+                    hitChance: 0.99,
+                    predictionFrames: 25,
+                    usePhysicsPrediction: true
+                },
+                impossible: {
+                    speed: 13,
+                    reactionDistance: 450,
+                    accuracy: 1.0,
+                    hitChance: 1.0,
+                    predictionFrames: 30,
+                    usePhysicsPrediction: true
+                }
+            };
+            return settings[difficulty] || settings.medium;
+        }
+
+        // Ball physics (side-view: X = horizontal, Y = height, Z = depth)
+        let ballState = {
+            x: 100, // horizontal position (left-right) - will be set by resetBall()
+            y: 80, // height above ground
+            z: 250, // depth position (front-back) - visual layering
+            vx: 0, // velocity x (horizontal)
+            vy: 0, // velocity y (vertical - up/down)
+            vz: 0, // velocity z (depth - forward/backward in court)
+            gravity: 0.5, // Gravity (reduced from 0.6 for better serves)
+            bounceDecay: 0.5, // More realistic bounce energy loss
+            firstBounce: false,
+            scored: false,
+            rotation: 0, // ball rotation angle in degrees
+            rotationSpeed: 0, // rotation speed
+            mass: 1, // Ball mass for physics calculations
+            airDrag: 0.0005 // Air resistance coefficient (reduced from 0.002)
+        };
+
+        // Player state (side-view: X = horizontal, Y = height, Z = depth)
+        let playerState = {
+            x: 200, // horizontal position (left-right on screen)
+            y: 0, // height (jumping)
+            z: 250, // depth position (300 = front, 200 = back)
+            vx: 0,
+            speed: 12, // Enhanced speed for user player
+            jumping: false,
+            jumpPower: 0,
+            maxJumpPower: 25,
+            hitType: null,
+            blocking: false, // Is player attempting to block?
+            stamina: 100, // Player stamina for jumps
+            lastJumpTime: 0, // Cooldown for jumps
+            jumpServing: false, // Is player performing jump serve?
+            jumpServePhase: 0, // 0=not serving, 1=jumping, 2=hitting
+            isServingNow: false // Is currently serving (locked behind baseline)?
+        };
+
+        // Player 2 AI (teammate behind player 1)
+        let player2State = {
+            x: 250,
+            y: 0,
+            z: 200, // further back
+            targetX: 250,
+            targetZ: 200,
+            speed: 5,
+            jumping: false,
+            jumpPower: 0,
+            maxJumpPower: 20
+        };
+
+        // CPU state (opponent 1 - front)
+        let cpuState = {
+            x: 800,
+            y: 0,
+            z: 250,
+            targetX: 800,
+            targetZ: 250,
+            speed: 5,
+            jumping: false,
+            jumpPower: 0,
+            maxJumpPower: 20
+        };
+
+        // CPU 2 state (opponent 2 - back)
+        let cpu2State = {
+            x: 750,
+            y: 0,
+            z: 200,
+            targetX: 750,
+            targetZ: 200,
+            speed: 5,
+            jumping: false,
+            jumpPower: 0,
+            maxJumpPower: 20
+        };
+
+        // Player 3 AI (teammate - middle position)
+        let player3State = {
+            x: 225,
+            y: 0,
+            z: 225, // middle depth
+            targetX: 225,
+            targetZ: 225,
+            speed: 5,
+            jumping: false,
+            jumpPower: 0,
+            maxJumpPower: 20,
+            isServingNow: false // Is currently serving (locked behind baseline)?
+        };
+
+        // CPU 3 state (opponent 3 - middle)
+        let cpu3State = {
+            x: 775,
+            y: 0,
+            z: 225,
+            targetX: 775,
+            targetZ: 225,
+            speed: 5,
+            jumping: false,
+            jumpPower: 0,
+            maxJumpPower: 20
+        };
+
+        // Player 4 AI (teammate - back-left position)
+        let player4State = {
+            x: 200,
+            y: 0,
+            z: 175, // further back
+            targetX: 200,
+            targetZ: 175,
+            speed: 5,
+            jumping: false,
+            jumpPower: 0,
+            maxJumpPower: 20
+        };
+
+        // CPU 4 state (opponent 4 - back-right position)
+        let cpu4State = {
+            x: 800,
+            y: 0,
+            z: 175,
+            targetX: 800,
+            targetZ: 175,
+            speed: 5,
+            jumping: false,
+            jumpPower: 0,
+            maxJumpPower: 20
+        };
+
+        // Input
+        let keys = {};
+        let chargingPower = false;
+        let powerLevel = 0;
+
+        // Court dimensions (side-view)
+        const courtRect = court.getBoundingClientRect();
+        const courtWidth = courtRect.width;
+        const courtHeight = courtRect.height;
+        const netX = courtWidth / 2; // Net at center horizontally
+        const groundY = courtHeight * 0.7; // Ground line at 70% from top
+        const netHeight = 100; // Net height for collision detection
+
+        // Court boundaries
+        const leftBoundary = courtWidth * 0.1; // Left edge
+        const rightBoundary = courtWidth * 0.9; // Right edge
+        const frontZ = 300; // Front of court (depth)
+        const backZ = 150; // Back of court (depth)
+
+        // Serve lines (player must be behind these to serve)
+        const playerServeLineX = leftBoundary + (netX - leftBoundary) * 0.15; // 15% from left edge toward net
+        const cpuServeLineX = rightBoundary - (rightBoundary - netX) * 0.15; // 15% from right edge toward net
+
+
+        // Difficulty change handlers
+        document.getElementById('teammateDifficulty').addEventListener('change', (e) => {
+            gameState.teammateDifficulty = e.target.value;
+        });
+
+        document.getElementById('opponentDifficulty').addEventListener('change', (e) => {
+            gameState.opponentDifficulty = e.target.value;
+        });
+
+        // First serve change handler
+        document.getElementById('firstServe').addEventListener('change', (e) => {
+            gameState.serving = e.target.value;
+            resetBall();
+        });
+
+        // Player team server change handler
+        document.getElementById('playerTeamServer').addEventListener('change', (e) => {
+            gameState.playerTeamServer = e.target.value;
+            if (gameState.serving === 'player') {
+                resetBall();
+            }
+        });
+
+        // Toggle controls panel
+        function toggleControlsPanel() {
+            const controls = document.getElementById('controls');
+            const toggleBtn = document.getElementById('toggleControls');
+
+            controls.classList.toggle('hidden');
+
+            if (controls.classList.contains('hidden')) {
+                toggleBtn.classList.remove('controls-visible');
+            } else {
+                toggleBtn.classList.add('controls-visible');
+            }
+        }
+
+        // Set up toggle button click handler
+        document.getElementById('toggleControls').addEventListener('click', toggleControlsPanel);
+
+        // Initialize game
+        function init() {
+            resetBall();
+            updatePositions();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function resetBall() {
+            // Reset all serving flags
+            playerState.isServingNow = false;
+            player3State.isServingNow = false;
+
+            if (gameState.serving === 'player') {
+                // Player team serves
+                if (gameState.playerTeamServer === 'user') {
+                    // User serves from behind baseline (left side)
+                    playerState.x = playerServeLineX;
+                    playerState.z = 250;
+                    playerState.isServingNow = true; // Lock user behind baseline
+                    ballState.x = playerState.x;
+                    ballState.y = 80; // Height above ground for serve
+                    ballState.z = playerState.z;
+                    console.log('🔵 PLAYER SERVE - Ball positioned at x:', ballState.x, 'netX:', netX, 'Ball is on LEFT side (player side)');
+                    showMessage('YOUR SERVE! (Go to baseline - press A)', 1500);
+                } else {
+                    // AI teammate (player3 - back player) serves from baseline
+                    // User player spawns at the net (front)
+                    playerState.x = netX - 120; // Spawn user at net
+                    playerState.z = 250;
+                    playerState.isServingNow = false; // User is free to move
+
+                    // AI server spawns at baseline
+                    player3State.x = playerServeLineX;
+                    player3State.z = 250;
+                    player3State.isServingNow = true; // Lock AI at baseline until serve
+
+                    ballState.x = player3State.x;
+                    ballState.y = 80;
+                    ballState.z = player3State.z;
+
+                    console.log('🔵 AI TEAMMATE SERVE - Ball at x:', ballState.x, 'User at net x:', playerState.x, 'AI server at baseline x:', player3State.x);
+                    showMessage('AI TEAMMATE SERVING...', 1500);
+
+                    // AI auto-serves after a delay
+                    setTimeout(() => {
+                        if (!gameState.ballInPlay && gameState.serving === 'player') {
+                            aiTeammateServe();
+                        }
+                    }, 1000);
+                }
+            } else {
+                // CPU serves from behind baseline (right side)
+                cpuState.x = cpuServeLineX;
+                cpuState.z = 250;
+                ballState.x = cpuState.x;
+                ballState.y = 80;
+                ballState.z = cpuState.z;
+                console.log('🔴 OPPONENT SERVE - Ball positioned at x:', ballState.x, 'netX:', netX, 'Ball is on RIGHT side (opponent side)');
+                showMessage('OPPONENT SERVE!', 1500);
+            }
+            ballState.vx = 0;
+            ballState.vy = 0;
+            ballState.vz = 0;
+            ballState.firstBounce = false;
+            ballState.scored = false;
+            ballState.rotation = 0;
+            ballState.rotationSpeed = 0;
+            gameState.ballInPlay = false;
+            gameState.lastHitBy = null;
+            gameState.touchCount = 0;
+            gameState.currentSide = null;
+
+            updateServing();
+        }
+
+        function updateServing() {
+            document.getElementById('playerServing').textContent = gameState.serving === 'player' ? '🏐 SERVING' : '';
+            document.getElementById('opponentServing').textContent = gameState.serving === 'opponent' ? '🏐 SERVING' : '';
+        }
+
+        function showMessage(msg, duration = 2000) {
+            const message = document.getElementById('message');
+            message.textContent = msg;
+            message.classList.add('show');
+            setTimeout(() => {
+                message.classList.remove('show');
+            }, duration);
+        }
+
+        function updateTouchCounter() {
+            const touchCounter = document.getElementById('touchCounter');
+            const touchDots = document.getElementById('touchDots');
+
+            if (gameState.ballInPlay && gameState.currentSide) {
+                touchCounter.classList.add('show');
+                let dotsHTML = '';
+                for (let i = 0; i < 3; i++) {
+                    const usedClass = i < gameState.touchCount ? 'used' : '';
+                    dotsHTML += `<span class="touch-dot ${usedClass}"></span>`;
+                }
+                touchDots.innerHTML = dotsHTML;
+            } else {
+                touchCounter.classList.remove('show');
+            }
+        }
+
+        // Input handling
+        document.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+
+            if (e.key === ' ') {
+                e.preventDefault();
+                if (!gameState.ballInPlay && !chargingPower) {
+                    // Start charging power for serve
+                    chargingPower = true;
+                    powerLevel = 0;
+                    powerMeter.classList.add('active');
+                } else if (gameState.ballInPlay && !playerState.jumping) {
+                    // Jump (for spike)
+                    playerState.jumping = true;
+                    playerState.jumpPower = playerState.maxJumpPower;
+                    playerState.hitType = 'spike';
+                }
+            }
+
+            // Q key for bump
+            if (e.key.toLowerCase() === 'q' && gameState.ballInPlay) {
+                playerState.hitType = 'bump';
+            }
+
+            // E key for volley/set
+            if (e.key.toLowerCase() === 'e' && gameState.ballInPlay) {
+                playerState.hitType = 'volley';
+            }
+
+            // B key for block
+            if (e.key.toLowerCase() === 'b' && gameState.ballInPlay) {
+                const now = Date.now();
+                // Jump cooldown of 500ms for more realistic timing
+                if (!playerState.jumping && now - playerState.lastJumpTime > 500) {
+                    playerState.blocking = true;
+                    playerState.jumping = true;
+                    playerState.jumpPower = playerState.maxJumpPower * 0.8; // Slightly lower jump for blocks
+                    playerState.lastJumpTime = now;
+                }
+            }
+
+            // P key for jump serve
+            if (e.key.toLowerCase() === 'p' && !gameState.ballInPlay && gameState.serving === 'player') {
+                // Check if player is behind the serve line
+                if (playerState.x > playerServeLineX + 10) {
+                    showMessage(`❌ SERVE FROM BASELINE! (Press A to move left)`, 2000);
+                    return;
+                }
+
+                const now = Date.now();
+                if (!playerState.jumping && !playerState.jumpServing) {
+                    // Start jump serve sequence
+                    playerState.jumpServing = true;
+                    playerState.jumpServePhase = 1;
+                    playerState.jumping = true;
+                    playerState.jumpPower = playerState.maxJumpPower * 0.95; // Normal jump height
+                    playerState.lastJumpTime = now;
+
+                    // Toss ball up to match jump height
+                    ballState.y = 80;
+                    ballState.vy = 6; // Moderate toss
+                    ballState.vx = 0; // No forward motion during toss
+                    ballState.vz = 0;
+
+                    // Add visual effect
+                    userPlayer.classList.add('jump-serving');
+
+                    showMessage('JUMP SERVE! ⚡ Jumping...', 1500);
+                }
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+
+            if (e.key === ' ') {
+                if (chargingPower) {
+                    // Release serve
+                    serveBall(powerLevel);
+                    chargingPower = false;
+                    powerMeter.classList.remove('active');
+                }
+            }
+        });
+
+        function jumpServeHit() {
+            gameState.ballInPlay = true;
+            gameState.lastHitBy = 'player';
+            ballState.firstBounce = false;
+            ballState.scored = false;
+            gameState.touchCount = 0;
+            gameState.currentSide = 'player';
+
+            // Unlock player - they can now move forward
+            playerState.isServingNow = false;
+
+            // Powerful jump serve - balanced power and control
+            const power = 16;
+            ballState.vx = power * 0.9; // Horizontal speed (14.4)
+            ballState.vy = power * 1.5; // HIGH arc to clear net (24)
+            ballState.vz = (Math.random() - 0.5) * 2;
+            ballState.rotationSpeed = 20; // Maximum topspin for aggressive serve
+
+            // Visual feedback
+            userPlayer.classList.add('hitting');
+            setTimeout(() => userPlayer.classList.remove('hitting'), 300);
+            userPlayer.classList.remove('jump-serving');
+
+            showMessage('POWER SERVE! 💥⚡', 1500);
+        }
+
+        function serveBall(power) {
+            // Check if player is behind the serve line (at or past the baseline)
+            if (playerState.x > playerServeLineX + 10) {
+                showMessage(`❌ SERVE FROM BASELINE! (Press A to move left)`, 2000);
+                return;
+            }
+
+            gameState.ballInPlay = true;
+            gameState.lastHitBy = 'player';
+            ballState.firstBounce = false;
+            ballState.scored = false;
+            gameState.touchCount = 0; // Serve doesn't count as a touch
+            gameState.currentSide = 'player'; // Ball starts on player's side
+
+            // Unlock player - they can now move forward
+            playerState.isServingNow = false;
+
+            // Serve: horizontal toward opponent with HIGH upward arc to clear net
+            const speed = 12 + (power / 100) * 8; // Strong base speed
+            ballState.vx = speed; // Move right toward opponent
+            ballState.vy = speed * 1.6; // High upward arc to clear net
+            ballState.vz = (Math.random() - 0.5) * 1.5; // More depth variation
+            ballState.rotationSpeed = 8; // Add topspin to serve
+        }
+
+        // Game loop
+        function gameLoop() {
+            if (gameState.gameOver) return;
+
+            updatePlayer();
+            updatePlayer2AI();
+            updatePlayer3AI();
+            updatePlayer4AI();
+            updateCPU();
+            updateCPU2AI();
+            updateCPU3AI();
+            updateCPU4AI();
+            updateBall();
+            checkCollisions();
+            updatePositions();
+            updateTouchCounter();
+
+            if (chargingPower) {
+                powerLevel = (powerLevel + 3) % 100;
+                powerBar.style.width = powerLevel + '%';
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function updatePlayer() {
+            // Move left/right (horizontal across screen)
+            // If serving, restrict forward movement (can't go past baseline)
+            let minX = leftBoundary - 50;
+            let maxX = netX - 30;
+
+            if (playerState.isServingNow) {
+                // Locked behind baseline while serving
+                maxX = playerServeLineX + 5; // Can only move slightly past baseline
+            }
+
+            if (keys['a'] && playerState.x > minX) {
+                playerState.vx = -playerState.speed;
+            } else if (keys['d'] && playerState.x < maxX) {
+                playerState.vx = playerState.speed;
+            } else {
+                playerState.vx *= 0.8;
+            }
+            playerState.x += playerState.vx;
+
+            // Move forward/back (depth in court)
+            if (keys['w'] && playerState.z < frontZ) {
+                playerState.z += 4;
+            } else if (keys['s'] && playerState.z > backZ) {
+                playerState.z -= 4;
+            }
+
+            // Jumping
+            if (playerState.jumping) {
+                playerState.y += playerState.jumpPower;
+                playerState.jumpPower -= 1.2;
+
+                // Jump serve hitting logic - hit ball automatically at peak
+                if (playerState.jumpServing && playerState.jumpServePhase === 1) {
+                    // Auto-hit when player reaches good height
+                    if (playerState.y > 35) {
+                        jumpServeHit();
+                        playerState.jumpServePhase = 2;
+                    }
+                }
+
+                if (playerState.y <= 0) {
+                    playerState.y = 0;
+                    playerState.jumping = false;
+                    if (playerState.jumpServing) {
+                        playerState.jumpServing = false;
+                        playerState.jumpServePhase = 0;
+                        userPlayer.classList.remove('jump-serving');
+                    }
+                }
+            } else {
+                playerState.y = 0; // On ground
+            }
+
+            // Keep in bounds - allow going behind baseline to serve
+            playerState.x = Math.max(leftBoundary - 50, Math.min(netX - 30, playerState.x));
+            playerState.z = Math.max(backZ, Math.min(frontZ, playerState.z));
+        }
+
+        function updatePlayer2AI() {
+            const aiSettings = getAISettings(gameState.teammateDifficulty, false);
+
+            // Teammate AI - stays toward back, better court coverage
+            if (gameState.ballInPlay && ballState.x < netX - 50) {
+                // Ball on our side - predict where it will land
+                let predictedX, predictedZ;
+
+                if (aiSettings.usePhysicsPrediction && ballState.y > 10) {
+                    // Use physics-based prediction for accurate landing spot
+                    const landing = predictBallLanding();
+                    if (landing.willLand) {
+                        predictedX = landing.x;
+                        predictedZ = landing.z;
+                    } else {
+                        // Fallback to simple prediction
+                        predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                        predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                    }
+                } else {
+                    // Simple linear prediction
+                    predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                    predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                }
+
+                const distPlayerToBall = Math.sqrt(
+                    Math.pow(ballState.x - playerState.x, 2) +
+                    Math.pow(ballState.z - playerState.z, 2)
+                );
+
+                const distP2ToBall = Math.sqrt(
+                    Math.pow(ballState.x - player2State.x, 2) +
+                    Math.pow(ballState.z - player2State.z, 2)
+                );
+
+                // Go for ball if user player is far AND ball is coming down
+                if (distPlayerToBall > aiSettings.reactionDistance * 0.5 && ballState.vy > -5) {
+                    // Ball is reachable - aggressively move to predicted position
+                    player2State.targetX = Math.max(leftBoundary, Math.min(netX - 30, predictedX));
+                    player2State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
+                } else {
+                    // Maintain back court position for coverage
+                    player2State.targetX = netX - 180;
+                    player2State.targetZ = 200;
+                }
+            } else {
+                // Defensive position when ball is on opponent's side
+                player2State.targetX = netX - 200;
+                player2State.targetZ = 200;
+            }
+
+            // Move towards target with difficulty-based speed - faster diagonal movement
+            const dx = player2State.targetX - player2State.x;
+            const dz = player2State.targetZ - player2State.z;
+            const distance = Math.sqrt(dx * dx + dz * dz);
+
+            if (distance > 5) {
+                const normalizedDx = dx / distance;
+                const normalizedDz = dz / distance;
+                player2State.x += normalizedDx * aiSettings.speed * 1.1;
+                player2State.z += normalizedDz * aiSettings.speed * 1.1;
+            }
+
+            // Jumping
+            if (player2State.jumping) {
+                player2State.y += player2State.jumpPower;
+                player2State.jumpPower -= 1.2;
+                if (player2State.y <= 0) {
+                    player2State.y = 0;
+                    player2State.jumping = false;
+                }
+            } else {
+                player2State.y = 0;
+            }
+
+            // Keep in bounds
+            player2State.x = Math.max(leftBoundary, Math.min(netX - 30, player2State.x));
+            player2State.z = Math.max(backZ, Math.min(frontZ, player2State.z));
+        }
+
+        function updatePlayer3AI() {
+            const aiSettings = getAISettings(gameState.teammateDifficulty, false);
+
+            // Teammate AI - stays toward middle
+            if (gameState.ballInPlay && ballState.x < netX - 50) {
+                // Ball on our side - predict trajectory with physics
+                let predictedX, predictedZ;
+
+                if (aiSettings.usePhysicsPrediction && ballState.y > 10) {
+                    const landing = predictBallLanding();
+                    if (landing.willLand) {
+                        predictedX = landing.x;
+                        predictedZ = landing.z;
+                    } else {
+                        predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                        predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                    }
+                } else {
+                    predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                    predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                }
+
+                const distPlayerToBall = Math.sqrt(
+                    Math.pow(ballState.x - playerState.x, 2) +
+                    Math.pow(ballState.z - playerState.z, 2)
+                );
+                const distPlayer2ToBall = Math.sqrt(
+                    Math.pow(ballState.x - player2State.x, 2) +
+                    Math.pow(ballState.z - player2State.z, 2)
+                );
+
+                const distP3ToBall = Math.sqrt(
+                    Math.pow(ballState.x - player3State.x, 2) +
+                    Math.pow(ballState.z - player3State.z, 2)
+                );
+
+                // Go for ball if others are far and ball is descending
+                if (distPlayerToBall > aiSettings.reactionDistance * 0.4 &&
+                    distPlayer2ToBall > aiSettings.reactionDistance * 0.4 &&
+                    ballState.vy > -5) {
+                    // Aggressively go for predicted position
+                    player3State.targetX = Math.max(leftBoundary, Math.min(netX - 30, predictedX));
+                    player3State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
+                } else {
+                    player3State.targetX = netX - 150;
+                    player3State.targetZ = 225;
+                }
+            } else {
+                player3State.targetX = netX - 150;
+                player3State.targetZ = 225;
+            }
+
+            // Move towards target with difficulty-based speed - improved diagonal movement
+            // But if serving, stay locked behind baseline
+            if (!player3State.isServingNow) {
+                const dx = player3State.targetX - player3State.x;
+                const dz = player3State.targetZ - player3State.z;
+                const distance = Math.sqrt(dx * dx + dz * dz);
+
+                if (distance > 5) {
+                    const normalizedDx = dx / distance;
+                    const normalizedDz = dz / distance;
+                    player3State.x += normalizedDx * aiSettings.speed * 1.1;
+                    player3State.z += normalizedDz * aiSettings.speed * 1.1;
+                }
+            }
+
+            // Jumping
+            if (player3State.jumping) {
+                player3State.y += player3State.jumpPower;
+                player3State.jumpPower -= 1.2;
+                if (player3State.y <= 0) {
+                    player3State.y = 0;
+                    player3State.jumping = false;
+                }
+            } else {
+                player3State.y = 0;
+            }
+
+            // Keep in bounds
+            if (player3State.isServingNow) {
+                // Locked behind baseline while serving
+                player3State.x = Math.max(leftBoundary, Math.min(playerServeLineX + 5, player3State.x));
+            } else {
+                player3State.x = Math.max(leftBoundary, Math.min(netX - 30, player3State.x));
+            }
+            player3State.z = Math.max(backZ, Math.min(frontZ, player3State.z));
+        }
+
+        function updatePlayer4AI() {
+            const aiSettings = getAISettings(gameState.teammateDifficulty, false);
+
+            // Teammate AI - stays toward back-left
+            if (gameState.ballInPlay && ballState.x < netX - 50) {
+                // Ball on our side - predict trajectory using physics
+                let predictedX, predictedZ;
+
+                if (aiSettings.usePhysicsPrediction && ballState.y > 10) {
+                    const landing = predictBallLanding();
+                    if (landing.willLand) {
+                        predictedX = landing.x;
+                        predictedZ = landing.z;
+                    } else {
+                        predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                        predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                    }
+                } else {
+                    predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                    predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                }
+
+                const distPlayerToBall = Math.sqrt(
+                    Math.pow(ballState.x - playerState.x, 2) +
+                    Math.pow(ballState.z - playerState.z, 2)
+                );
+                const distPlayer2ToBall = Math.sqrt(
+                    Math.pow(ballState.x - player2State.x, 2) +
+                    Math.pow(ballState.z - player2State.z, 2)
+                );
+                const distPlayer3ToBall = Math.sqrt(
+                    Math.pow(ballState.x - player3State.x, 2) +
+                    Math.pow(ballState.z - player3State.z, 2)
+                );
+
+                if (distPlayerToBall > aiSettings.reactionDistance * 0.6 && distPlayer2ToBall > aiSettings.reactionDistance * 0.6 && distPlayer3ToBall > aiSettings.reactionDistance * 0.6) {
+                    // Aggressively go for predicted position
+                    player4State.targetX = Math.max(leftBoundary, Math.min(netX - 30, predictedX));
+                    player4State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
+                } else {
+                    player4State.targetX = netX - 200;
+                    player4State.targetZ = 175;
+                }
+            } else {
+                player4State.targetX = netX - 200;
+                player4State.targetZ = 175;
+            }
+
+            // Move towards target with normalized diagonal movement
+            const dx = player4State.targetX - player4State.x;
+            const dz = player4State.targetZ - player4State.z;
+            const distance = Math.sqrt(dx * dx + dz * dz);
+
+            if (distance > 5) {
+                const normalizedDx = dx / distance;
+                const normalizedDz = dz / distance;
+                player4State.x += normalizedDx * aiSettings.speed * 1.1;
+                player4State.z += normalizedDz * aiSettings.speed * 1.1;
+            }
+
+            // Jumping
+            if (player4State.jumping) {
+                player4State.y += player4State.jumpPower;
+                player4State.jumpPower -= 1.2;
+                if (player4State.y <= 0) {
+                    player4State.y = 0;
+                    player4State.jumping = false;
+                }
+            } else {
+                player4State.y = 0;
+            }
+
+            // Keep in bounds
+            player4State.x = Math.max(leftBoundary, Math.min(netX - 30, player4State.x));
+            player4State.z = Math.max(backZ, Math.min(frontZ, player4State.z));
+        }
+
+        function updateCPU() {
+            const aiSettings = getAISettings(gameState.opponentDifficulty, true);
+
+            // AI: Smart positioning and ball tracking
+            if (gameState.ballInPlay && ballState.x > netX + 50) {
+                // Ball on CPU's side - use physics prediction
+                let predictedX, predictedZ;
+
+                if (aiSettings.usePhysicsPrediction && ballState.y > 10) {
+                    const landing = predictBallLanding();
+                    if (landing.willLand) {
+                        predictedX = landing.x;
+                        predictedZ = landing.z;
+                    } else {
+                        predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                        predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                    }
+                } else {
+                    predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                    predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                }
+
+                cpuState.targetX = Math.max(netX + 30, Math.min(rightBoundary, predictedX));
+                cpuState.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
+            } else if (gameState.serving === 'opponent') {
+                // Move to baseline for serving
+                cpuState.targetX = cpuServeLineX;
+                cpuState.targetZ = 250;
+            } else {
+                // Defensive position - near net for blocking/attacking
+                cpuState.targetX = netX + 120;
+                cpuState.targetZ = 250;
+            }
+
+            // Move towards target with normalized diagonal movement
+            const dx = cpuState.targetX - cpuState.x;
+            const dz = cpuState.targetZ - cpuState.z;
+            const distance = Math.sqrt(dx * dx + dz * dz);
+
+            if (distance > 5) {
+                const normalizedDx = dx / distance;
+                const normalizedDz = dz / distance;
+                cpuState.x += normalizedDx * aiSettings.speed * 1.1;
+                cpuState.z += normalizedDz * aiSettings.speed * 1.1;
+            }
+
+            // Jumping
+            if (cpuState.jumping) {
+                cpuState.y += cpuState.jumpPower;
+                cpuState.jumpPower -= 1.2;
+                if (cpuState.y <= 0) {
+                    cpuState.y = 0;
+                    cpuState.jumping = false;
+                }
+            } else {
+                cpuState.y = 0;
+            }
+
+            // Keep in bounds - allow going behind baseline to serve
+            cpuState.x = Math.max(netX + 30, Math.min(rightBoundary + 50, cpuState.x));
+            cpuState.z = Math.max(backZ, Math.min(frontZ, cpuState.z));
+
+            // CPU serve logic - only serve when at baseline
+            if (!gameState.ballInPlay && gameState.serving === 'opponent') {
+                // Check if CPU is at or behind the serve line
+                if (cpuState.x >= cpuServeLineX - 10) {
+                    setTimeout(() => {
+                        if (!gameState.ballInPlay && gameState.serving === 'opponent') {
+                            cpuServe();
+                        }
+                    }, 1000);
+                }
+            }
+
+            // CPU hit ball (only if they weren't the last hitter and ball is in air) - with accuracy check and net avoidance
+            if (gameState.ballInPlay && ballState.x > netX && ballState.y > 5 &&
+                gameState.lastHitter !== 'cpu' && gameState.lastHitter !== 'cpu2' && gameState.lastHitter !== 'cpu3' && gameState.lastHitter !== 'cpu4') {
+                const distToBall = Math.sqrt(
+                    Math.pow(ballState.x - cpuState.x, 2) +
+                    Math.pow(ballState.y - cpuState.y, 2) +
+                    Math.pow(ballState.z - cpuState.z, 2)
+                );
+
+                // Check if ball is not too close to net (avoid hitting into net)
+                const distFromNet = Math.abs(ballState.x - netX);
+                const safeToHit = distFromNet > 100 || ballState.y > 80;
+
+                if (distToBall < 70 && Math.random() < aiSettings.hitChance && safeToHit) {
+                    if (ballState.y > 50 && !cpuState.jumping) {
+                        cpuState.jumping = true;
+                        cpuState.jumpPower = cpuState.maxJumpPower;
+                    }
+                    hitBall('cpu');
+                }
+            }
+        }
+
+        function updateCPU2AI() {
+            const aiSettings = getAISettings(gameState.opponentDifficulty, true);
+
+            // Second opponent AI - stays toward back
+            if (gameState.ballInPlay && ballState.x > netX + 50) {
+                // Predict ball trajectory with physics
+                let predictedX, predictedZ;
+
+                if (aiSettings.usePhysicsPrediction && ballState.y > 10) {
+                    const landing = predictBallLanding();
+                    if (landing.willLand) {
+                        predictedX = landing.x;
+                        predictedZ = landing.z;
+                    } else {
+                        predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                        predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                    }
+                } else {
+                    predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                    predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                }
+
+                const distCPU1ToBall = Math.sqrt(
+                    Math.pow(ballState.x - cpuState.x, 2) +
+                    Math.pow(ballState.z - cpuState.z, 2)
+                );
+
+                // Go for ball if CPU1 is far and ball is descending
+                if (distCPU1ToBall > aiSettings.reactionDistance * 0.5 && ballState.vy > -5) {
+                    // Aggressively go for predicted position
+                    cpu2State.targetX = Math.max(netX + 30, Math.min(rightBoundary, predictedX));
+                    cpu2State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
+                } else {
+                    cpu2State.targetX = netX + 180;
+                    cpu2State.targetZ = 200;
+                }
+            } else {
+                cpu2State.targetX = netX + 180;
+                cpu2State.targetZ = 200;
+            }
+
+            // Move towards target with improved diagonal movement
+            const dx = cpu2State.targetX - cpu2State.x;
+            const dz = cpu2State.targetZ - cpu2State.z;
+            const distance = Math.sqrt(dx * dx + dz * dz);
+
+            if (distance > 5) {
+                const normalizedDx = dx / distance;
+                const normalizedDz = dz / distance;
+                cpu2State.x += normalizedDx * aiSettings.speed * 1.1;
+                cpu2State.z += normalizedDz * aiSettings.speed * 1.1;
+            }
+
+            // Jumping
+            if (cpu2State.jumping) {
+                cpu2State.y += cpu2State.jumpPower;
+                cpu2State.jumpPower -= 1.2;
+                if (cpu2State.y <= 0) {
+                    cpu2State.y = 0;
+                    cpu2State.jumping = false;
+                }
+            } else {
+                cpu2State.y = 0;
+            }
+
+            // Keep in bounds
+            cpu2State.x = Math.max(netX + 30, Math.min(rightBoundary, cpu2State.x));
+            cpu2State.z = Math.max(backZ, Math.min(frontZ, cpu2State.z));
+
+            // CPU2 hit ball - with accuracy check and net avoidance (only if ball is in air)
+            if (gameState.ballInPlay && ballState.x > netX && ballState.y > 5) {
+                const distToBall = Math.sqrt(
+                    Math.pow(ballState.x - cpu2State.x, 2) +
+                    Math.pow(ballState.y - cpu2State.y, 2) +
+                    Math.pow(ballState.z - cpu2State.z, 2)
+                );
+
+                // Check if ball is not too close to net (avoid hitting into net)
+                const distFromNet = Math.abs(ballState.x - netX);
+                const safeToHit = distFromNet > 100 || ballState.y > 80;
+
+                if (distToBall < 70 && gameState.lastHitter !== 'cpu' && gameState.lastHitter !== 'cpu2' && gameState.lastHitter !== 'cpu3' && gameState.lastHitter !== 'cpu4' && Math.random() < aiSettings.hitChance && safeToHit) {
+                    if (ballState.y > 50 && !cpu2State.jumping) {
+                        cpu2State.jumping = true;
+                        cpu2State.jumpPower = cpu2State.maxJumpPower;
+                    }
+                    hitBall('cpu2');
+                }
+            }
+        }
+
+        function updateCPU3AI() {
+            const aiSettings = getAISettings(gameState.opponentDifficulty, true);
+
+            // Third opponent AI - stays toward middle
+            if (gameState.ballInPlay && ballState.x > netX + 50) {
+                // Predict ball trajectory with physics
+                let predictedX, predictedZ;
+
+                if (aiSettings.usePhysicsPrediction && ballState.y > 10) {
+                    const landing = predictBallLanding();
+                    if (landing.willLand) {
+                        predictedX = landing.x;
+                        predictedZ = landing.z;
+                    } else {
+                        predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                        predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                    }
+                } else {
+                    predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                    predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                }
+
+                const distCPU1ToBall = Math.sqrt(
+                    Math.pow(ballState.x - cpuState.x, 2) +
+                    Math.pow(ballState.z - cpuState.z, 2)
+                );
+                const distCPU2ToBall = Math.sqrt(
+                    Math.pow(ballState.x - cpu2State.x, 2) +
+                    Math.pow(ballState.z - cpu2State.z, 2)
+                );
+
+                // Go for ball if others are far and ball is descending
+                if (distCPU1ToBall > aiSettings.reactionDistance * 0.4 &&
+                    distCPU2ToBall > aiSettings.reactionDistance * 0.4 &&
+                    ballState.vy > -5) {
+                    // Aggressively go for predicted position
+                    cpu3State.targetX = Math.max(netX + 30, Math.min(rightBoundary, predictedX));
+                    cpu3State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
+                } else {
+                    cpu3State.targetX = netX + 150;
+                    cpu3State.targetZ = 225;
+                }
+            } else {
+                cpu3State.targetX = netX + 150;
+                cpu3State.targetZ = 225;
+            }
+
+            // Move towards target with improved diagonal movement
+            const dx = cpu3State.targetX - cpu3State.x;
+            const dz = cpu3State.targetZ - cpu3State.z;
+            const distance = Math.sqrt(dx * dx + dz * dz);
+
+            if (distance > 5) {
+                const normalizedDx = dx / distance;
+                const normalizedDz = dz / distance;
+                cpu3State.x += normalizedDx * aiSettings.speed * 1.1;
+                cpu3State.z += normalizedDz * aiSettings.speed * 1.1;
+            }
+
+            // Jumping
+            if (cpu3State.jumping) {
+                cpu3State.y += cpu3State.jumpPower;
+                cpu3State.jumpPower -= 1.2;
+                if (cpu3State.y <= 0) {
+                    cpu3State.y = 0;
+                    cpu3State.jumping = false;
+                }
+            } else {
+                cpu3State.y = 0;
+            }
+
+            // Keep in bounds
+            cpu3State.x = Math.max(netX + 30, Math.min(rightBoundary, cpu3State.x));
+            cpu3State.z = Math.max(backZ, Math.min(frontZ, cpu3State.z));
+
+            // CPU3 hit ball - with accuracy check and net avoidance (only if ball is in air)
+            if (gameState.ballInPlay && ballState.x > netX && ballState.y > 5) {
+                const distToBall = Math.sqrt(
+                    Math.pow(ballState.x - cpu3State.x, 2) +
+                    Math.pow(ballState.y - cpu3State.y, 2) +
+                    Math.pow(ballState.z - cpu3State.z, 2)
+                );
+
+                // Check if ball is not too close to net (avoid hitting into net)
+                const distFromNet = Math.abs(ballState.x - netX);
+                const safeToHit = distFromNet > 100 || ballState.y > 80;
+
+                if (distToBall < 70 && gameState.lastHitter !== 'cpu' && gameState.lastHitter !== 'cpu2' && gameState.lastHitter !== 'cpu3' && gameState.lastHitter !== 'cpu4' && Math.random() < aiSettings.hitChance && safeToHit) {
+                    if (ballState.y > 50 && !cpu3State.jumping) {
+                        cpu3State.jumping = true;
+                        cpu3State.jumpPower = cpu3State.maxJumpPower;
+                    }
+                    hitBall('cpu3');
+                }
+            }
+        }
+
+        function updateCPU4AI() {
+            const aiSettings = getAISettings(gameState.opponentDifficulty, true);
+
+            // Fourth opponent AI - stays toward back-right
+            if (gameState.ballInPlay && ballState.x > netX + 50) {
+                // Predict ball trajectory using physics
+                let predictedX, predictedZ;
+
+                if (aiSettings.usePhysicsPrediction && ballState.y > 10) {
+                    const landing = predictBallLanding();
+                    if (landing.willLand) {
+                        predictedX = landing.x;
+                        predictedZ = landing.z;
+                    } else {
+                        predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                        predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                    }
+                } else {
+                    predictedX = ballState.x + ballState.vx * aiSettings.predictionFrames;
+                    predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
+                }
+
+                const distCPU1ToBall = Math.sqrt(
+                    Math.pow(ballState.x - cpuState.x, 2) +
+                    Math.pow(ballState.z - cpuState.z, 2)
+                );
+                const distCPU2ToBall = Math.sqrt(
+                    Math.pow(ballState.x - cpu2State.x, 2) +
+                    Math.pow(ballState.z - cpu2State.z, 2)
+                );
+                const distCPU3ToBall = Math.sqrt(
+                    Math.pow(ballState.x - cpu3State.x, 2) +
+                    Math.pow(ballState.z - cpu3State.z, 2)
+                );
+
+                if (distCPU1ToBall > aiSettings.reactionDistance * 0.6 && distCPU2ToBall > aiSettings.reactionDistance * 0.6 && distCPU3ToBall > aiSettings.reactionDistance * 0.6) {
+                    // Aggressively go for predicted position
+                    cpu4State.targetX = Math.max(netX + 30, Math.min(rightBoundary, predictedX));
+                    cpu4State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
+                } else {
+                    cpu4State.targetX = netX + 200;
+                    cpu4State.targetZ = 175;
+                }
+            } else {
+                cpu4State.targetX = netX + 200;
+                cpu4State.targetZ = 175;
+            }
+
+            // Move towards target with normalized diagonal movement
+            const dx = cpu4State.targetX - cpu4State.x;
+            const dz = cpu4State.targetZ - cpu4State.z;
+            const distance = Math.sqrt(dx * dx + dz * dz);
+
+            if (distance > 5) {
+                const normalizedDx = dx / distance;
+                const normalizedDz = dz / distance;
+                cpu4State.x += normalizedDx * aiSettings.speed * 1.1;
+                cpu4State.z += normalizedDz * aiSettings.speed * 1.1;
+            }
+
+            // Jumping
+            if (cpu4State.jumping) {
+                cpu4State.y += cpu4State.jumpPower;
+                cpu4State.jumpPower -= 1.2;
+                if (cpu4State.y <= 0) {
+                    cpu4State.y = 0;
+                    cpu4State.jumping = false;
+                }
+            } else {
+                cpu4State.y = 0;
+            }
+
+            // Keep in bounds
+            cpu4State.x = Math.max(netX + 30, Math.min(rightBoundary, cpu4State.x));
+            cpu4State.z = Math.max(backZ, Math.min(frontZ, cpu4State.z));
+
+            // CPU4 hit ball - with accuracy check and net avoidance (only if ball is in air)
+            if (gameState.ballInPlay && ballState.x > netX && ballState.y > 5) {
+                const distToBall = Math.sqrt(
+                    Math.pow(ballState.x - cpu4State.x, 2) +
+                    Math.pow(ballState.y - cpu4State.y, 2) +
+                    Math.pow(ballState.z - cpu4State.z, 2)
+                );
+
+                // Check if ball is not too close to net (avoid hitting into net)
+                const distFromNet = Math.abs(ballState.x - netX);
+                const safeToHit = distFromNet > 100 || ballState.y > 80;
+
+                if (distToBall < 70 && gameState.lastHitter !== 'cpu' && gameState.lastHitter !== 'cpu2' && gameState.lastHitter !== 'cpu3' && gameState.lastHitter !== 'cpu4' && Math.random() < aiSettings.hitChance && safeToHit) {
+                    if (ballState.y > 50 && !cpu4State.jumping) {
+                        cpu4State.jumping = true;
+                        cpu4State.jumpPower = cpu4State.maxJumpPower;
+                    }
+                    hitBall('cpu4');
+                }
+            }
+        }
+
+        function aiTeammateServe() {
+            gameState.ballInPlay = true;
+            gameState.lastHitBy = 'player';
+            ballState.x = player3State.x;
+            ballState.y = 80;
+            ballState.z = player3State.z;
+            gameState.touchCount = 0;
+            gameState.currentSide = 'player';
+
+            // Unlock AI server - they can now move forward
+            player3State.isServingNow = false;
+
+            // AI teammate serves with varying strength based on difficulty
+            const aiSettings = getAISettings(gameState.teammateDifficulty, false);
+
+            // 50/50 chance for underhand or overhand serve
+            const serveType = Math.random() < 0.5 ? 'underhand' : 'overhand';
+            let speed, arcMultiplier;
+
+            if (serveType === 'underhand') {
+                // Underhand serve - higher arc, slower speed, safer
+                speed = 10 + aiSettings.accuracy * 1.5;
+                arcMultiplier = 2.0; // High arc
+                showMessage('AI TEAMMATE: UNDERHAND SERVE! 🤚', 1200);
+            } else {
+                // Overhand serve - lower arc, faster speed, more aggressive
+                speed = 13 + aiSettings.accuracy * 3;
+                arcMultiplier = 1.5; // Lower, faster arc
+                showMessage('AI TEAMMATE: OVERHAND SERVE! ✋', 1200);
+            }
+
+            // 80% accuracy - sometimes the serve goes out or into net
+            const serveAccuracy = Math.random();
+
+            if (serveAccuracy < 0.8) {
+                // 80% - Good serve
+                ballState.vx = speed; // Move right toward opponent
+                ballState.vy = speed * arcMultiplier;
+                ballState.vz = (Math.random() - 0.5) * 2;
+                ballState.rotationSpeed = speed * 0.6;
+            } else {
+                // 20% - Bad serve
+                const badServeType = Math.random();
+                if (badServeType < 0.5) {
+                    // Too short - into net
+                    ballState.vx = speed * 0.5;
+                    ballState.vy = speed * arcMultiplier * 0.6;
+                    ballState.vz = (Math.random() - 0.5) * 2;
+                } else {
+                    // Too long - out of bounds
+                    ballState.vx = speed * 1.4;
+                    ballState.vy = speed * arcMultiplier * 0.9;
+                    ballState.vz = (Math.random() - 0.5) * 3;
+                }
+                ballState.rotationSpeed = speed * 0.6;
+            }
+        }
+
+        function cpuServe() {
+            gameState.ballInPlay = true;
+            gameState.lastHitBy = 'cpu';
+            ballState.x = cpuState.x;
+            ballState.y = 80;
+            ballState.z = cpuState.z;
+            gameState.touchCount = 0; // Serve doesn't count as a touch
+            gameState.currentSide = 'cpu'; // Ball starts on CPU's side
+
+            // CPU serves with varying strength based on difficulty and randomness
+            const aiSettings = getAISettings(gameState.opponentDifficulty, true);
+            const randomFactor = Math.random();
+
+            // Determine serve strength: soft (just over net) or hard (powerful)
+            let speed, arcMultiplier;
+            if (randomFactor < 0.3) {
+                // 30% chance: Soft serve (just clears net)
+                speed = 10 + aiSettings.accuracy * 1;
+                arcMultiplier = 1.9; // Higher arc for soft placement
+            } else if (randomFactor < 0.7) {
+                // 40% chance: Medium serve
+                speed = 12 + aiSettings.accuracy * 2;
+                arcMultiplier = 1.7;
+            } else {
+                // 30% chance: Hard serve (powerful)
+                speed = 14 + aiSettings.accuracy * 4;
+                arcMultiplier = 1.5; // Lower, faster arc
+            }
+
+            // 80% accuracy - sometimes the serve goes out or into net
+            const serveAccuracy = Math.random();
+
+            if (serveAccuracy < 0.8) {
+                // 80% - Good serve
+                ballState.vx = -speed; // Move left toward player
+                ballState.vy = speed * arcMultiplier; // Arc varies with strength
+                ballState.vz = (Math.random() - 0.5) * 2; // Random depth variation
+                ballState.rotationSpeed = -speed * 0.6; // Spin based on power
+            } else {
+                // 20% - Bad serve (either too short or too long)
+                const badServeType = Math.random();
+                if (badServeType < 0.5) {
+                    // Too short - into net
+                    ballState.vx = -speed * 0.5; // Slower
+                    ballState.vy = speed * arcMultiplier * 0.6; // Lower arc
+                    ballState.vz = (Math.random() - 0.5) * 2;
+                } else {
+                    // Too long - out of bounds
+                    ballState.vx = -speed * 1.4; // Too fast
+                    ballState.vy = speed * arcMultiplier * 0.9; // Still decent arc
+                    ballState.vz = (Math.random() - 0.5) * 3; // More depth variation
+                }
+                ballState.rotationSpeed = -speed * 0.6;
+            }
+        }
+
+        function updateBall() {
+            if (!gameState.ballInPlay) {
+                // Ball follows server (unless jump serving)
+                if (playerState.jumpServing && playerState.jumpServePhase === 1) {
+                    // Ball is tossed - apply physics
+                    ballState.vy -= ballState.gravity;
+                    ballState.y += ballState.vy;
+                    ballState.x = playerState.x + 20; // Keep ball in front of player
+                    ballState.z = playerState.z;
+
+                    // Don't let ball fall below starting height during toss
+                    if (ballState.y < 75) {
+                        ballState.y = 75;
+                        ballState.vy = 0;
+                    }
+                } else if (gameState.serving === 'player') {
+                    ballState.x = playerState.x;
+                    ballState.y = 80;
+                    ballState.z = playerState.z;
+                } else {
+                    ballState.x = cpuState.x;
+                    ballState.y = 80;
+                    ballState.z = cpuState.z;
+                }
+                return;
+            }
+
+            // Apply gravity to vertical velocity
+            ballState.vy -= ballState.gravity;
+
+            // Apply air resistance for more realistic physics (quadratic drag)
+            const speed = Math.sqrt(ballState.vx * ballState.vx + ballState.vy * ballState.vy + ballState.vz * ballState.vz);
+            const dragForce = ballState.airDrag * speed * speed;
+
+            if (speed > 0) {
+                const dragX = (ballState.vx / speed) * dragForce;
+                const dragY = (ballState.vy / speed) * dragForce;
+                const dragZ = (ballState.vz / speed) * dragForce;
+
+                ballState.vx -= dragX;
+                ballState.vy -= dragY;
+                ballState.vz -= dragZ;
+            }
+
+            // Update ball rotation based on velocity
+            ballState.rotationSpeed = ballState.vx * 3;
+            ballState.rotation += ballState.rotationSpeed;
+
+            // Track if ball crosses net to reset lastHitter
+            const prevX = ballState.x;
+
+            // Update position
+            ballState.x += ballState.vx;
+            ballState.y += ballState.vy;
+            ballState.z += ballState.vz;
+
+            // Reset lastHitter and touch count when ball crosses net
+            if ((prevX < netX && ballState.x >= netX) || (prevX > netX && ballState.x <= netX)) {
+                gameState.lastHitter = null; // Allow any player on new side to hit
+                gameState.touchCount = 0; // Reset touch count for new side
+                gameState.currentSide = ballState.x < netX ? 'player' : 'cpu';
+            }
+
+            // Ground collision (Y = 0 is ground level)
+            if (ballState.y <= 0 && gameState.ballInPlay) {
+                ballState.y = 0;
+
+                // First bounce - score it but let ball keep bouncing
+                if (!ballState.firstBounce && !ballState.scored) {
+                    ballState.firstBounce = true;
+                    ballState.scored = true;
+                    checkScore();
+                }
+
+                // Apply bounce physics
+                ballState.vy = -ballState.vy * ballState.bounceDecay;
+
+                // Friction on bounce
+                ballState.vx *= 0.92;
+                ballState.vz *= 0.92;
+
+                // Stop bouncing when energy is very low
+                if (Math.abs(ballState.vy) < 0.5) {
+                    ballState.vy = 0;
+                    ballState.vx *= 0.85;
+                    ballState.vz *= 0.85;
+                }
+            }
+
+            // Net collision - team that hit ball into net loses point and serve
+            if (gameState.ballInPlay && Math.abs(ballState.x - netX) < 20 && ballState.y < netHeight) {
+                // Ball hit the net - team that hit it last loses
+                if (!ballState.scored) {
+                    ballState.scored = true;
+
+                    // Team that hit ball into net loses the point
+                    if (gameState.lastHitBy === 'player') {
+                        // Player team hit into net - opponent scores and gets serve
+                        gameState.opponentScore++;
+                        console.log('🔴 NET COLLISION! Player hit into net. New score:', gameState.playerScore, '-', gameState.opponentScore);
+                        gameState.serving = 'opponent';
+                        showMessage('NET! OPPONENT SCORES! 🏐');
+                        makeCrowdCheer('right');
+                    } else {
+                        // Opponent team hit into net - player scores and gets serve
+                        gameState.playerScore++;
+                        console.log('🔵 NET COLLISION! Opponent hit into net. New score:', gameState.playerScore, '-', gameState.opponentScore);
+                        gameState.serving = 'player';
+                        showMessage('NET! YOU SCORE! 🏐');
+                        makeCrowdCheer('left');
+                    }
+
+                    updateScore();
+
+                    // Infinite play mode - no game over
+
+                    // Reset ball immediately (no delay)
+                    resetBall();
+                    return;
+                }
+            }
+
+            // Keep ball in depth bounds
+            ballState.z = Math.max(backZ, Math.min(frontZ, ballState.z));
+        }
+
+        function checkCollisions() {
+            if (!gameState.ballInPlay) return;
+
+            // Don't allow hitting if ball has already scored (is on ground after bounce)
+            if (ballState.scored) return;
+
+            const hitRange = 70;
+
+            // Player hitting ball (only if they weren't the last hitter and ball is in air)
+            if (ballState.x < netX && ballState.y > 5 && gameState.lastHitter !== 'player' && gameState.lastHitter !== 'player2' && gameState.lastHitter !== 'player3' && gameState.lastHitter !== 'player4') {
+                const playerDist = Math.sqrt(
+                    Math.pow(ballState.x - playerState.x, 2) +
+                    Math.pow(ballState.y - playerState.y, 2) +
+                    Math.pow(ballState.z - playerState.z, 2)
+                );
+
+                if (playerDist < hitRange) {
+                    // Check if blocking
+                    if (playerState.blocking && playerState.y > 40) {
+                        blockBall('player');
+                        playerState.blocking = false;
+                    } else {
+                        hitBall('player');
+                    }
+                }
+            }
+
+            // Player 2 (teammate AI) hitting ball - avoid hitting when too close to net or on ground
+            if (ballState.x < netX && ballState.y > 5 && gameState.lastHitter !== 'player' && gameState.lastHitter !== 'player2' && gameState.lastHitter !== 'player3' && gameState.lastHitter !== 'player4') {
+                const player2Dist = Math.sqrt(
+                    Math.pow(ballState.x - player2State.x, 2) +
+                    Math.pow(ballState.y - player2State.y, 2) +
+                    Math.pow(ballState.z - player2State.z, 2)
+                );
+
+                // Check if ball is not too close to net (avoid hitting into net)
+                const distFromNet = Math.abs(ballState.x - netX);
+                const safeToHit = distFromNet > 100 || ballState.y > 80; // Only hit if far from net or ball is high
+
+                if (player2Dist < 70 && safeToHit) {
+                    if (ballState.y > 50 && !player2State.jumping) {
+                        player2State.jumping = true;
+                        player2State.jumpPower = player2State.maxJumpPower;
+                    }
+                    hitBall('player2');
+                }
+            }
+
+            // Player 3 (teammate AI) hitting ball - avoid hitting when too close to net or on ground
+            if (ballState.x < netX && ballState.y > 5 && gameState.lastHitter !== 'player' && gameState.lastHitter !== 'player2' && gameState.lastHitter !== 'player3' && gameState.lastHitter !== 'player4') {
+                const player3Dist = Math.sqrt(
+                    Math.pow(ballState.x - player3State.x, 2) +
+                    Math.pow(ballState.y - player3State.y, 2) +
+                    Math.pow(ballState.z - player3State.z, 2)
+                );
+
+                // Check if ball is not too close to net (avoid hitting into net)
+                const distFromNet = Math.abs(ballState.x - netX);
+                const safeToHit = distFromNet > 100 || ballState.y > 80;
+
+                if (player3Dist < 70 && safeToHit) {
+                    if (ballState.y > 50 && !player3State.jumping) {
+                        player3State.jumping = true;
+                        player3State.jumpPower = player3State.maxJumpPower;
+                    }
+                    hitBall('player3');
+                }
+            }
+
+            // Player 4 (teammate AI) hitting ball - avoid hitting when too close to net or on ground
+            if (ballState.x < netX && ballState.y > 5 && gameState.lastHitter !== 'player' && gameState.lastHitter !== 'player2' && gameState.lastHitter !== 'player3' && gameState.lastHitter !== 'player4') {
+                const player4Dist = Math.sqrt(
+                    Math.pow(ballState.x - player4State.x, 2) +
+                    Math.pow(ballState.y - player4State.y, 2) +
+                    Math.pow(ballState.z - player4State.z, 2)
+                );
+
+                // Check if ball is not too close to net (avoid hitting into net)
+                const distFromNet = Math.abs(ballState.x - netX);
+                const safeToHit = distFromNet > 100 || ballState.y > 80;
+
+                if (player4Dist < 70 && safeToHit) {
+                    if (ballState.y > 50 && !player4State.jumping) {
+                        player4State.jumping = true;
+                        player4State.jumpPower = player4State.maxJumpPower;
+                    }
+                    hitBall('player4');
+                }
+            }
+        }
+
+        function blockBall(hitter) {
+            // Block deflects ball back with minimal change - doesn't count as a touch!
+            ballState.vx = -ballState.vx * 0.6; // Reverse direction, lose some speed
+            ballState.vy = Math.abs(ballState.vy) * 0.4; // Send slightly upward
+            ballState.vz *= 0.8;
+            ballState.rotationSpeed = -5; // Reverse spin
+            showMessage('BLOCK! 🛡️', 800);
+
+            // Play block animation
+            const blockerElement = document.getElementById(hitter === 'player' ? 'userPlayer' : 'cpuPlayer');
+            blockerElement.classList.add('hitting');
+            setTimeout(() => blockerElement.classList.remove('hitting'), 300);
+        }
+
+        function hitBall(hitter) {
+            // Check 3-touch limit
+            const hitterTeam = (hitter === 'player' || hitter === 'player2' || hitter === 'player3' || hitter === 'player4') ? 'player' : 'cpu';
+
+            // If ball is on this side and we've hit 3 times already, violation!
+            if (gameState.currentSide === hitterTeam && gameState.touchCount >= 3) {
+                // Too many touches - opponent scores
+                if (hitterTeam === 'player') {
+                    gameState.opponentScore++;
+                    console.log('🔴 4 TOUCHES VIOLATION by player! New score:', gameState.playerScore, '-', gameState.opponentScore);
+                    gameState.serving = 'opponent';
+                    showMessage('4 TOUCHES! OPPONENT SCORES! ⚠️', 2000);
+                } else {
+                    gameState.playerScore++;
+                    console.log('🔵 4 TOUCHES VIOLATION by opponent! New score:', gameState.playerScore, '-', gameState.opponentScore);
+                    gameState.serving = 'player';
+                    showMessage('4 TOUCHES! YOU SCORE! ⚠️', 2000);
+                }
+                updateScore();
+                ballState.scored = true;
+                setTimeout(() => resetBall(), 1500);
+                return;
+            }
+
+            // Increment touch count
+            if (gameState.currentSide === hitterTeam) {
+                gameState.touchCount++;
+            } else {
+                // First touch on this side
+                gameState.currentSide = hitterTeam;
+                gameState.touchCount = 1;
+            }
+
+            if (hitter === 'player' || hitter === 'player2' || hitter === 'player3' || hitter === 'player4') {
+                // Use player's chosen hit type
+                const hitType = playerState.hitType || 'auto';
+
+                // Check if ball is high enough to spike over the net
+                const netHeight = 120;
+                const minSpikeHeight = netHeight + 20; // Ball must be at least 20 units above net
+                const canSpike = ballState.y >= minSpikeHeight;
+
+                if (hitType === 'spike' && canSpike) {
+                    // Spike - hard hit toward opponent with topspin
+                    // User player gets enhanced spike power
+                    const power = (hitter === 'player') ? 16 : 12;
+                    const downwardForce = (hitter === 'player') ? -8 : 0; // User gets strong downward spike
+                    ballState.vx = power; // Right toward opponent
+                    ballState.vy = power * 0.4 + downwardForce; // Small arc, with downward force for user
+                    ballState.vz = (Math.random() - 0.5) * 2;
+                    ballState.rotationSpeed = 15; // Fast forward spin
+                    showMessage((hitter === 'player') ? 'POWER SPIKE! 💥' : 'SPIKE! 🔥', 800);
+                } else if (hitType === 'spike' && !canSpike) {
+                    // Ball too low to spike - automatically convert to volley
+                    const power = 11;
+                    ballState.vx = power * 0.8;
+                    ballState.vy = power * 1.2; // Higher arc to clear net safely
+                    ballState.vz = (Math.random() - 0.5) * 1;
+                    ballState.rotationSpeed = 5;
+                    showMessage('TOO LOW! VOLLEY! ⬆️', 800);
+                } else if (hitType === 'bump') {
+                    // Bump (Q key) - high defensive arc with minimal spin
+                    const power = 10;
+                    ballState.vx = power * 0.6; // Slower horizontal speed
+                    ballState.vy = power * 1.8; // Much higher arc for receiving
+                    ballState.vz = (Math.random() - 0.5) * 1;
+                    ballState.rotationSpeed = 3; // Minimal spin for control
+                    showMessage('BUMP! ⬆️', 800);
+                } else if (hitType === 'volley') {
+                    // Volley/Set (E key) - controlled arc with backspin
+                    const power = 11;
+                    ballState.vx = power * 0.8;
+                    ballState.vy = power * 0.8;
+                    ballState.vz = (Math.random() - 0.5) * 1;
+                    ballState.rotationSpeed = 5; // Moderate spin
+                    showMessage('VOLLEY! 🤲', 800);
+                } else {
+                    // Auto hit for AI teammates - use varied hit types
+                    const power = 12;
+                    if (hitter === 'player2' || hitter === 'player3' || hitter === 'player4') {
+                        // AI teammates use smart hitting based on ball height and distance
+                        const distFromNet = Math.abs(ballState.x - netX);
+                        const ballHeight = ballState.y;
+
+                        // Decide hit type based on ball height and situation
+                        const hitChoice = Math.random();
+
+                        if (ballHeight < 40) {
+                            // Low ball - use bump (60% chance) or volley (40% chance)
+                            if (hitChoice < 0.6) {
+                                // Bump - high defensive arc
+                                ballState.vx = power * 0.6;
+                                ballState.vy = power * 1.7;
+                                ballState.vz = (Math.random() - 0.5) * 1;
+                                ballState.rotationSpeed = 3;
+                            } else {
+                                // Volley
+                                ballState.vx = power * 0.7;
+                                ballState.vy = power * 1.3;
+                                ballState.vz = (Math.random() - 0.5) * 1;
+                                ballState.rotationSpeed = 5;
+                            }
+                        } else if (ballHeight > 100 && distFromNet < 200 && canSpike) {
+                            // High ball near net - spike opportunity (70% chance)
+                            if (hitChoice < 0.7) {
+                                // Spike
+                                ballState.vx = power * 1.1;
+                                ballState.vy = power * 0.5;
+                                ballState.vz = (Math.random() - 0.5) * 2;
+                                ballState.rotationSpeed = 12;
+                            } else {
+                                // Volley (controlled)
+                                ballState.vx = power * 0.8;
+                                ballState.vy = power * 1.2;
+                                ballState.vz = (Math.random() - 0.5) * 1;
+                                ballState.rotationSpeed = 5;
+                            }
+                        } else {
+                            // Medium height - mix of bump (30%), volley (50%), spike (20%)
+                            if (hitChoice < 0.3) {
+                                // Bump
+                                ballState.vx = power * 0.6;
+                                ballState.vy = power * 1.6;
+                                ballState.vz = (Math.random() - 0.5) * 1;
+                                ballState.rotationSpeed = 3;
+                            } else if (hitChoice < 0.8) {
+                                // Volley (most common for medium balls)
+                                ballState.vx = power * 0.8;
+                                ballState.vy = power * 1.3;
+                                ballState.vz = (Math.random() - 0.5) * 1;
+                                ballState.rotationSpeed = 5;
+                            } else if (canSpike) {
+                                // Spike
+                                ballState.vx = power * 1.0;
+                                ballState.vy = power * 0.6;
+                                ballState.vz = (Math.random() - 0.5) * 2;
+                                ballState.rotationSpeed = 12;
+                            } else {
+                                // Too low to spike - volley instead
+                                ballState.vx = power * 0.8;
+                                ballState.vy = power * 1.3;
+                                ballState.vz = (Math.random() - 0.5) * 1;
+                                ballState.rotationSpeed = 5;
+                            }
+                        }
+                        // No message for AI teammate hits
+                    } else {
+                        // Player manual hit
+                        ballState.vx = power * 0.8;
+                        ballState.vy = power * 0.7;
+                        ballState.vz = (Math.random() - 0.5) * 1.5;
+                    }
+                }
+
+                // Reset hit type after hitting
+                playerState.hitType = null;
+
+                // Track who hit the ball (team and individual)
+                gameState.lastHitBy = 'player';
+                gameState.lastHitter = hitter; // Track specific player
+
+                // Reset scored flag when ball is hit
+                ballState.scored = false;
+            } else if (hitter === 'cpu' || hitter === 'cpu2' || hitter === 'cpu3' || hitter === 'cpu4') {
+                // CPU hit toward player with varied hit types
+                const aiSettings = getAISettings(gameState.opponentDifficulty, true);
+                const power = 12;
+
+                // Check if ball is high enough to spike
+                const netHeight = 120;
+                const minSpikeHeight = netHeight + 20;
+                const canSpike = ballState.y >= minSpikeHeight;
+
+                // Calculate distance to net and ball height
+                const distToNet = Math.abs(ballState.x - netX);
+                const ballHeight = ballState.y;
+
+                // Decide hit type based on ball height and situation
+                const hitChoice = Math.random();
+
+                let horizontalPower, verticalPower;
+
+                // AI chooses hit type based on ball height
+                if (ballHeight < 40) {
+                    // Low ball - use bump (70% chance) or volley (30% chance)
+                    if (hitChoice < 0.7) {
+                        // Bump - high defensive arc
+                        horizontalPower = power * 0.6;
+                        verticalPower = power * 1.8;
+                        ballState.rotationSpeed = 3;
+                    } else {
+                        // Volley
+                        horizontalPower = power * 0.7;
+                        verticalPower = power * 1.4;
+                        ballState.rotationSpeed = 5;
+                    }
+                } else if (ballHeight > 100 && distToNet < 200 && canSpike) {
+                    // High ball near net - spike opportunity (80% chance on harder difficulties)
+                    const spikeChance = aiSettings.accuracy; // Higher difficulty = more spikes
+                    if (hitChoice < spikeChance) {
+                        // Spike - aggressive attack
+                        horizontalPower = power * 1.2;
+                        verticalPower = power * 0.5;
+                        ballState.rotationSpeed = 15;
+                    } else {
+                        // Volley (controlled placement)
+                        horizontalPower = power * 0.8;
+                        verticalPower = power * 1.3;
+                        ballState.rotationSpeed = 5;
+                    }
+                } else {
+                    // Medium height - mix based on distance
+                    if (!canSpike) {
+                        // Too low to spike - must use high arc
+                        horizontalPower = power * 0.6;
+                        verticalPower = power * 1.8;
+                        ballState.rotationSpeed = 5;
+                    } else if (distToNet < 150) {
+                        // Close to net - bump (40%) or volley (60%)
+                        if (hitChoice < 0.4) {
+                            horizontalPower = power * 0.6;
+                            verticalPower = power * 1.7;
+                            ballState.rotationSpeed = 3;
+                        } else {
+                            horizontalPower = power * 0.7;
+                            verticalPower = power * 1.5;
+                            ballState.rotationSpeed = 5;
+                        }
+                    } else if (distToNet < 250) {
+                        // Medium distance - volley (60%) or spike (40%)
+                        if (hitChoice < 0.6) {
+                            horizontalPower = power * 0.8;
+                            verticalPower = power * 1.3;
+                            ballState.rotationSpeed = 5;
+                        } else {
+                            horizontalPower = power * 1.0;
+                            verticalPower = power * 0.7;
+                            ballState.rotationSpeed = 12;
+                        }
+                    } else {
+                        // Far from net - need more power
+                        horizontalPower = power * 1.0;
+                        verticalPower = power * 1.4;
+                        ballState.rotationSpeed = 8;
+                    }
+                }
+
+                ballState.vx = -horizontalPower * aiSettings.accuracy; // Left toward player
+                ballState.vy = verticalPower; // Arc to clear net
+                ballState.vz = (Math.random() - 0.5) * 1.5;
+                // No message for CPU hits
+
+                // Track who hit the ball (team and individual)
+                gameState.lastHitBy = 'cpu';
+                gameState.lastHitter = hitter; // Track specific CPU player
+
+                // Reset scored flag when ball is hit
+                ballState.scored = false;
+            }
+        }
+
+        function checkScore() {
+            // Don't stop ball movement - just score the point
+            let scoringTeam = null;
+            let reason = '';
+
+            // Check if ball landed out of bounds (left/right or depth)
+            const isOutLeft = ballState.x < leftBoundary;
+            const isOutRight = ballState.x > rightBoundary;
+
+            if (isOutLeft || isOutRight) {
+                // Ball landed out - whoever hit it last loses the point
+                if (gameState.lastHitBy === 'player') {
+                    scoringTeam = 'opponent';
+                    reason = 'OUT OF BOUNDS!';
+                } else {
+                    scoringTeam = 'player';
+                    reason = 'OPPONENT OUT!';
+                }
+            } else {
+                // Ball landed in bounds - determine which side
+                if (ballState.x < netX) {
+                    // Ball landed on player's side - opponent scores
+                    scoringTeam = 'opponent';
+                    reason = 'OPPONENT SCORES!';
+                } else {
+                    // Ball landed on opponent's side - player scores
+                    scoringTeam = 'player';
+                    reason = 'YOU SCORE!';
+                }
+            }
+
+            // Award point
+            if (scoringTeam === 'player') {
+                gameState.playerScore++;
+                console.log('🔵 PLAYER SCORED! Reason:', reason, 'New score:', gameState.playerScore, '-', gameState.opponentScore);
+                gameState.serving = 'player';
+                showMessage(reason);
+                makeCrowdCheer('left');
+            } else {
+                gameState.opponentScore++;
+                console.log('🔴 OPPONENT SCORED! Reason:', reason, 'New score:', gameState.playerScore, '-', gameState.opponentScore);
+                gameState.serving = 'opponent';
+                showMessage(reason);
+                makeCrowdCheer('right');
+            }
+
+            updateScore();
+
+            // Check for tournament mode win condition
+            if (gameState.gameMode === 'tournament') {
+                if (gameState.playerScore >= 25 || gameState.opponentScore >= 25) {
+                    setTimeout(() => {
+                        endGame();
+                    }, 2000);
+                    return;
+                }
+            }
+            // Infinite mode - no score limit, game continues indefinitely
+
+            // Reset ball after it finishes bouncing (wait for visual effect)
+            setTimeout(() => {
+                resetBall();
+            }, 2500);
+        }
+
+        function makeCrowdCheer(side) {
+            const audienceSection = side === 'left' ?
+                document.getElementById('audienceLeft') :
+                document.getElementById('audienceRight');
+
+            const spectators = audienceSection.querySelectorAll('.spectator');
+            spectators.forEach((spectator, index) => {
+                setTimeout(() => {
+                    spectator.classList.add('celebrating');
+                    setTimeout(() => {
+                        spectator.classList.remove('celebrating');
+                    }, 1500);
+                }, index * 50);
+            });
+        }
+
+        function updateScore() {
+            document.getElementById('playerScore').textContent = gameState.playerScore;
+            document.getElementById('opponentScore').textContent = gameState.opponentScore;
+        }
+
+        function updatePositions() {
+            // Side-view: X = horizontal, Y = height, Z = depth
+            // Visual rendering: X = left/right, top = groundY - Y (inverted for screen coords)
+            // Z-index for depth layering
+
+            // Update ball position with rotation
+            ball.style.left = ballState.x + 'px';
+            ball.style.bottom = (courtHeight * 0.3 + ballState.y) + 'px';
+            ball.style.zIndex = Math.floor(ballState.z);
+            ball.style.transform = `rotate(${ballState.rotation}deg)`;
+
+            // Ball shadow on ground
+            const shadowScale = Math.max(0.3, 1 - (ballState.y / 200));
+            ballShadow.style.left = ballState.x + 'px';
+            ballShadow.style.bottom = (courtHeight * 0.3) + 'px';
+            ballShadow.style.transform = `scale(${shadowScale})`;
+            ballShadow.style.opacity = shadowScale * 0.5;
+            ballShadow.style.zIndex = Math.floor(ballState.z) - 1;
+
+            // Update player positions
+            userPlayer.style.left = playerState.x + 'px';
+            userPlayer.style.bottom = (courtHeight * 0.3 + playerState.y) + 'px';
+            userPlayer.style.zIndex = Math.floor(playerState.z);
+
+            player2.style.left = player2State.x + 'px';
+            player2.style.bottom = (courtHeight * 0.3 + player2State.y) + 'px';
+            player2.style.zIndex = Math.floor(player2State.z);
+
+            player3.style.left = player3State.x + 'px';
+            player3.style.bottom = (courtHeight * 0.3 + player3State.y) + 'px';
+            player3.style.zIndex = Math.floor(player3State.z);
+
+            cpuPlayer.style.left = cpuState.x + 'px';
+            cpuPlayer.style.bottom = (courtHeight * 0.3 + cpuState.y) + 'px';
+            cpuPlayer.style.zIndex = Math.floor(cpuState.z);
+
+            cpu2Player.style.left = cpu2State.x + 'px';
+            cpu2Player.style.bottom = (courtHeight * 0.3 + cpu2State.y) + 'px';
+            cpu2Player.style.zIndex = Math.floor(cpu2State.z);
+
+            cpu3Player.style.left = cpu3State.x + 'px';
+            cpu3Player.style.bottom = (courtHeight * 0.3 + cpu3State.y) + 'px';
+            cpu3Player.style.zIndex = Math.floor(cpu3State.z);
+
+            player4.style.left = player4State.x + 'px';
+            player4.style.bottom = (courtHeight * 0.3 + player4State.y) + 'px';
+            player4.style.zIndex = Math.floor(player4State.z);
+
+            cpu4Player.style.left = cpu4State.x + 'px';
+            cpu4Player.style.bottom = (courtHeight * 0.3 + cpu4State.y) + 'px';
+            cpu4Player.style.zIndex = Math.floor(cpu4State.z);
+        }
+
+        function endGame() {
+            gameState.gameOver = true;
+            const modal = document.getElementById('gameOverModal');
+            const title = document.getElementById('gameOverTitle');
+            const message = document.getElementById('gameOverMessage');
+            const finalScore = document.getElementById('finalScore');
+
+            if (gameState.playerScore > gameState.opponentScore) {
+                title.textContent = '🏆 VICTORY! 🏆';
+                message.textContent = 'You won the championship!';
+                // Make entire crowd celebrate
+                makeCrowdCheer('left');
+                setTimeout(() => makeCrowdCheer('right'), 300);
+            } else {
+                title.textContent = '😔 DEFEAT';
+                message.textContent = 'Better luck next time!';
+                makeCrowdCheer('right');
+            }
+
+            finalScore.textContent = `Final Score: ${gameState.playerScore} - ${gameState.opponentScore}`;
+            modal.classList.add('show');
+        }
+
+        function startGame(mode) {
+            gameState.gameMode = mode;
+            document.getElementById('gameModeModal').style.display = 'none';
+            resetBall();
+        }
+
+        function restartGame() {
+            // Show game mode selection again
+            document.getElementById('gameOverModal').classList.remove('show');
+            document.getElementById('gameModeModal').style.display = 'flex';
+
+            gameState = {
+                playerScore: 0,
+                opponentScore: 0,
+                serving: 'player',
+                ballInPlay: false,
+                gameOver: false,
+                lastHitBy: null,
+                lastHitter: null,
+                teammateDifficulty: gameState.teammateDifficulty || 'medium',
+                opponentDifficulty: gameState.opponentDifficulty || 'medium',
+                touchCount: 0,
+                currentSide: null,
+                playerTeamServer: gameState.playerTeamServer || 'user',
+                gameMode: null
+            };
+
+            playerState.x = 200;
+            playerState.y = 0;
+            playerState.z = 250;
+            player2State.x = 250;
+            player2State.y = 0;
+            player2State.z = 200;
+            player3State.x = 225;
+            player3State.y = 0;
+            player3State.z = 225;
+            cpuState.x = 800;
+            cpuState.y = 0;
+            cpuState.z = 250;
+            cpu2State.x = 750;
+            cpu2State.y = 0;
+            cpu2State.z = 200;
+            cpu3State.x = 775;
+            cpu3State.y = 0;
+            cpu3State.z = 225;
+            player4State.x = 200;
+            player4State.y = 0;
+            player4State.z = 175;
+            cpu4State.x = 800;
+            cpu4State.y = 0;
+            cpu4State.z = 175;
+
+            updateScore();
+            // Don't reset ball yet - wait for mode selection
+            // Game Over modal already hidden above, mode selection modal now showing
+        }
+
+        // Start game
+        init();
+    </script>
+</body>
+</html>

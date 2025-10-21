@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏸 Badminton Championship 🏸</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(180deg, #87CEEB 0%, #98D8E8 50%, #8FBC8F 100%);
+            background-attachment: fixed;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-bottom: 3px solid rgba(255, 255, 255, 0.5);
+        }
+
+        #header h1 {
+            font-size: 42px;
+            color: #fff;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+        }
+
+        #scoreboard {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .team-score {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 35px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .team-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .team-score.player {
+            border: 4px solid #2E8B57;
+        }
+
+        .team-score.opponent {
+            border: 4px solid #DC143C;
+        }
+
+        .score {
+            font-size: 56px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .serving {
+            color: #FFD700;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        #gameContainer {
+            flex: 1;
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        #court {
+            position: relative;
+            width: 100%;
+            height: 550px;
+            /* More realistic indoor court colors */
+            background:
+                linear-gradient(180deg,
+                    rgba(135, 206, 235, 0.3) 0%,
+                    rgba(135, 206, 235, 0.1) 65%,
+                    transparent 65%
+                ),
+                linear-gradient(180deg,
+                    #4A90E2 0%,
+                    #5FA3E8 30%,
+                    #87CEEB 65%,
+                    #1B5E20 65%,
+                    #2E7D32 80%,
+                    #388E3C 100%
+                );
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            overflow: hidden;
+            box-shadow: inset 0 -10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Court lines */
+        .court-line {
+            position: absolute;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Ground line */
+        .baseline {
+            bottom: 35%;
+            left: 0;
+            width: 100%;
+            height: 3px;
+        }
+
+        /* Sidelines */
+        .sideline {
+            width: 3px;
+            height: 65%;
+            bottom: 0;
+        }
+
+        .sideline.left {
+            left: 12%;
+        }
+
+        .sideline.right {
+            right: 12%;
+        }
+
+        /* Service lines */
+        .service-line {
+            position: absolute;
+            width: 3px;
+            height: 65%;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .service-line.left {
+            left: calc(12% + 120px);
+        }
+
+        .service-line.right {
+            right: calc(12% + 120px);
+        }
+
+        /* Net */
+        #net {
+            position: absolute;
+            left: 50%;
+            bottom: 35%;
+            width: 4px;
+            height: 18%;
+            background: white;
+            transform: translateX(-50%);
+            z-index: 5;
+        }
+
+        #netTop {
+            position: absolute;
+            left: 50%;
+            bottom: 53%;
+            width: 12px;
+            height: 12px;
+            background: #333;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            z-index: 6;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        #netMesh {
+            position: absolute;
+            left: 50%;
+            bottom: 35%;
+            width: 2px;
+            height: 18%;
+            transform: translateX(-50%);
+            z-index: 4;
+            opacity: 0.3;
+            background-image:
+                repeating-linear-gradient(0deg, white, white 1px, transparent 1px, transparent 6px),
+                repeating-linear-gradient(90deg, white, white 1px, transparent 1px, transparent 6px);
+        }
+
+        /* Shuttlecock */
+        #shuttlecock {
+            position: absolute;
+            width: 30px;
+            height: 40px;
+            z-index: 10;
+            transition: all 0.05s linear;
+        }
+
+        /* Shuttlecock cork (bottom) */
+        .shuttle-cork {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle at 40% 40%, #fff, #e0e0e0);
+            border-radius: 50%;
+            border: 2px solid #999;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Shuttlecock feathers (top) */
+        .shuttle-feathers {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 25px solid rgba(255, 255, 255, 0.9);
+            filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.2));
+        }
+
+        /* Feather details */
+        .shuttle-feathers::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: -15px;
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 17px solid rgba(240, 240, 240, 0.7);
+        }
+
+        #shuttleShadow {
+            position: absolute;
+            width: 30px;
+            height: 12px;
+            background: radial-gradient(ellipse, rgba(0, 0, 0, 0.3), transparent);
+            border-radius: 50%;
+            z-index: 3;
+            transition: all 0.05s linear;
+        }
+
+        /* Players */
+        .player {
+            position: absolute;
+            width: 50px;
+            height: 90px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 8;
+            transition: all 0.15s;
+        }
+
+        .player-head {
+            width: 28px;
+            height: 28px;
+            background: #FFD4A3;
+            border-radius: 50%;
+            border: 2px solid #333;
+            margin-bottom: 4px;
+        }
+
+        .player-body {
+            width: 35px;
+            height: 45px;
+            border-radius: 5px;
+            margin-bottom: 3px;
+        }
+
+        .player.user .player-body {
+            background: linear-gradient(135deg, #2E8B57, #3CB371);
+            border: 2px solid #fff;
+        }
+
+        .player.cpu .player-body {
+            background: linear-gradient(135deg, #DC143C, #FF6347);
+            border: 2px solid #fff;
+        }
+
+        /* Racket */
+        .racket {
+            position: absolute;
+            width: 25px;
+            height: 35px;
+            top: 30px;
+            z-index: 9;
+        }
+
+        .racket-head {
+            width: 20px;
+            height: 25px;
+            border: 3px solid #8B4513;
+            border-radius: 50%;
+            background: rgba(135, 206, 235, 0.2);
+            position: relative;
+        }
+
+        /* Racket strings */
+        .racket-head::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image:
+                repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.4) 3px, rgba(255,255,255,0.4) 4px),
+                repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(255,255,255,0.4) 3px, rgba(255,255,255,0.4) 4px);
+        }
+
+        .racket-handle {
+            width: 4px;
+            height: 15px;
+            background: #8B4513;
+            margin: 0 auto;
+            border-radius: 2px;
+        }
+
+        .player.user .racket {
+            right: -18px;
+        }
+
+        .player.cpu .racket {
+            left: -18px;
+        }
+
+        .player-shadow {
+            position: absolute;
+            width: 45px;
+            height: 12px;
+            background: radial-gradient(ellipse, rgba(0, 0, 0, 0.3), transparent);
+            border-radius: 50%;
+            bottom: -8px;
+        }
+
+        /* Power meter */
+        #powerMeter {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 20;
+            display: none;
+        }
+
+        #powerMeter.active {
+            display: block;
+        }
+
+        #powerBarContainer {
+            width: 100%;
+            height: 25px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        #powerBar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #FFD700, #FF6347);
+            transition: width 0.05s linear;
+            border-radius: 12px;
+        }
+
+        .power-label {
+            color: white;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        /* Controls */
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            z-index: 20;
+            min-width: 200px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        #controls.hidden {
+            transform: translateX(-120%);
+        }
+
+        #controls h3 {
+            margin-bottom: 12px;
+            color: #2E8B57;
+            border-bottom: 2px solid #2E8B57;
+            padding-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #closeControlsBtn {
+            background: #DC143C;
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        #closeControlsBtn:hover {
+            background: #FF6347;
+            transform: rotate(90deg);
+        }
+
+        #toggleControlsBtn {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #2E8B57, #3CB371);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 19;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        #toggleControlsBtn:hover {
+            background: linear-gradient(135deg, #3CB371, #2E8B57);
+            transform: scale(1.1);
+        }
+
+        #toggleControlsBtn.visible {
+            display: flex;
+        }
+
+        .control-row {
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .control-label {
+            font-weight: bold;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .control-key {
+            background: #2E8B57;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 13px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        #difficultySelect {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            border: 2px solid #2E8B57;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+
+        #restartBtn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 12px;
+            background: linear-gradient(135deg, #2E8B57, #3CB371);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        #restartBtn:hover {
+            background: linear-gradient(135deg, #3CB371, #2E8B57);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        #restartBtn:active {
+            transform: translateY(0);
+        }
+
+        /* Message display */
+        #messageDisplay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 25px 45px;
+            border-radius: 20px;
+            font-size: 32px;
+            font-weight: bold;
+            z-index: 30;
+            display: none;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            border: 3px solid #FFD700;
+        }
+
+        #messageDisplay.show {
+            display: block;
+            animation: popIn 0.3s ease-out;
+        }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        /* Hit effect */
+        @keyframes hitEffect {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(-15deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        @keyframes smashEffect {
+            0% { transform: scale(1) rotate(0deg); }
+            30% { transform: scale(1.3) rotate(-25deg); }
+            60% { transform: scale(1.1) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        @keyframes playerMoving {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        .player.hitting .racket {
+            animation: hitEffect 0.3s ease-out;
+        }
+
+        .player.smashing .racket {
+            animation: smashEffect 0.4s ease-out;
+        }
+
+        .player.moving {
+            animation: playerMoving 0.3s ease-in-out infinite;
+        }
+
+        /* Shuttlecock trail effect */
+        @keyframes shuttleTrail {
+            0% { opacity: 0.6; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.5); }
+        }
+
+        .shuttle-trail {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.6), transparent);
+            pointer-events: none;
+            z-index: 9;
+            animation: shuttleTrail 0.4s ease-out forwards;
+        }
+
+        /* Info panel */
+        #infoPanel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 20;
+            min-width: 150px;
+        }
+
+        .info-item {
+            margin: 6px 0;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #2E8B57;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>🏸 Badminton Championship 🏸</h1>
+        <div id="scoreboard">
+            <div class="team-score player">
+                <div class="team-name">YOU</div>
+                <div class="score" id="playerScore">0</div>
+                <div class="serving" id="playerServing"></div>
+            </div>
+            <div class="team-score opponent">
+                <div class="team-name">OPPONENT</div>
+                <div class="score" id="opponentScore">0</div>
+                <div class="serving" id="opponentServing"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="gameContainer">
+        <div id="court">
+            <!-- Court lines -->
+            <div class="court-line baseline"></div>
+            <div class="court-line sideline left"></div>
+            <div class="court-line sideline right"></div>
+            <div class="court-line service-line left"></div>
+            <div class="court-line service-line right"></div>
+
+            <!-- Net -->
+            <div id="net"></div>
+            <div id="netTop"></div>
+            <div id="netMesh"></div>
+
+            <!-- Shuttlecock -->
+            <div id="shuttlecock">
+                <div class="shuttle-feathers"></div>
+                <div class="shuttle-cork"></div>
+            </div>
+            <div id="shuttleShadow"></div>
+
+            <!-- Players -->
+            <div id="player" class="player user">
+                <div class="player-head"></div>
+                <div class="player-body"></div>
+                <div class="racket">
+                    <div class="racket-head"></div>
+                    <div class="racket-handle"></div>
+                </div>
+                <div class="player-shadow"></div>
+            </div>
+
+            <div id="cpu" class="player cpu">
+                <div class="player-head"></div>
+                <div class="player-body"></div>
+                <div class="racket">
+                    <div class="racket-head"></div>
+                    <div class="racket-handle"></div>
+                </div>
+                <div class="player-shadow"></div>
+            </div>
+        </div>
+
+        <!-- Power meter -->
+        <div id="powerMeter">
+            <div class="power-label">SHOT POWER</div>
+            <div id="powerBarContainer">
+                <div id="powerBar"></div>
+            </div>
+        </div>
+
+        <!-- Message display -->
+        <div id="messageDisplay"></div>
+
+        <!-- Info panel -->
+        <div id="infoPanel">
+            <div class="info-item">
+                <span class="info-label">Rally:</span> <span id="rallyCount">0</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Game:</span> <span id="gameStatus">In Progress</span>
+            </div>
+        </div>
+
+        <!-- Toggle button for controls -->
+        <button id="toggleControlsBtn">🎮</button>
+
+        <!-- Controls -->
+        <div id="controls">
+            <h3>
+                <span>🎮 Controls</span>
+                <button id="closeControlsBtn">×</button>
+            </h3>
+            <div class="control-row">
+                <span class="control-label">Move Left</span>
+                <span class="control-key">A</span>
+            </div>
+            <div class="control-row">
+                <span class="control-label">Move Right</span>
+                <span class="control-key">D</span>
+            </div>
+            <div class="control-row">
+                <span class="control-label">Move Up</span>
+                <span class="control-key">W</span>
+            </div>
+            <div class="control-row">
+                <span class="control-label">Move Down</span>
+                <span class="control-key">S</span>
+            </div>
+            <div class="control-row">
+                <span class="control-label">Hit/Serve</span>
+                <span class="control-key">SPACE</span>
+            </div>
+            <div class="control-row">
+                <span class="control-label">Smash</span>
+                <span class="control-key">E</span>
+            </div>
+            <div class="control-row">
+                <span class="control-label">Drop Shot</span>
+                <span class="control-key">Q</span>
+            </div>
+            <select id="difficultySelect">
+                <option value="easy">Easy</option>
+                <option value="medium" selected>Medium</option>
+                <option value="hard">Hard</option>
+            </select>
+            <button id="restartBtn">🔄 Restart Game</button>
+        </div>
+    </div>
+
+    <script>
+        // Game elements
+        const court = document.getElementById('court');
+        const shuttlecock = document.getElementById('shuttlecock');
+        const shuttleShadow = document.getElementById('shuttleShadow');
+        const playerElement = document.getElementById('player');
+        const cpuElement = document.getElementById('cpu');
+        const powerMeter = document.getElementById('powerMeter');
+        const powerBar = document.getElementById('powerBar');
+        const messageDisplay = document.getElementById('messageDisplay');
+        const playerScoreEl = document.getElementById('playerScore');
+        const opponentScoreEl = document.getElementById('opponentScore');
+        const playerServingEl = document.getElementById('playerServing');
+        const opponentServingEl = document.getElementById('opponentServing');
+        const rallyCountEl = document.getElementById('rallyCount');
+        const gameStatusEl = document.getElementById('gameStatus');
+        const restartBtn = document.getElementById('restartBtn');
+        const difficultySelect = document.getElementById('difficultySelect');
+        const controlsPanel = document.getElementById('controls');
+        const closeControlsBtn = document.getElementById('closeControlsBtn');
+        const toggleControlsBtn = document.getElementById('toggleControlsBtn');
+
+        // Court dimensions
+        const courtWidth = court.offsetWidth;
+        const courtHeight = court.offsetHeight;
+        const netX = courtWidth / 2;
+        const groundY = courtHeight * 0.65;
+        const netHeight = courtHeight * 0.18;
+
+        // Boundaries
+        const leftBoundary = courtWidth * 0.12;
+        const rightBoundary = courtWidth * 0.88;
+        const playerBaselineX = leftBoundary + 80;
+        const cpuBaselineX = rightBoundary - 80;
+
+        // Game state
+        let gameState = {
+            playerScore: 0,
+            opponentScore: 0,
+            serving: 'player', // 'player' or 'opponent'
+            rallyCount: 0,
+            gameOver: false,
+            matchPoint: false
+        };
+
+        // Shuttlecock state - Enhanced realistic physics
+        let shuttleState = {
+            x: playerBaselineX,
+            y: groundY - 20,
+            z: 0, // depth
+            vx: 0,
+            vy: 0,
+            vz: 0,
+            rotation: 0,
+            inPlay: false,
+            gravity: 0.7, // Realistic gravity
+            drag: 0.97, // Balanced air resistance
+            scored: false,
+            spinRate: 0, // Shuttlecock rotation
+            trajectoryType: 'normal', // 'serve', 'clear', 'drop', 'smash'
+            lastHitter: null // Track who last hit the shuttle ('player' or 'cpu')
+        };
+
+        // Player state
+        let playerState = {
+            x: playerBaselineX,
+            y: groundY,
+            z: 0,
+            speed: 10,
+            shotType: 'normal',
+            canHit: true
+        };
+
+        // CPU state
+        let cpuState = {
+            x: cpuBaselineX,
+            y: groundY,
+            z: 0,
+            speed: 6,
+            reactionTime: 0,
+            targetX: cpuBaselineX,
+            difficulty: 'medium'
+        };
+
+        // Input tracking
+        let keys = {};
+        let chargingPower = false;
+        let powerLevel = 0;
+
+        // Difficulty settings
+        function getDifficultySettings(difficulty) {
+            const settings = {
+                easy: { speed: 5, reactionTime: 15, accuracy: 0.6, smashChance: 0.1 },
+                medium: { speed: 7, reactionTime: 10, accuracy: 0.8, smashChance: 0.3 },
+                hard: { speed: 9, reactionTime: 5, accuracy: 0.95, smashChance: 0.5 }
+            };
+            return settings[difficulty] || settings.medium;
+        }
+
+        // Event listeners
+        document.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+
+            if (e.key === ' ' && !chargingPower) {
+                e.preventDefault();
+                if (!shuttleState.inPlay && gameState.serving === 'player') {
+                    // Start charging power for serve
+                    startChargingPower();
+                } else if (canPlayerHit() && playerState.canHit) {
+                    // Start charging power for normal hit
+                    startChargingPower();
+                }
+            }
+
+            if (e.key.toLowerCase() === 'e' && canPlayerHit() && shuttleState.inPlay) {
+                e.preventDefault();
+                playerState.shotType = 'smash';
+                hitShuttle('player');
+            }
+
+            if (e.key.toLowerCase() === 'q' && canPlayerHit() && shuttleState.inPlay) {
+                e.preventDefault();
+                playerState.shotType = 'drop';
+                hitShuttle('player');
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+
+            if (e.key === ' ' && chargingPower) {
+                e.preventDefault();
+                // Release for serve or normal shot
+                if (!shuttleState.inPlay && gameState.serving === 'player') {
+                    serve();
+                } else {
+                    releaseShot();
+                }
+            }
+        });
+
+        restartBtn.addEventListener('click', restartGame);
+        difficultySelect.addEventListener('change', (e) => {
+            cpuState.difficulty = e.target.value;
+            const settings = getDifficultySettings(cpuState.difficulty);
+            cpuState.speed = settings.speed;
+        });
+
+        // Controls panel toggle functionality
+        closeControlsBtn.addEventListener('click', () => {
+            controlsPanel.classList.add('hidden');
+            toggleControlsBtn.classList.add('visible');
+        });
+
+        toggleControlsBtn.addEventListener('click', () => {
+            controlsPanel.classList.remove('hidden');
+            toggleControlsBtn.classList.remove('visible');
+        });
+
+        // Initialize game
+        function init() {
+            resetPositions();
+            updateScore();
+            updateServeIndicator();
+            gameLoop();
+        }
+
+        function resetPositions() {
+            if (gameState.serving === 'player') {
+                playerState.x = playerBaselineX;
+                shuttleState.x = playerBaselineX;
+                shuttleState.y = groundY - 20;
+            } else {
+                cpuState.x = cpuBaselineX;
+                shuttleState.x = cpuBaselineX;
+                shuttleState.y = groundY - 20;
+            }
+            shuttleState.vx = 0;
+            shuttleState.vy = 0;
+            shuttleState.vz = 0;
+            shuttleState.inPlay = false;
+            shuttleState.scored = false;
+            playerState.canHit = true;
+        }
+
+        function serve() {
+            if (gameState.serving !== 'player') return;
+
+            // Use power level for serve strength (20-100 range)
+            const servePower = Math.max(30, powerLevel) / 100;
+
+            // Ensure serves always clear the net with proper arc
+            // Higher velocities to compensate for strong drag
+            const baseHorizontal = 15; // Much higher base speed
+            const baseVertical = 18; // Much higher arc
+            const powerMultiplier = 1 + servePower * 0.8; // 1.0x to 1.8x multiplier
+
+            shuttleState.vx = baseHorizontal * powerMultiplier; // Range: 15-27
+            shuttleState.vy = -(baseVertical * powerMultiplier); // Range: -18 to -32 (strong upward)
+            shuttleState.vz = 0;
+            shuttleState.inPlay = true;
+            shuttleState.trajectoryType = 'serve';
+            shuttleState.lastHitter = 'player'; // Track that player hit it
+            playerState.canHit = false;
+            gameState.rallyCount++;
+            updateRallyCount();
+
+            // Show power level in message
+            const powerPercent = Math.round(servePower * 100);
+            if (powerPercent < 40) {
+                showMessage('SOFT SERVE! 🏸', 600);
+            } else if (powerPercent < 70) {
+                showMessage('SERVE! 🏸', 600);
+            } else {
+                showMessage('POWER SERVE! 🏸💪', 600);
+            }
+
+            playerElement.classList.add('hitting');
+            setTimeout(() => playerElement.classList.remove('hitting'), 300);
+
+            // Reset power meter
+            chargingPower = false;
+            powerMeter.classList.remove('active');
+            powerLevel = 0;
+        }
+
+        function cpuServe() {
+            if (gameState.serving !== 'opponent') return;
+
+            const settings = getDifficultySettings(cpuState.difficulty);
+            const targetX = leftBoundary + 100 + Math.random() * 200;
+
+            shuttleState.vx = -(15 + Math.random() * 6);
+            shuttleState.vy = -(18 + Math.random() * 5);
+            shuttleState.vz = 0;
+            shuttleState.inPlay = true;
+            shuttleState.lastHitter = 'cpu'; // Track that CPU hit it
+            gameState.rallyCount++;
+            updateRallyCount();
+            showMessage('OPPONENT SERVES! 🏸', 600);
+            cpuElement.classList.add('hitting');
+            setTimeout(() => cpuElement.classList.remove('hitting'), 300);
+        }
+
+        function startChargingPower() {
+            chargingPower = true;
+            powerLevel = 0;
+            powerMeter.classList.add('active');
+            playerState.shotType = 'normal';
+        }
+
+        function releaseShot() {
+            if (!chargingPower) return;
+            chargingPower = false;
+            powerMeter.classList.remove('active');
+            hitShuttle('player');
+        }
+
+        function canPlayerHit() {
+            if (!shuttleState.inPlay || shuttleState.scored) return false;
+
+            const dist = Math.sqrt(
+                Math.pow(shuttleState.x - playerState.x, 2) +
+                Math.pow(shuttleState.y - playerState.y, 2)
+            );
+
+            return dist < 60 && shuttleState.x < netX && shuttleState.y < groundY;
+        }
+
+        function canCPUHit() {
+            if (!shuttleState.inPlay || shuttleState.scored) return false;
+
+            const dist = Math.sqrt(
+                Math.pow(shuttleState.x - cpuState.x, 2) +
+                Math.pow(shuttleState.y - cpuState.y, 2)
+            );
+
+            return dist < 60 && shuttleState.x > netX && shuttleState.y < groundY;
+        }
+
+        function hitShuttle(hitter) {
+            if (hitter === 'player') {
+                const shotType = playerState.shotType;
+
+                if (shotType === 'smash') {
+                    // Powerful downward smash - realistic physics
+                    shuttleState.vx = 20;
+                    shuttleState.vy = -5; // Strong downward angle
+                    shuttleState.vz = 0;
+                    shuttleState.trajectoryType = 'smash';
+                    shuttleState.lastHitter = 'player'; // Track player hit
+                    showMessage('SMASH! 💥', 600);
+                    playerElement.classList.add('smashing');
+                    setTimeout(() => playerElement.classList.remove('smashing'), 400);
+                } else if (shotType === 'drop') {
+                    // Soft drop shot - high arc, lands close to net
+                    shuttleState.vx = 9;
+                    shuttleState.vy = -14;
+                    shuttleState.vz = 0;
+                    shuttleState.trajectoryType = 'drop';
+                    shuttleState.lastHitter = 'player'; // Track player hit
+                    showMessage('DROP SHOT! 🎯', 600);
+                    playerElement.classList.add('hitting');
+                    setTimeout(() => playerElement.classList.remove('hitting'), 300);
+                } else {
+                    // Normal shot with power - clear to back of court
+                    const power = Math.max(20, powerLevel) / 10;
+                    shuttleState.vx = 11 + power * 2;
+                    shuttleState.vy = -(12 + power * 1.8);
+                    shuttleState.vz = 0;
+                    shuttleState.trajectoryType = 'clear';
+                    shuttleState.lastHitter = 'player'; // Track player hit
+                    playerElement.classList.add('hitting');
+                    setTimeout(() => playerElement.classList.remove('hitting'), 300);
+                }
+
+                playerState.canHit = false;
+                playerState.shotType = 'normal';
+
+            } else if (hitter === 'cpu') {
+                const settings = getDifficultySettings(cpuState.difficulty);
+                const shouldSmash = Math.random() < settings.smashChance && shuttleState.y < groundY - 100;
+
+                if (shouldSmash) {
+                    // CPU smash
+                    shuttleState.vx = -(15 + Math.random() * 3);
+                    shuttleState.vy = -(2 + Math.random() * 2);
+                    shuttleState.lastHitter = 'cpu'; // Track CPU hit
+                    showMessage('CPU SMASH! ⚡', 600);
+                } else {
+                    // Normal return
+                    const targetX = leftBoundary + Math.random() * (netX - leftBoundary - 100);
+                    const angle = Math.atan2(groundY - shuttleState.y, targetX - shuttleState.x);
+                    const speed = 12 + Math.random() * 3;
+
+                    shuttleState.vx = Math.cos(angle) * speed * settings.accuracy;
+                    shuttleState.vy = Math.sin(angle) * speed - 8;
+                    shuttleState.vz = 0;
+                    shuttleState.lastHitter = 'cpu'; // Track CPU hit
+                }
+
+                cpuElement.classList.add('hitting');
+                setTimeout(() => cpuElement.classList.remove('hitting'), 300);
+            }
+
+            shuttleState.rotation = 0;
+        }
+
+        function updatePlayer() {
+            let isMoving = false;
+
+            // Move left/right
+            if (keys['a'] && playerState.x > leftBoundary) {
+                playerState.x -= playerState.speed;
+                isMoving = true;
+            }
+            if (keys['d'] && playerState.x < netX - 50) {
+                playerState.x += playerState.speed;
+                isMoving = true;
+            }
+
+            // Move up/down (depth)
+            if (keys['w']) {
+                playerState.z = Math.max(-80, playerState.z - 5);
+                isMoving = true;
+            }
+            if (keys['s']) {
+                playerState.z = Math.min(80, playerState.z + 5);
+                isMoving = true;
+            }
+
+            // Add/remove movement animation
+            if (isMoving) {
+                playerElement.classList.add('moving');
+            } else {
+                playerElement.classList.remove('moving');
+            }
+        }
+
+        function updateCPU() {
+            if (!shuttleState.inPlay) {
+                // Return to baseline when not in play
+                cpuState.targetX = cpuBaselineX;
+            } else if (shuttleState.vx > 0) {
+                // Shuttle coming toward CPU
+                const settings = getDifficultySettings(cpuState.difficulty);
+
+                // Predict where shuttle will land
+                let predictX = shuttleState.x;
+                let predictY = shuttleState.y;
+                let predictVX = shuttleState.vx;
+                let predictVY = shuttleState.vy;
+
+                for (let i = 0; i < settings.reactionTime; i++) {
+                    predictVY += shuttleState.gravity;
+                    predictX += predictVX;
+                    predictY += predictVY;
+                    predictVX *= shuttleState.drag;
+                    predictVY *= shuttleState.drag;
+
+                    if (predictY >= groundY || predictX > netX) break;
+                }
+
+                cpuState.targetX = predictX + (Math.random() - 0.5) * (100 - settings.accuracy * 100);
+                cpuState.targetX = Math.max(netX + 50, Math.min(rightBoundary, cpuState.targetX));
+            }
+
+            // Move toward target
+            const diff = cpuState.targetX - cpuState.x;
+            if (Math.abs(diff) > 5) {
+                cpuState.x += Math.sign(diff) * Math.min(cpuState.speed, Math.abs(diff));
+            }
+
+            // Try to hit
+            if (canCPUHit()) {
+                hitShuttle('cpu');
+            }
+        }
+
+        function updateShuttle() {
+            if (!shuttleState.inPlay) return;
+
+            // Realistic shuttlecock physics - shuttlecocks decelerate rapidly due to feathers
+            const speed = Math.sqrt(shuttleState.vx * shuttleState.vx + shuttleState.vy * shuttleState.vy);
+
+            // Apply gravity (stronger as shuttle slows down - shuttles drop sharply)
+            const gravityMultiplier = 1 + (1 - Math.min(speed / 25, 1)) * 0.3;
+            shuttleState.vy += shuttleState.gravity * gravityMultiplier;
+
+            // Realistic air drag - balanced for better gameplay
+            // Shuttlecocks have high drag due to feather design
+            const horizontalDrag = 0.97; // Moderate horizontal drag
+            const verticalDrag = 0.98; // Less vertical drag
+
+            shuttleState.vx *= horizontalDrag;
+            shuttleState.vy *= verticalDrag;
+
+            // Update position
+            shuttleState.x += shuttleState.vx;
+            shuttleState.y += shuttleState.vy;
+
+            // Realistic rotation - shuttles rotate cork-forward
+            shuttleState.spinRate = Math.atan2(shuttleState.vy, Math.abs(shuttleState.vx)) * 10;
+            shuttleState.rotation += shuttleState.spinRate;
+
+            // Check net collision - score if shuttle passes through net height
+            if (Math.abs(shuttleState.x - netX) < 15) {
+                // Check if shuttle is at or below net height
+                if (shuttleState.y > groundY - netHeight && shuttleState.y < groundY - netHeight + 20) {
+                    // Shuttle hits the net - award point to opposite side
+                    if (!shuttleState.scored) {
+                        shuttleState.scored = true;
+                        shuttleState.inPlay = false;
+
+                        // Award point based on who hit it last
+                        if (shuttleState.lastHitter === 'player') {
+                            // Player hit it into the net - opponent scores
+                            gameState.opponentScore++;
+                            gameState.serving = 'opponent';
+                            showMessage('NET FAULT! OPPONENT SCORES! 🥅', 1500);
+                        } else if (shuttleState.lastHitter === 'cpu') {
+                            // CPU hit it into the net - player scores
+                            gameState.playerScore++;
+                            gameState.serving = 'player';
+                            showMessage('NET FAULT! YOU SCORE! 🥅', 1500);
+                        }
+
+                        updateScore();
+                        checkGameOver();
+
+                        if (!gameState.gameOver) {
+                            setTimeout(() => {
+                                resetPositions();
+                                updateServeIndicator();
+                                if (gameState.serving === 'opponent') {
+                                    setTimeout(cpuServe, 1000);
+                                }
+                            }, 1500);
+                        }
+                    }
+                }
+            }
+
+            // Check ground collision
+            if (shuttleState.y >= groundY) {
+                shuttleState.y = groundY;
+
+                // Shuttlecocks have very little bounce
+                if (Math.abs(shuttleState.vy) > 2) {
+                    shuttleState.vy = -Math.abs(shuttleState.vy) * 0.15; // Tiny bounce
+                    shuttleState.vx *= 0.5; // Lose horizontal speed on bounce
+                } else {
+                    shuttleState.vy = 0;
+                    shuttleState.vx *= 0.7;
+                }
+
+                // Check if shuttle landed in bounds
+                if (!shuttleState.scored && Math.abs(shuttleState.vx) < 0.5) {
+                    checkScore();
+                }
+            }
+
+            // Check out of bounds (sidelines)
+            if (shuttleState.x < leftBoundary || shuttleState.x > rightBoundary) {
+                if (!shuttleState.scored) {
+                    checkScore();
+                }
+            }
+
+            // Allow player to hit again when shuttle passes the net
+            if (shuttleState.x > netX && !playerState.canHit) {
+                playerState.canHit = false;
+            } else if (shuttleState.x < netX) {
+                playerState.canHit = true;
+            }
+        }
+
+        function checkScore() {
+            shuttleState.scored = true;
+            shuttleState.inPlay = false;
+
+            // Determine who scored
+            if (shuttleState.x < netX) {
+                // Shuttle on player's side - opponent scores
+                gameState.opponentScore++;
+                gameState.serving = 'opponent';
+                showMessage('OPPONENT SCORES! 🔴', 1500);
+            } else {
+                // Shuttle on opponent's side - player scores
+                gameState.playerScore++;
+                gameState.serving = 'player';
+                showMessage('YOU SCORE! 🟢', 1500);
+            }
+
+            updateScore();
+            checkGameOver();
+
+            if (!gameState.gameOver) {
+                setTimeout(() => {
+                    resetPositions();
+                    updateServeIndicator();
+                    if (gameState.serving === 'opponent') {
+                        setTimeout(cpuServe, 1000);
+                    }
+                }, 1500);
+            }
+        }
+
+        function checkGameOver() {
+            const winScore = 21;
+            const minDiff = 2;
+
+            if (gameState.playerScore >= winScore || gameState.opponentScore >= winScore) {
+                if (Math.abs(gameState.playerScore - gameState.opponentScore) >= minDiff) {
+                    gameState.gameOver = true;
+
+                    if (gameState.playerScore > gameState.opponentScore) {
+                        showMessage('🎉 YOU WIN! 🎉', 5000);
+                        gameStatusEl.textContent = 'YOU WON!';
+                        gameStatusEl.style.color = '#2E8B57';
+                    } else {
+                        showMessage('😢 YOU LOSE! 😢', 5000);
+                        gameStatusEl.textContent = 'YOU LOST';
+                        gameStatusEl.style.color = '#DC143C';
+                    }
+                }
+            }
+        }
+
+        function updateScore() {
+            playerScoreEl.textContent = gameState.playerScore;
+            opponentScoreEl.textContent = gameState.opponentScore;
+        }
+
+        function updateServeIndicator() {
+            if (gameState.serving === 'player') {
+                playerServingEl.textContent = '🏸 SERVING';
+                opponentServingEl.textContent = '';
+            } else {
+                playerServingEl.textContent = '';
+                opponentServingEl.textContent = '🏸 SERVING';
+            }
+        }
+
+        function updateRallyCount() {
+            rallyCountEl.textContent = gameState.rallyCount;
+        }
+
+        function updatePositions() {
+            // Update player position
+            playerElement.style.left = (playerState.x - 25) + 'px';
+            playerElement.style.bottom = (courtHeight - playerState.y - 20) + 'px';
+            playerElement.style.transform = `scale(${1 + playerState.z / 300})`;
+            playerElement.style.zIndex = Math.floor(8 + playerState.z / 10);
+
+            // Update CPU position
+            cpuElement.style.left = (cpuState.x - 25) + 'px';
+            cpuElement.style.bottom = (courtHeight - cpuState.y - 20) + 'px';
+            cpuElement.style.transform = `scale(${1 + cpuState.z / 300})`;
+            cpuElement.style.zIndex = Math.floor(8 + cpuState.z / 10);
+
+            // Update shuttlecock position
+            shuttlecock.style.left = (shuttleState.x - 15) + 'px';
+            shuttlecock.style.bottom = (courtHeight - shuttleState.y - 40) + 'px';
+            shuttlecock.style.transform = `rotate(${shuttleState.rotation}deg) scale(${1 + shuttleState.z / 300})`;
+            shuttlecock.style.zIndex = Math.floor(10 + shuttleState.z / 10);
+
+            // Update shadow
+            const shadowSize = Math.max(20, 40 - (groundY - shuttleState.y) / 10);
+            shuttleShadow.style.left = (shuttleState.x - shadowSize / 2) + 'px';
+            shuttleShadow.style.bottom = (courtHeight - groundY) + 'px';
+            shuttleShadow.style.width = shadowSize + 'px';
+            shuttleShadow.style.opacity = Math.max(0.1, 0.3 - (groundY - shuttleState.y) / 500);
+        }
+
+        function showMessage(msg, duration) {
+            messageDisplay.textContent = msg;
+            messageDisplay.classList.add('show');
+            setTimeout(() => {
+                messageDisplay.classList.remove('show');
+            }, duration);
+        }
+
+        function restartGame() {
+            gameState = {
+                playerScore: 0,
+                opponentScore: 0,
+                serving: 'player',
+                rallyCount: 0,
+                gameOver: false,
+                matchPoint: false
+            };
+
+            resetPositions();
+            updateScore();
+            updateServeIndicator();
+            updateRallyCount();
+            gameStatusEl.textContent = 'In Progress';
+            gameStatusEl.style.color = '#333';
+            showMessage('NEW GAME! 🏸', 1000);
+        }
+
+        // Game loop
+        function gameLoop() {
+            if (!gameState.gameOver) {
+                updatePlayer();
+                updateCPU();
+                updateShuttle();
+                updatePositions();
+
+                if (chargingPower) {
+                    powerLevel = (powerLevel + 2) % 100;
+                    powerBar.style.width = powerLevel + '%';
+                }
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Start game
+        init();
+    </script>
+</body>
+</html>

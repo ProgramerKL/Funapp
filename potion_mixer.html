@@ -1,0 +1,2022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Potion Mixer 🧪</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #2d1b69 0%, #1a0f3d 100%);
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            position: relative;
+            padding: 20px 0;
+        }
+
+        /* Floating particles background */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-100px) translateX(50px); }
+            50% { transform: translateY(-50px) translateX(-50px); }
+            75% { transform: translateY(-150px) translateX(25px); }
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 95vw;
+            max-width: 1400px;
+            min-height: auto;
+            background: rgba(20, 10, 40, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8),
+                        inset 0 0 100px rgba(138, 43, 226, 0.1);
+            padding: 30px;
+            padding-bottom: 280px;
+            border: 3px solid rgba(138, 43, 226, 0.3);
+            margin-bottom: 20px;
+        }
+
+        #header {
+            text-align: center;
+            color: #FFD700;
+            margin-bottom: 30px;
+        }
+
+        #header h1 {
+            font-size: 48px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            margin-bottom: 10px;
+        }
+
+        #stats {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(138, 43, 226, 0.2);
+            border-radius: 15px;
+            position: relative;
+        }
+
+        #pauseButton {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #8a2be2, #6a1bb2);
+            color: white;
+            border: 3px solid #FFD700;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.5);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #pauseButton:hover {
+            background: linear-gradient(135deg, #9a3bf2, #7a2bc2);
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.7);
+        }
+
+        #pauseButton:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        #pauseOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        #pauseOverlay.active {
+            display: flex;
+        }
+
+        #pauseMenu {
+            background: linear-gradient(135deg, #2d1b69, #1a0f3d);
+            border: 5px solid #FFD700;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+        }
+
+        #pauseMenu h2 {
+            color: #FFD700;
+            font-size: 48px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+        }
+
+        #pauseMenu button {
+            background: linear-gradient(135deg, #8a2be2, #6a1bb2);
+            color: white;
+            border: 3px solid #FFD700;
+            border-radius: 15px;
+            padding: 15px 40px;
+            font-size: 24px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.5);
+        }
+
+        #pauseMenu button:hover {
+            background: linear-gradient(135deg, #9a3bf2, #7a2bc2);
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.7);
+        }
+
+        .stat {
+            text-align: center;
+            color: white;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .stat-label {
+            font-size: 16px;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        #gameArea {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        #ingredients {
+            background: rgba(100, 50, 150, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid rgba(138, 43, 226, 0.5);
+            max-height: 700px;
+            overflow-y: auto;
+        }
+
+        #ingredients h2 {
+            color: #FFD700;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .ingredient {
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.4), rgba(102, 126, 234, 0.4));
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: grab;
+            transition: all 0.3s;
+            user-select: none;
+        }
+
+        .ingredient:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(138, 43, 226, 0.6);
+        }
+
+        .ingredient:active {
+            cursor: grabbing;
+        }
+
+        .ingredient-icon {
+            font-size: 32px;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .ingredient-name {
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        #cauldron {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 10px;
+        }
+
+        #cauldronContainer {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle at center, rgba(50, 20, 80, 0.8), rgba(20, 10, 40, 0.9));
+            border: 5px solid #8a2be2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 50px rgba(138, 43, 226, 0.5),
+                        inset 0 0 50px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+
+        #cauldronLiquid {
+            width: 350px;
+            height: 350px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, #4a0080 0%, #2d004d 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.5s;
+        }
+
+        #cauldronContent {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .dropped-ingredient {
+            font-size: 48px;
+            margin: 5px;
+            animation: drop 0.5s ease-out;
+        }
+
+        @keyframes drop {
+            from {
+                transform: translateY(-200px) scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: 0;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: rise 3s infinite;
+        }
+
+        @keyframes rise {
+            0% {
+                bottom: 0;
+                opacity: 0;
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                bottom: 100%;
+                opacity: 0;
+            }
+        }
+
+        #brewButton {
+            padding: 20px 50px;
+            font-size: 24px;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.5);
+            transition: all 0.3s;
+        }
+
+        #brewButton:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(255, 107, 107, 0.8);
+        }
+
+        #brewButton:active {
+            transform: translateY(0);
+        }
+
+        #brewButton:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #recipes {
+            background: rgba(50, 100, 150, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid rgba(102, 126, 234, 0.5);
+            max-height: 700px;
+            overflow-y: auto;
+        }
+
+        #recipes h2 {
+            color: #FFD700;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .recipe {
+            background: rgba(102, 126, 234, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+
+        .recipe:hover {
+            background: rgba(102, 126, 234, 0.5);
+            transform: translateX(5px);
+        }
+
+        .recipe.discovered {
+            border-color: #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .recipe-name {
+            color: #FFD700;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .recipe-ingredients {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .recipe-effect {
+            color: #aaa;
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        .recipe.unknown .recipe-name,
+        .recipe.unknown .recipe-effect {
+            color: #666;
+        }
+
+        .recipe.unknown .recipe-ingredients {
+            filter: blur(5px);
+        }
+
+        #resultPopup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 50px;
+            border-radius: 20px;
+            border: 3px solid #FFD700;
+            z-index: 1000;
+            text-align: center;
+            min-width: 400px;
+            box-shadow: 0 0 100px rgba(255, 215, 0, 0.5);
+            transition: transform 0.3s;
+        }
+
+        #resultPopup.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        #resultPopup h2 {
+            color: #FFD700;
+            font-size: 36px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+        }
+
+        #resultPopup .potion-icon {
+            font-size: 100px;
+            margin: 20px 0;
+            animation: bounce 0.5s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-20px); }
+        }
+
+        #resultPopup p {
+            color: white;
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        #resultPopup button {
+            margin-top: 30px;
+            padding: 15px 40px;
+            font-size: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        #resultPopup button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        #clearButton {
+            padding: 10px 30px;
+            font-size: 16px;
+            background: rgba(255, 107, 107, 0.5);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+
+        #clearButton:hover {
+            background: rgba(255, 107, 107, 0.8);
+            transform: scale(1.05);
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(138, 43, 226, 0.6);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(138, 43, 226, 0.8);
+        }
+
+        /* Customer styles */
+        #customerArea {
+            position: fixed;
+            top: 50%;
+            right: -350px;
+            transform: translateY(-50%);
+            z-index: 100;
+            transition: right 0.5s ease-out;
+        }
+
+        #customerArea.show {
+            right: 20px;
+        }
+
+        @media (max-width: 1600px) {
+            #customerArea.show {
+                right: 10px;
+            }
+        }
+
+        .customer {
+            background: rgba(138, 43, 226, 0.4);
+            border: 3px solid rgba(255, 215, 0, 0.6);
+            border-radius: 20px;
+            padding: 25px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+        }
+
+        .customer-avatar {
+            font-size: 80px;
+            margin-bottom: 15px;
+            animation: bounce 1s infinite;
+        }
+
+        .customer-name {
+            color: #FFD700;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .customer-request {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .customer-wants {
+            color: white;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .customer-potion {
+            font-size: 48px;
+            margin: 10px 0;
+        }
+
+        .customer-timer {
+            color: #ff6b6b;
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .customer-payment {
+            color: #FFD700;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        #serveButton {
+            padding: 15px 40px;
+            font-size: 18px;
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+
+        #serveButton:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(78, 205, 196, 0.5);
+        }
+
+        #serveButton:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Inventory styles */
+        #inventory {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 10, 40, 0.95);
+            border: 3px solid rgba(138, 43, 226, 0.6);
+            border-radius: 15px;
+            padding: 20px;
+            min-width: 600px;
+            max-width: 800px;
+            box-shadow: 0 -5px 30px rgba(138, 43, 226, 0.4);
+            z-index: 50;
+        }
+
+        #inventory h3 {
+            color: #FFD700;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        #inventorySlots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .inventory-slot {
+            background: rgba(138, 43, 226, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .inventory-slot.empty {
+            opacity: 0.3;
+            cursor: default;
+        }
+
+        .inventory-slot:not(.empty):hover {
+            transform: scale(1.1);
+            border-color: #FFD700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .inventory-slot .potion-icon {
+            font-size: 40px;
+            margin-bottom: 5px;
+        }
+
+        .inventory-slot .potion-name {
+            font-size: 10px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .inventory-slot .potion-count {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255, 215, 0, 0.9);
+            color: black;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        #collectButton {
+            padding: 10px 30px;
+            font-size: 16px;
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+
+        #collectButton:hover {
+            background: linear-gradient(135deg, #44a08d, #4ecdc4);
+            transform: scale(1.05);
+        }
+
+        #collectButton:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .selected-from-inventory {
+            border: 3px solid #FFD700 !important;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8) !important;
+        }
+
+        /* Shop styles */
+        #shopButton {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 30px;
+            font-size: 20px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: black;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.5);
+            transition: all 0.3s;
+            z-index: 200;
+        }
+
+        #shopButton:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.8);
+        }
+
+        #shopModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 500;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        #shopModal.show {
+            display: flex;
+        }
+
+        #shopContent {
+            background: rgba(20, 10, 40, 0.98);
+            border: 3px solid #FFD700;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 0 100px rgba(255, 215, 0, 0.5);
+        }
+
+        #shopContent h2 {
+            color: #FFD700;
+            text-align: center;
+            font-size: 42px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+        }
+
+        #shopGold {
+            text-align: center;
+            color: white;
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+
+        .shop-section {
+            margin-bottom: 40px;
+        }
+
+        .shop-section h3 {
+            color: #FFD700;
+            font-size: 28px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .shop-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .shop-item {
+            background: rgba(138, 43, 226, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .shop-item:hover {
+            transform: translateY(-5px);
+            border-color: #FFD700;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .shop-item.owned {
+            opacity: 0.5;
+            background: rgba(50, 150, 50, 0.3);
+        }
+
+        .shop-item.locked {
+            opacity: 0.6;
+        }
+
+        .shop-item-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .shop-item-name {
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .shop-item-price {
+            color: #FFD700;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .shop-item-status {
+            color: #4ecdc4;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .buy-button {
+            padding: 10px 25px;
+            font-size: 16px;
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .buy-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 15px rgba(78, 205, 196, 0.5);
+        }
+
+        .buy-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: gray;
+        }
+
+        #closeShop {
+            display: block;
+            margin: 30px auto 0;
+            padding: 15px 40px;
+            font-size: 18px;
+            background: rgba(255, 107, 107, 0.5);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        #closeShop:hover {
+            background: rgba(255, 107, 107, 0.8);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <!-- Background particles -->
+    <script>
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.width = Math.random() * 10 + 5 + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.background = `rgba(${Math.random() * 255}, ${Math.random() * 255}, 255, 0.5)`;
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            document.body.appendChild(particle);
+        }
+    </script>
+
+    <div id="gameContainer">
+        <div id="header">
+            <h1>🧪 Potion Mixer 🧪</h1>
+            <p style="color: #aaa; font-size: 16px;">Drag ingredients to the cauldron and discover magical recipes!</p>
+        </div>
+
+        <div id="stats">
+            <div class="stat">
+                <div class="stat-value" id="goldValue">0</div>
+                <div class="stat-label">💰 Gold</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="scoreValue">0</div>
+                <div class="stat-label">Score</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="potionsValue">0</div>
+                <div class="stat-label">Potions Brewed</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="discoveredValue">0/30</div>
+                <div class="stat-label">Recipes Discovered</div>
+            </div>
+            <button id="pauseButton" title="Pause Game">⏸</button>
+        </div>
+
+        <!-- Pause Menu Overlay -->
+        <div id="pauseOverlay">
+            <div id="pauseMenu">
+                <h2>⏸ PAUSED ⏸</h2>
+                <button id="resumeButton">▶ Resume Game</button>
+                <button id="restartButton">🔄 Restart Game</button>
+            </div>
+        </div>
+
+        <div id="gameArea">
+            <div id="ingredients">
+                <h2>🌿 Ingredients 🌿</h2>
+                <div id="ingredientsList"></div>
+            </div>
+
+            <div id="cauldron">
+                <div id="cauldronContainer">
+                    <div id="cauldronLiquid">
+                        <div id="cauldronContent">
+                            <p style="color: #aaa; font-size: 14px;">Drop ingredients here</p>
+                        </div>
+                    </div>
+                </div>
+                <button id="brewButton" disabled>🔥 Brew Potion 🔥</button>
+                <button id="collectButton" disabled>📦 Collect Potion 📦</button>
+                <button id="clearButton">Clear Cauldron</button>
+            </div>
+
+            <div id="recipes">
+                <h2>📖 Recipe Book 📖</h2>
+                <div id="recipesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="resultPopup">
+        <h2 id="resultTitle">Success!</h2>
+        <div class="potion-icon" id="resultIcon">🧪</div>
+        <p id="resultText">You discovered a new potion!</p>
+        <p id="resultEffect" style="color: #FFD700;"></p>
+        <button onclick="closePopup()">Continue</button>
+    </div>
+
+    <div id="customerArea">
+        <div class="customer">
+            <div class="customer-avatar" id="customerAvatar">🧙‍♂️</div>
+            <div class="customer-name" id="customerName">Wizard</div>
+            <div class="customer-request">
+                <div class="customer-wants">Wants:</div>
+                <div class="customer-potion" id="customerPotion">🧪</div>
+                <div class="customer-payment" id="customerPayment">💰 Pays: 100 gold</div>
+            </div>
+            <div class="customer-timer" id="customerTimer">30s</div>
+            <button id="serveButton" onclick="serveCustomer()">Serve Potion</button>
+            <button id="giveSpecialPotionButton" onclick="openSpecialPotionMenu()" style="display: none; margin-top: 10px; background: linear-gradient(135deg, #ff1493, #ff69b4); border: 3px solid #FFD700;">💝 Give Special Potion</button>
+        </div>
+    </div>
+
+    <!-- Special Potion Selection Modal -->
+    <div id="specialPotionModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10001; align-items: center; justify-content: center;">
+        <div style="background: linear-gradient(135deg, #2d1b69, #1a0f3d); border: 5px solid #FFD700; border-radius: 20px; padding: 40px; max-width: 600px; max-height: 80vh; overflow-y: auto;">
+            <h2 style="color: #FFD700; text-align: center; margin-bottom: 20px;">💝 Choose Special Potion 💝</h2>
+            <p style="color: #aaa; text-align: center; margin-bottom: 30px;">Select a love potion to give to the guest for special rewards!</p>
+            <div id="specialPotionList"></div>
+            <button onclick="closeSpecialPotionMenu()" style="width: 100%; margin-top: 20px; padding: 15px; background: #DC143C; color: white; border: 3px solid #FFD700; border-radius: 10px; font-size: 18px; cursor: pointer;">Cancel</button>
+        </div>
+    </div>
+
+    <div id="inventory">
+        <h3>🎒 Potion Inventory 🎒</h3>
+        <div id="inventorySlots"></div>
+    </div>
+
+    <button id="shopButton" onclick="openShop()">🏪 Shop</button>
+
+    <div id="shopModal">
+        <div id="shopContent">
+            <h2>🏪 Magical Shop 🏪</h2>
+            <div id="shopGold">Your Gold: <span id="shopGoldAmount" style="color: #FFD700; font-weight: bold;">0</span> 💰</div>
+
+            <div class="shop-section">
+                <h3>🌿 Ingredients</h3>
+                <div class="shop-items" id="ingredientsShop"></div>
+            </div>
+
+            <div class="shop-section">
+                <h3>📖 Recipe Hints</h3>
+                <div class="shop-items" id="recipesShop"></div>
+            </div>
+
+            <button id="closeShop" onclick="closeShop()">Close Shop</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let score = 0;
+        let gold = 0; // Currency for shop
+        let potionsBrewed = 0;
+        let discoveredRecipes = new Set();
+        let cauldronIngredients = [];
+        let brewedPotions = []; // Inventory of brewed potions to give to guests
+        let lastBrewedPotion = null; // Stores the last successfully brewed potion
+
+        // Inventory system
+        let inventory = {}; // { recipeIndex: count }
+        let selectedInventoryPotion = null; // Currently selected potion from inventory
+
+        // Shop system
+        let unlockedIngredients = new Set(['fire', 'water', 'earth', 'air', 'moon', 'sun', 'star', 'skull', 'heart', 'crystal']); // All original 10 are free
+        let purchasedRecipeHints = new Set();
+
+        // Customer system
+        let currentCustomer = null;
+        let customerPatience = 0;
+        let nextCustomerTime = 20; // Seconds until next customer
+        let customerInterval = null;
+        let patienceInterval = null;
+        let isPaused = false;
+
+        const customerTypes = [
+            { avatar: '🧙‍♂️', name: 'Wizard Aldric', multiplier: 1.5 },
+            { avatar: '🧙‍♀️', name: 'Sorceress Luna', multiplier: 1.5 },
+            { avatar: '🧝‍♀️', name: 'Elf Sylvana', multiplier: 1.2 },
+            { avatar: '🧝‍♂️', name: 'Elf Legolas', multiplier: 1.2 },
+            { avatar: '👸', name: 'Princess Aurora', multiplier: 2.0 },
+            { avatar: '🤴', name: 'Prince Charming', multiplier: 2.0 },
+            { avatar: '🧛', name: 'Count Dracula', multiplier: 1.3 },
+            { avatar: '🧛‍♀️', name: 'Vampire Selene', multiplier: 1.3 },
+            { avatar: '🧚‍♀️', name: 'Fairy Tinker', multiplier: 1.4 },
+            { avatar: '🧚‍♂️', name: 'Fairy Oberon', multiplier: 1.4 },
+            { avatar: '🧞‍♂️', name: 'Genie Aladdin', multiplier: 1.6 },
+            { avatar: '🧞‍♀️', name: 'Genie Jasmine', multiplier: 1.6 },
+            { avatar: '👹', name: 'Ogre Shrek', multiplier: 1.1 },
+            { avatar: '👺', name: 'Demon Baal', multiplier: 1.7 },
+            { avatar: '🤖', name: 'Golem Iron', multiplier: 1.0 }
+        ];
+
+        // Ingredients data
+        const ingredients = [
+            // Original free ingredients
+            { id: 'fire', icon: '🔥', name: 'Fire Essence', color: '#ff6b6b', price: 0 },
+            { id: 'water', icon: '💧', name: 'Water Drop', color: '#4ecdc4', price: 0 },
+            { id: 'earth', icon: '🌿', name: 'Earth Root', color: '#95e1d3', price: 0 },
+            { id: 'air', icon: '💨', name: 'Air Wisp', color: '#aaf0d1', price: 0 },
+            { id: 'moon', icon: '🌙', name: 'Moonstone', color: '#c7ecee', price: 0 },
+            { id: 'sun', icon: '☀️', name: 'Sunstone', color: '#ffd93d', price: 0 },
+            { id: 'star', icon: '⭐', name: 'Star Dust', color: '#ffe66d', price: 0 },
+            { id: 'skull', icon: '💀', name: 'Shadow Essence', color: '#6c5ce7', price: 0 },
+            { id: 'heart', icon: '❤️', name: 'Love Petals', color: '#ff69b4', price: 0 },
+            { id: 'crystal', icon: '💎', name: 'Crystal Shard', color: '#00ffff', price: 0 },
+            // Premium ingredients (purchasable with gold)
+            { id: 'lightning', icon: '⚡', name: 'Lightning Bolt', color: '#ffeb3b', price: 300 },
+            { id: 'ice', icon: '🧊', name: 'Frozen Core', color: '#b3e5fc', price: 300 },
+            { id: 'poison', icon: '☣️', name: 'Venom Extract', color: '#76ff03', price: 400 },
+            { id: 'blood', icon: '🩸', name: 'Dragon Blood', color: '#d32f2f', price: 500 },
+            { id: 'magic', icon: '✨', name: 'Pure Magic', color: '#e1bee7', price: 600 },
+            { id: 'void', icon: '🌑', name: 'Void Essence', color: '#212121', price: 700 },
+            { id: 'time', icon: '⏰', name: 'Time Sand', color: '#ffd54f', price: 800 },
+            { id: 'chaos', icon: '🌀', name: 'Chaos Orb', color: '#ff6090', price: 900 },
+            { id: 'holy', icon: '✝️', name: 'Holy Water', color: '#fff9c4', price: 1000 },
+            { id: 'demon', icon: '👿', name: 'Demon Horn', color: '#4a148c', price: 1000 }
+        ];
+
+        // Recipes (combinations that work)
+        const recipes = [
+            // Basic 2-ingredient recipes
+            { ingredients: ['fire', 'water'], name: 'Steam Potion', effect: 'Creates magical mist', icon: '☁️', points: 100, hintPrice: 0 },
+            { ingredients: ['earth', 'water'], name: 'Growth Elixir', effect: 'Accelerates plant growth', icon: '🌱', points: 100, hintPrice: 0 },
+            { ingredients: ['fire', 'earth'], name: 'Lava Brew', effect: 'Burns with intense heat', icon: '🌋', points: 100, hintPrice: 0 },
+            { ingredients: ['air', 'water'], name: 'Ice Potion', effect: 'Freezes on contact', icon: '❄️', points: 100, hintPrice: 250 },
+            { ingredients: ['fire', 'air'], name: 'Smoke Bomb', effect: 'Creates thick smoke', icon: '💨', points: 100, hintPrice: 250 },
+            { ingredients: ['earth', 'air'], name: 'Dust Storm', effect: 'Summons a sandstorm', icon: '🌪️', points: 100, hintPrice: 250 },
+
+            // Celestial recipes
+            { ingredients: ['moon', 'star'], name: 'Celestial Tonic', effect: 'Grants night vision', icon: '✨', points: 150, hintPrice: 400 },
+            { ingredients: ['sun', 'fire'], name: 'Inferno Draught', effect: 'Radiates brilliant light', icon: '💥', points: 150, hintPrice: 400 },
+            { ingredients: ['sun', 'water'], name: 'Rainbow Elixir', effect: 'Creates beautiful rainbows', icon: '🌈', points: 150, hintPrice: 400 },
+            { ingredients: ['moon', 'water'], name: 'Tide Brew', effect: 'Controls the tides', icon: '🌊', points: 150, hintPrice: 400 },
+            { ingredients: ['star', 'crystal'], name: 'Starlight Serum', effect: 'Illuminates darkness', icon: '💫', points: 150, hintPrice: 450 },
+
+            // Emotion & essence recipes
+            { ingredients: ['heart', 'moon'], name: 'Love Philter', effect: 'Attracts admirers', icon: '💕', points: 150, hintPrice: 600 },
+            { ingredients: ['heart', 'fire'], name: 'Passion Potion', effect: 'Ignites desire', icon: '🔥', points: 150, hintPrice: 550 },
+            { ingredients: ['heart', 'water'], name: 'Empathy Draught', effect: 'Enhances compassion', icon: '💙', points: 150, hintPrice: 550 },
+            { ingredients: ['skull', 'earth'], name: 'Poison Vial', effect: 'Deadly to touch', icon: '☠️', points: 150, hintPrice: 600 },
+            { ingredients: ['skull', 'moon'], name: 'Undeath Brew', effect: 'Animates the dead', icon: '🧟', points: 150, hintPrice: 650 },
+            { ingredients: ['skull', 'fire'], name: 'Soul Burn', effect: 'Burns the spirit', icon: '👻', points: 150, hintPrice: 650 },
+
+            // Crystal recipes
+            { ingredients: ['crystal', 'water'], name: 'Clarity Serum', effect: 'Reveals hidden truths', icon: '🔮', points: 150, hintPrice: 700 },
+            { ingredients: ['crystal', 'fire'], name: 'Prism Potion', effect: 'Refracts light beautifully', icon: '💎', points: 150, hintPrice: 700 },
+            { ingredients: ['crystal', 'earth'], name: 'Gem Growth', effect: 'Grows precious stones', icon: '💠', points: 150, hintPrice: 700 },
+
+            // 3-ingredient recipes
+            { ingredients: ['fire', 'water', 'earth'], name: 'Life Essence', effect: 'Restores vitality', icon: '💚', points: 200, hintPrice: 500 },
+            { ingredients: ['air', 'fire', 'moon'], name: 'Aurora Brew', effect: 'Creates northern lights', icon: '🌌', points: 200, hintPrice: 800 },
+            { ingredients: ['heart', 'sun', 'star'], name: 'Joy Elixir', effect: 'Brings pure happiness', icon: '😊', points: 200, hintPrice: 850 },
+            { ingredients: ['skull', 'water', 'earth'], name: 'Decay Draught', effect: 'Accelerates decomposition', icon: '🍄', points: 200, hintPrice: 750 },
+            { ingredients: ['crystal', 'air', 'star'], name: 'Levitation Potion', effect: 'Grants flight', icon: '🪶', points: 200, hintPrice: 900 },
+
+            // Advanced 3-ingredient recipes
+            { ingredients: ['moon', 'star', 'crystal'], name: 'Cosmic Elixir', effect: 'Bends space and time', icon: '🌌', points: 250, hintPrice: 900 },
+            { ingredients: ['fire', 'skull', 'heart'], name: 'Phoenix Tears', effect: 'Grants rebirth', icon: '🔥', points: 250, hintPrice: 900 },
+            { ingredients: ['sun', 'moon', 'star'], name: 'Eternal Potion', effect: 'Grants immortality', icon: '♾️', points: 300, hintPrice: 1000 },
+
+            // 4-ingredient recipes
+            { ingredients: ['air', 'earth', 'water', 'fire'], name: 'Elemental Brew', effect: 'Controls the elements', icon: '🌊', points: 400, hintPrice: 800 },
+            { ingredients: ['skull', 'heart', 'moon', 'sun'], name: 'Balance Tonic', effect: 'Harmonizes light and dark', icon: '☯️', points: 350, hintPrice: 1100 },
+
+            // Ultimate 5-ingredient recipe
+            { ingredients: ['sun', 'moon', 'star', 'crystal', 'heart'], name: 'Divine Nectar', effect: 'Ascends to godhood', icon: '👑', points: 500, hintPrice: 1500 },
+
+            // Special Guest Potions (must include Love Petals - 'heart')
+            { ingredients: ['heart', 'crystal', 'star'], name: 'Charm of Generosity', effect: 'Makes guests give gold', icon: '💰', points: 250, hintPrice: 800, guestEffect: 'gold', guestReward: 500 },
+            { ingredients: ['heart', 'air', 'sun'], name: 'Essence of Sharing', effect: 'Guests share ingredients', icon: '🎁', points: 250, hintPrice: 850, guestEffect: 'ingredients', guestReward: 3 },
+            { ingredients: ['heart', 'moon', 'crystal'], name: 'Wisdom Elixir', effect: 'Reveals hidden recipes', icon: '📖', points: 300, hintPrice: 900, guestEffect: 'recipe', guestReward: 1 },
+            { ingredients: ['heart', 'skull', 'star'], name: 'Oath of Secrets', effect: 'Reveals multiple recipes', icon: '🔓', points: 350, hintPrice: 1000, guestEffect: 'recipes', guestReward: 2 },
+            { ingredients: ['heart', 'fire', 'crystal', 'sun'], name: 'Fortune Blessing', effect: 'Grants massive gold', icon: '💸', points: 400, hintPrice: 1200, guestEffect: 'fortune', guestReward: 1000 },
+
+            // More Love Petal recipes (non-guest effect)
+            { ingredients: ['heart', 'air'], name: 'Friendship Brew', effect: 'Attracts companions', icon: '🤝', points: 150, hintPrice: 500 },
+            { ingredients: ['heart', 'earth'], name: 'Compassion Tonic', effect: 'Heals emotional wounds', icon: '💚', points: 150, hintPrice: 550 },
+            { ingredients: ['heart', 'star', 'fire'], name: 'Devotion Draught', effect: 'Strengthens bonds', icon: '💝', points: 200, hintPrice: 750 },
+            { ingredients: ['heart', 'water', 'moon'], name: 'Dream of Love', effect: 'Creates romantic dreams', icon: '💭', points: 200, hintPrice: 700 },
+            { ingredients: ['heart', 'crystal', 'air'], name: 'Soul Mate Serum', effect: 'Finds true love', icon: '💞', points: 250, hintPrice: 850 }
+        ];
+
+        // Initialize game
+        function init() {
+            renderIngredients();
+            renderRecipes();
+            renderInventory();
+            updateStats();
+            setupEventListeners();
+            createBubbles();
+        }
+
+        function renderInventory() {
+            const slotsContainer = document.getElementById('inventorySlots');
+            slotsContainer.innerHTML = '';
+
+            // Show all discovered recipes as inventory slots
+            recipes.forEach((recipe, index) => {
+                if (discoveredRecipes.has(index)) {
+                    const count = inventory[index] || 0;
+                    const slot = document.createElement('div');
+                    slot.className = count > 0 ? 'inventory-slot' : 'inventory-slot empty';
+                    slot.dataset.recipeIndex = index;
+
+                    slot.innerHTML = `
+                        ${count > 0 ? `<div class="potion-count">${count}</div>` : ''}
+                        <div class="potion-icon">${recipe.icon}</div>
+                        <div class="potion-name">${recipe.name}</div>
+                    `;
+
+                    if (count > 0) {
+                        slot.addEventListener('click', () => selectPotionFromInventory(index));
+                    }
+
+                    slotsContainer.appendChild(slot);
+                }
+            });
+
+            // Add empty slots to fill out the grid
+            const currentSlots = slotsContainer.children.length;
+            const minSlots = 8;
+            for (let i = currentSlots; i < minSlots; i++) {
+                const emptySlot = document.createElement('div');
+                emptySlot.className = 'inventory-slot empty';
+                emptySlot.innerHTML = '<div style="color: #666; font-size: 30px;">🔒</div>';
+                slotsContainer.appendChild(emptySlot);
+            }
+        }
+
+        function selectPotionFromInventory(recipeIndex) {
+            selectedInventoryPotion = recipeIndex;
+
+            // Update visual selection
+            document.querySelectorAll('.inventory-slot').forEach(slot => {
+                slot.classList.remove('selected-from-inventory');
+            });
+            const selectedSlot = document.querySelector(`[data-recipe-index="${recipeIndex}"]`);
+            if (selectedSlot) {
+                selectedSlot.classList.add('selected-from-inventory');
+            }
+        }
+
+        function collectPotion() {
+            if (!lastBrewedPotion) return;
+
+            const recipeIndex = lastBrewedPotion.recipeIndex;
+
+            // Add to inventory
+            if (!inventory[recipeIndex]) {
+                inventory[recipeIndex] = 0;
+            }
+            inventory[recipeIndex]++;
+
+            // Clear the cauldron
+            clearCauldron();
+            lastBrewedPotion = null;
+
+            // Update inventory display
+            renderInventory();
+
+            // Disable collect button
+            document.getElementById('collectButton').disabled = true;
+
+            // Show feedback
+            const popup = document.getElementById('resultPopup');
+            const title = document.getElementById('resultTitle');
+            const icon = document.getElementById('resultIcon');
+            const text = document.getElementById('resultText');
+            const effect = document.getElementById('resultEffect');
+
+            title.textContent = 'Potion Collected!';
+            icon.textContent = '📦';
+            text.textContent = 'Added to inventory';
+            effect.textContent = 'You can now serve this potion anytime';
+            popup.classList.add('show');
+        }
+
+        function renderIngredients() {
+            const list = document.getElementById('ingredientsList');
+            list.innerHTML = '';
+
+            ingredients.forEach(ing => {
+                // Only show unlocked ingredients
+                if (!unlockedIngredients.has(ing.id)) return;
+
+                const div = document.createElement('div');
+                div.className = 'ingredient';
+                div.draggable = true;
+                div.dataset.id = ing.id;
+                div.innerHTML = `
+                    <div class="ingredient-icon">${ing.icon}</div>
+                    <div class="ingredient-name">${ing.name}</div>
+                `;
+                div.addEventListener('dragstart', handleDragStart);
+                list.appendChild(div);
+            });
+        }
+
+        function renderRecipes() {
+            const list = document.getElementById('recipesList');
+            list.innerHTML = '';
+
+            recipes.forEach((recipe, index) => {
+                const div = document.createElement('div');
+                const discovered = discoveredRecipes.has(index);
+                div.className = `recipe ${discovered ? 'discovered' : 'unknown'}`;
+
+                const ingIcons = recipe.ingredients.map(id =>
+                    ingredients.find(i => i.id === id).icon
+                ).join(' + ');
+
+                div.innerHTML = `
+                    <div class="recipe-name">${discovered ? recipe.name : '???'}</div>
+                    <div class="recipe-ingredients">${ingIcons}</div>
+                    <div class="recipe-effect">${discovered ? recipe.effect : 'Unknown recipe'}</div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('goldValue').textContent = gold;
+            document.getElementById('scoreValue').textContent = score;
+            document.getElementById('potionsValue').textContent = potionsBrewed;
+            document.getElementById('discoveredValue').textContent = `${discoveredRecipes.size}/${recipes.length}`;
+        }
+
+        function handleDragStart(e) {
+            e.dataTransfer.setData('ingredientId', e.target.dataset.id);
+            e.target.style.opacity = '0.5';
+        }
+
+        function setupEventListeners() {
+            const cauldron = document.getElementById('cauldronLiquid');
+
+            // Pause button listeners
+            document.getElementById('pauseButton').addEventListener('click', togglePause);
+            document.getElementById('resumeButton').addEventListener('click', resumeGame);
+            document.getElementById('restartButton').addEventListener('click', restartGame);
+
+            // Keyboard shortcut for pause (Escape key)
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    togglePause();
+                }
+            });
+
+            cauldron.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                cauldron.style.borderColor = '#FFD700';
+            });
+
+            cauldron.addEventListener('dragleave', () => {
+                cauldron.style.borderColor = 'transparent';
+            });
+
+            cauldron.addEventListener('drop', (e) => {
+                e.preventDefault();
+                cauldron.style.borderColor = 'transparent';
+
+                const ingId = e.dataTransfer.getData('ingredientId');
+                addIngredientToCauldron(ingId);
+            });
+
+            document.querySelectorAll('.ingredient').forEach(ing => {
+                ing.addEventListener('dragend', (e) => {
+                    e.target.style.opacity = '1';
+                });
+            });
+
+            document.getElementById('brewButton').addEventListener('click', brewPotion);
+            document.getElementById('collectButton').addEventListener('click', collectPotion);
+            document.getElementById('clearButton').addEventListener('click', clearCauldron);
+        }
+
+        function addIngredientToCauldron(id) {
+            if (cauldronIngredients.length >= 5) {
+                return; // Max 5 ingredients
+            }
+
+            cauldronIngredients.push(id);
+            const ing = ingredients.find(i => i.id === id);
+
+            const content = document.getElementById('cauldronContent');
+            const icon = document.createElement('span');
+            icon.className = 'dropped-ingredient';
+            icon.textContent = ing.icon;
+            content.appendChild(icon);
+
+            // Update cauldron color
+            updateCauldronColor();
+
+            // Enable brew button if at least 2 ingredients
+            document.getElementById('brewButton').disabled = cauldronIngredients.length < 2;
+        }
+
+        function updateCauldronColor() {
+            const liquid = document.getElementById('cauldronLiquid');
+            const colors = cauldronIngredients.map(id =>
+                ingredients.find(i => i.id === id).color
+            );
+
+            if (colors.length === 0) {
+                liquid.style.background = 'linear-gradient(180deg, #4a0080 0%, #2d004d 100%)';
+            } else {
+                const gradient = `linear-gradient(180deg, ${colors.join(', ')})`;
+                liquid.style.background = gradient;
+            }
+        }
+
+        function clearCauldron() {
+            cauldronIngredients = [];
+            const content = document.getElementById('cauldronContent');
+            content.innerHTML = '<p style="color: #aaa; font-size: 14px;">Drop ingredients here</p>';
+            updateCauldronColor();
+            document.getElementById('brewButton').disabled = true;
+            document.getElementById('collectButton').disabled = true;
+            lastBrewedPotion = null;
+        }
+
+        function brewPotion() {
+            const sorted = [...cauldronIngredients].sort();
+            let foundRecipe = null;
+            let recipeIndex = -1;
+
+            // Find matching recipe
+            recipes.forEach((recipe, index) => {
+                const recipeSorted = [...recipe.ingredients].sort();
+                if (JSON.stringify(sorted) === JSON.stringify(recipeSorted)) {
+                    foundRecipe = recipe;
+                    recipeIndex = index;
+                }
+            });
+
+            potionsBrewed++;
+
+            if (foundRecipe) {
+                // Success!
+                const isNew = !discoveredRecipes.has(recipeIndex);
+                discoveredRecipes.add(recipeIndex);
+
+                score += foundRecipe.points;
+                if (isNew) score += 100; // Bonus for discovery
+
+                // Store the brewed potion
+                lastBrewedPotion = {
+                    recipe: foundRecipe,
+                    recipeIndex: recipeIndex
+                };
+
+                // Enable collect button
+                document.getElementById('collectButton').disabled = false;
+                document.getElementById('brewButton').disabled = true;
+
+                showResult(true, foundRecipe, isNew);
+                renderRecipes();
+                renderInventory();
+            } else {
+                // Failed potion
+                score += 10; // Small points for trying
+                showResult(false);
+                clearCauldron();
+            }
+
+            updateStats();
+        }
+
+        function showResult(success, recipe = null, isNew = false) {
+            const popup = document.getElementById('resultPopup');
+            const title = document.getElementById('resultTitle');
+            const icon = document.getElementById('resultIcon');
+            const text = document.getElementById('resultText');
+            const effect = document.getElementById('resultEffect');
+
+            if (success) {
+                title.textContent = isNew ? 'New Recipe Discovered!' : 'Perfect Brew!';
+                icon.textContent = recipe.icon;
+                text.textContent = recipe.name;
+                effect.textContent = recipe.effect;
+            } else {
+                title.textContent = 'Potion Failed!';
+                icon.textContent = '💨';
+                text.textContent = 'The mixture fizzled out...';
+                effect.textContent = 'Try a different combination!';
+            }
+
+            popup.classList.add('show');
+        }
+
+        function closePopup() {
+            document.getElementById('resultPopup').classList.remove('show');
+        }
+
+        function createBubbles() {
+            const liquid = document.getElementById('cauldronLiquid');
+            setInterval(() => {
+                if (cauldronIngredients.length > 0 && !isPaused) {
+                    const bubble = document.createElement('div');
+                    bubble.className = 'bubble';
+                    bubble.style.left = Math.random() * 100 + '%';
+                    bubble.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    liquid.appendChild(bubble);
+
+                    setTimeout(() => bubble.remove(), 3000);
+                }
+            }, 500);
+        }
+
+        // Customer system functions
+        function spawnCustomer() {
+            if (currentCustomer) return; // Don't spawn if customer already present
+
+            // Select random customer type
+            const customerType = customerTypes[Math.floor(Math.random() * customerTypes.length)];
+
+            // Select random recipe that has been discovered (or any recipe for first customer)
+            let availableRecipes = recipes.filter((_, index) => discoveredRecipes.has(index));
+            if (availableRecipes.length === 0) {
+                // If no recipes discovered yet, customer can ask for any basic recipe
+                availableRecipes = recipes.slice(0, 5);
+            }
+
+            const requestedRecipe = availableRecipes[Math.floor(Math.random() * availableRecipes.length)];
+            const recipeIndex = recipes.indexOf(requestedRecipe);
+
+            // Create customer object
+            currentCustomer = {
+                type: customerType,
+                requestedRecipe: requestedRecipe,
+                recipeIndex: recipeIndex,
+                payment: Math.floor(requestedRecipe.points * customerType.multiplier),
+                maxPatience: 30
+            };
+
+            customerPatience = currentCustomer.maxPatience;
+
+            // Update UI
+            document.getElementById('customerAvatar').textContent = customerType.avatar;
+            document.getElementById('customerName').textContent = customerType.name;
+            document.getElementById('customerPotion').textContent = requestedRecipe.icon;
+            document.getElementById('customerPayment').textContent = `💰 Pays: ${currentCustomer.payment} gold`;
+            document.getElementById('customerTimer').textContent = `${customerPatience}s`;
+            document.getElementById('serveButton').disabled = false;
+
+            // Enable give special potion button if player has guest effect potions
+            const hasGuestPotions = Object.keys(inventory).some(idx => {
+                const recipe = recipes[idx];
+                return recipe && recipe.guestEffect && inventory[idx] > 0;
+            });
+            document.getElementById('giveSpecialPotionButton').style.display = hasGuestPotions ? 'inline-block' : 'none';
+
+            // Show customer area
+            document.getElementById('customerArea').classList.add('show');
+
+            // Start patience countdown
+            startPatienceTimer();
+        }
+
+        function startPatienceTimer() {
+            if (patienceInterval) clearInterval(patienceInterval);
+
+            patienceInterval = setInterval(() => {
+                if (isPaused) return; // Don't decrement if paused
+
+                customerPatience--;
+                document.getElementById('customerTimer').textContent = `${customerPatience}s`;
+
+                // Change color when running out of time
+                const timerEl = document.getElementById('customerTimer');
+                if (customerPatience <= 10) {
+                    timerEl.style.color = '#ff3333';
+                    timerEl.style.fontSize = '24px';
+                } else if (customerPatience <= 20) {
+                    timerEl.style.color = '#ff6b6b';
+                }
+
+                if (customerPatience <= 0) {
+                    customerLeaves(false);
+                }
+            }, 1000);
+        }
+
+        function customerLeaves(satisfied) {
+            clearInterval(patienceInterval);
+
+            if (!satisfied) {
+                // Customer left unhappy - lose points
+                score = Math.max(0, score - 50);
+                updateStats();
+
+                // Show notification
+                const popup = document.getElementById('resultPopup');
+                const title = document.getElementById('resultTitle');
+                const icon = document.getElementById('resultIcon');
+                const text = document.getElementById('resultText');
+                const effect = document.getElementById('resultEffect');
+
+                title.textContent = 'Customer Left!';
+                icon.textContent = '😠';
+                text.textContent = 'Time ran out!';
+                effect.textContent = 'You lost 50 points';
+                popup.classList.add('show');
+            }
+
+            // Hide customer area
+            document.getElementById('customerArea').classList.remove('show');
+            currentCustomer = null;
+            customerPatience = 0;
+
+            // Reset timer color
+            const timerEl = document.getElementById('customerTimer');
+            timerEl.style.color = '#ff6b6b';
+            timerEl.style.fontSize = '20px';
+        }
+
+        function serveCustomer() {
+            if (!currentCustomer) return;
+
+            let isCorrect = false;
+            let servedFromInventory = false;
+
+            // Check if serving from inventory
+            if (selectedInventoryPotion !== null) {
+                // Serving from inventory
+                if (inventory[selectedInventoryPotion] > 0) {
+                    isCorrect = selectedInventoryPotion === currentCustomer.recipeIndex;
+                    if (isCorrect) {
+                        // Remove from inventory
+                        inventory[selectedInventoryPotion]--;
+                        renderInventory();
+                        selectedInventoryPotion = null;
+                        servedFromInventory = true;
+                    }
+                } else {
+                    alert('No potions of this type in inventory!');
+                    return;
+                }
+            } else if (lastBrewedPotion) {
+                // Serving the freshly brewed potion from cauldron
+                isCorrect = lastBrewedPotion.recipeIndex === currentCustomer.recipeIndex;
+            } else if (cauldronIngredients.length >= 2) {
+                // Serving unbottled ingredients (old behavior for compatibility)
+                const sorted = [...cauldronIngredients].sort();
+                const requestedSorted = [...currentCustomer.requestedRecipe.ingredients].sort();
+                isCorrect = JSON.stringify(sorted) === JSON.stringify(requestedSorted);
+            } else {
+                alert('You need to brew a potion or select one from inventory!');
+                return;
+            }
+
+            if (isCorrect) {
+                // Correct potion!
+                score += currentCustomer.payment;
+                gold += currentCustomer.payment; // Award gold equal to payment
+                if (!servedFromInventory) {
+                    potionsBrewed++;
+                }
+
+                // Discover recipe if not already discovered
+                const wasNew = !discoveredRecipes.has(currentCustomer.recipeIndex);
+                discoveredRecipes.add(currentCustomer.recipeIndex);
+
+                if (wasNew) {
+                    score += 100; // Discovery bonus
+                    gold += 50; // Gold bonus for discovery
+                    renderRecipes();
+                }
+
+                // Show success popup
+                const popup = document.getElementById('resultPopup');
+                const title = document.getElementById('resultTitle');
+                const icon = document.getElementById('resultIcon');
+                const text = document.getElementById('resultText');
+                const effect = document.getElementById('resultEffect');
+
+                title.textContent = 'Customer Satisfied!';
+                icon.textContent = currentCustomer.type.avatar;
+                text.textContent = `You earned ${currentCustomer.payment} gold!`;
+                effect.textContent = wasNew ? `New recipe discovered: ${currentCustomer.requestedRecipe.name}!` : currentCustomer.requestedRecipe.name;
+                popup.classList.add('show');
+
+                updateStats();
+                clearCauldron();
+                customerLeaves(true);
+            } else {
+                // Wrong potion!
+                score = Math.max(0, score - 30);
+
+                const popup = document.getElementById('resultPopup');
+                const title = document.getElementById('resultTitle');
+                const icon = document.getElementById('resultIcon');
+                const text = document.getElementById('resultText');
+                const effect = document.getElementById('resultEffect');
+
+                title.textContent = 'Wrong Potion!';
+                icon.textContent = '😞';
+                text.textContent = 'That\'s not what I ordered!';
+                effect.textContent = 'You lost 30 points';
+                popup.classList.add('show');
+
+                updateStats();
+
+                // If served from inventory, still consumed the wrong potion
+                if (servedFromInventory) {
+                    selectedInventoryPotion = null;
+                } else {
+                    clearCauldron();
+                }
+
+                customerLeaves(false);
+            }
+        }
+
+        function startCustomerTimer() {
+            // Spawn first customer after 5 seconds
+            setTimeout(() => {
+                spawnCustomer();
+            }, 5000);
+
+            // Start interval for spawning customers every 20 seconds
+            customerInterval = setInterval(() => {
+                if (!currentCustomer && !isPaused) {
+                    spawnCustomer();
+                }
+            }, 20000);
+        }
+
+        // Pause/Resume functions
+        function pauseGame() {
+            isPaused = true;
+            document.getElementById('pauseOverlay').classList.add('active');
+            document.getElementById('pauseButton').textContent = '▶';
+            document.getElementById('pauseButton').title = 'Resume Game';
+        }
+
+        function resumeGame() {
+            isPaused = false;
+            document.getElementById('pauseOverlay').classList.remove('active');
+            document.getElementById('pauseButton').textContent = '⏸';
+            document.getElementById('pauseButton').title = 'Pause Game';
+        }
+
+        function togglePause() {
+            if (isPaused) {
+                resumeGame();
+            } else {
+                pauseGame();
+            }
+        }
+
+        function restartGame() {
+            // Clear all timers
+            if (customerInterval) clearInterval(customerInterval);
+            if (patienceInterval) clearInterval(patienceInterval);
+
+            // Reset all game variables
+            gold = 0;
+            score = 0;
+            potionsBrewed = 0;
+            cauldronIngredients = [];
+            discoveredRecipes = new Set();
+            currentCustomer = null;
+            customerPatience = 0;
+            isPaused = false;
+
+            // Clear UI
+            updateStats();
+            updateCauldron();
+            document.getElementById('customerArea').innerHTML = '<p style="color: #aaa;">Waiting for customers...</p>';
+            document.getElementById('recipeBook').innerHTML = '';
+
+            // Restart game
+            resumeGame();
+            startCustomerTimer();
+            initRecipeBook();
+        }
+
+        // Special Potion System for Guests
+        function openSpecialPotionMenu() {
+            if (!currentCustomer) return;
+
+            const modal = document.getElementById('specialPotionModal');
+            const list = document.getElementById('specialPotionList');
+            list.innerHTML = '';
+
+            // Get all guest effect potions from inventory
+            const guestPotions = Object.keys(inventory).filter(idx => {
+                const recipe = recipes[idx];
+                return recipe && recipe.guestEffect && inventory[idx] > 0;
+            });
+
+            if (guestPotions.length === 0) {
+                list.innerHTML = '<p style="color: #aaa; text-align: center;">No special potions available!</p>';
+            } else {
+                guestPotions.forEach(idx => {
+                    const recipe = recipes[idx];
+                    const count = inventory[idx];
+
+                    const potionCard = document.createElement('div');
+                    potionCard.style.cssText = 'background: rgba(138, 43, 226, 0.3); border: 3px solid #FFD700; border-radius: 15px; padding: 20px; margin: 10px 0; cursor: pointer; transition: all 0.3s;';
+                    potionCard.onmouseover = () => potionCard.style.background = 'rgba(138, 43, 226, 0.5)';
+                    potionCard.onmouseout = () => potionCard.style.background = 'rgba(138, 43, 226, 0.3)';
+
+                    potionCard.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="font-size: 48px;">${recipe.icon}</div>
+                            <div style="flex: 1;">
+                                <div style="color: #FFD700; font-size: 20px; font-weight: bold;">${recipe.name}</div>
+                                <div style="color: #aaa; font-size: 14px; margin-top: 5px;">${recipe.effect}</div>
+                                <div style="color: #4ecdc4; font-size: 16px; margin-top: 10px; font-weight: bold;">
+                                    ${getGuestEffectDescription(recipe.guestEffect, recipe.guestReward)}
+                                </div>
+                                <div style="color: white; font-size: 14px; margin-top: 5px;">In stock: ${count}</div>
+                            </div>
+                        </div>
+                    `;
+
+                    potionCard.onclick = () => giveSpecialPotion(idx);
+                    list.appendChild(potionCard);
+                });
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function closeSpecialPotionMenu() {
+            document.getElementById('specialPotionModal').style.display = 'none';
+        }
+
+        function getGuestEffectDescription(effect, reward) {
+            const descriptions = {
+                'gold': `Grants ${reward} gold 💰`,
+                'ingredients': `Grants ${reward} random ingredients 🎁`,
+                'recipe': `Reveals 1 hidden recipe 📖`,
+                'recipes': `Reveals ${reward} hidden recipes 🔓`,
+                'fortune': `Grants ${reward} gold (fortune!) 💸`
+            };
+            return descriptions[effect] || 'Unknown effect';
+        }
+
+        function giveSpecialPotion(recipeIndex) {
+            if (!currentCustomer) return;
+            if (!inventory[recipeIndex] || inventory[recipeIndex] <= 0) return;
+
+            const recipe = recipes[recipeIndex];
+            if (!recipe.guestEffect) return;
+
+            // Remove potion from inventory
+            inventory[recipeIndex]--;
+            renderInventory();
+
+            // Apply the effect
+            let message = '';
+            let rewardIcon = '';
+
+            switch (recipe.guestEffect) {
+                case 'gold':
+                    gold += recipe.guestReward;
+                    message = `${currentCustomer.type.name} gives you ${recipe.guestReward} gold!`;
+                    rewardIcon = '💰';
+                    break;
+
+                case 'ingredients':
+                    // Give random unlocked ingredients
+                    const unlockedList = Array.from(unlockedIngredients);
+                    for (let i = 0; i < recipe.guestReward; i++) {
+                        const randomIng = unlockedList[Math.floor(Math.random() * unlockedList.length)];
+                        // Just add as bonus (could add inventory system for ingredients later)
+                    }
+                    message = `${currentCustomer.type.name} shares ${recipe.guestReward} ingredients with you!`;
+                    rewardIcon = '🎁';
+                    gold += 100; // Give gold equivalent for now
+                    break;
+
+                case 'recipe':
+                case 'recipes':
+                    const numRecipes = recipe.guestReward;
+                    const undiscovered = recipes.filter((r, idx) => !discoveredRecipes.has(idx));
+                    const toReveal = Math.min(numRecipes, undiscovered.length);
+
+                    for (let i = 0; i < toReveal; i++) {
+                        const revealIdx = recipes.indexOf(undiscovered[Math.floor(Math.random() * undiscovered.length)]);
+                        discoveredRecipes.add(revealIdx);
+                        undiscovered.splice(undiscovered.indexOf(recipes[revealIdx]), 1);
+                    }
+
+                    message = `${currentCustomer.type.name} reveals ${toReveal} secret recipe${toReveal > 1 ? 's' : ''}!`;
+                    rewardIcon = '📖';
+                    renderRecipes();
+                    break;
+
+                case 'fortune':
+                    gold += recipe.guestReward;
+                    message = `${currentCustomer.type.name} blesses you with ${recipe.guestReward} gold!`;
+                    rewardIcon = '💸';
+                    break;
+            }
+
+            // Show reward popup
+            const popup = document.getElementById('resultPopup');
+            const title = document.getElementById('resultTitle');
+            const icon = document.getElementById('resultIcon');
+            const text = document.getElementById('resultText');
+            const effect = document.getElementById('resultEffect');
+
+            title.textContent = 'Special Potion Success!';
+            icon.textContent = rewardIcon;
+            text.textContent = recipe.name;
+            effect.textContent = message;
+            popup.classList.add('show');
+
+            // Customer is very happy and leaves satisfied
+            customerLeaves(true);
+
+            updateStats();
+            closeSpecialPotionMenu();
+        }
+
+        // Shop functions
+        function openShop() {
+            document.getElementById('shopModal').classList.add('show');
+            renderShop();
+        }
+
+        function closeShop() {
+            document.getElementById('shopModal').classList.remove('show');
+        }
+
+        function renderShop() {
+            // Update gold display
+            document.getElementById('shopGoldAmount').textContent = gold;
+
+            // Render ingredient shop
+            const ingredientsShop = document.getElementById('ingredientsShop');
+            ingredientsShop.innerHTML = '';
+
+            ingredients.forEach(ing => {
+                const isOwned = unlockedIngredients.has(ing.id);
+                const canAfford = gold >= ing.price;
+
+                const div = document.createElement('div');
+                div.className = `shop-item ${isOwned ? 'owned' : ''} ${!canAfford && !isOwned ? 'locked' : ''}`;
+
+                div.innerHTML = `
+                    <div class="shop-item-icon">${ing.icon}</div>
+                    <div class="shop-item-name">${ing.name}</div>
+                    <div class="shop-item-price">${ing.price === 0 ? 'FREE' : `${ing.price} 💰`}</div>
+                    ${isOwned ? '<div class="shop-item-status">✅ Owned</div>' : ''}
+                    ${!isOwned ? `<button class="buy-button" ${!canAfford ? 'disabled' : ''} onclick="buyIngredient('${ing.id}')">${canAfford ? 'Buy' : 'Not Enough Gold'}</button>` : ''}
+                `;
+
+                ingredientsShop.appendChild(div);
+            });
+
+            // Render recipe hints shop
+            const recipesShop = document.getElementById('recipesShop');
+            recipesShop.innerHTML = '';
+
+            recipes.forEach((recipe, index) => {
+                const isDiscovered = discoveredRecipes.has(index);
+                const hintPurchased = purchasedRecipeHints.has(index);
+                const canAfford = gold >= recipe.hintPrice;
+
+                // Check if all ingredients are unlocked
+                const allIngredientsUnlocked = recipe.ingredients.every(id => unlockedIngredients.has(id));
+
+                const div = document.createElement('div');
+                div.className = `shop-item ${isDiscovered ? 'owned' : ''} ${!canAfford && !hintPurchased && !isDiscovered ? 'locked' : ''}`;
+
+                const ingIcons = recipe.ingredients.map(id =>
+                    ingredients.find(i => i.id === id).icon
+                ).join(' + ');
+
+                let statusText = '';
+                let buttonHTML = '';
+
+                if (isDiscovered) {
+                    statusText = '✅ Discovered';
+                } else if (hintPurchased) {
+                    statusText = `💡 Hint: ${ingIcons}`;
+                } else if (!allIngredientsUnlocked) {
+                    statusText = '🔒 Unlock ingredients first';
+                } else {
+                    buttonHTML = `<button class="buy-button" ${!canAfford ? 'disabled' : ''} onclick="buyRecipeHint(${index})">${canAfford ? 'Buy Hint' : 'Not Enough Gold'}</button>`;
+                }
+
+                div.innerHTML = `
+                    <div class="shop-item-icon">${recipe.icon}</div>
+                    <div class="shop-item-name">${isDiscovered || hintPurchased ? recipe.name : '???'}</div>
+                    <div class="shop-item-price">${recipe.hintPrice === 0 ? 'FREE' : `${recipe.hintPrice} 💰`}</div>
+                    ${statusText ? `<div class="shop-item-status">${statusText}</div>` : ''}
+                    ${buttonHTML}
+                `;
+
+                recipesShop.appendChild(div);
+            });
+        }
+
+        function buyIngredient(ingredientId) {
+            const ingredient = ingredients.find(i => i.id === ingredientId);
+            if (!ingredient) return;
+
+            if (gold >= ingredient.price && !unlockedIngredients.has(ingredientId)) {
+                gold -= ingredient.price;
+                unlockedIngredients.add(ingredientId);
+                renderIngredients();
+                renderShop();
+                updateStats();
+
+                // Show success message
+                alert(`🎉 You unlocked ${ingredient.name}!`);
+            }
+        }
+
+        function buyRecipeHint(recipeIndex) {
+            const recipe = recipes[recipeIndex];
+            if (!recipe) return;
+
+            if (gold >= recipe.hintPrice && !purchasedRecipeHints.has(recipeIndex) && !discoveredRecipes.has(recipeIndex)) {
+                gold -= recipe.hintPrice;
+                purchasedRecipeHints.add(recipeIndex);
+                renderShop();
+                updateStats();
+
+                // Show hint
+                const ingIcons = recipe.ingredients.map(id =>
+                    ingredients.find(i => i.id === id).icon
+                ).join(' + ');
+
+                alert(`💡 Recipe Hint for ${recipe.name}:\n\n${ingIcons}\n\nCombine these ingredients in the cauldron!`);
+            }
+        }
+
+        // Start game
+        init();
+        startCustomerTimer();
+    </script>
+</body>
+</html>

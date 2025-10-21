@@ -1075,11 +1075,11 @@
             <div class="portfolio-grid">
                 <!-- Profile Card -->
                 <div class="profile-card">
-                    <div class="avatar">👨‍🎨</div>
+                    <div class="avatar">💻</div>
                     <h2 class="profile-name">Kyle Liu</h2>
                     <p class="profile-role">Creative Developer</p>
                     <p class="profile-bio">
-                        Full-stack developer specializing in creating engaging interactive experiences. Passionate about clean code, user-centered design, and building products that delight users.
+                        Specializing in creating engaging interactive experiences. Passionate about clean code, user-centered design, and building products that delight users.
                     </p>
                     <div class="vibe-status">
                         <span id="vibeEmoji">🎯</span>
@@ -1188,6 +1188,38 @@
                         <div class="app-category" data-category="strategy">Strategy</div>
                         <h3 class="app-title">Tower Defense</h3>
                         <p class="app-desc">Strategic tower placement game with multiple tower types, enemy waves, and difficulty levels</p>
+                    </div>
+                </div>
+                <div class="app-card" onclick="showPotionMixer()">
+                    <div class="app-content">
+                        <div class="app-icon">🧪</div>
+                        <div class="app-category" data-category="puzzle">Puzzle</div>
+                        <h3 class="app-title">Potion Mixer</h3>
+                        <p class="app-desc">Magical potion brewing game with recipe discovery, customer service, and special guest interactions</p>
+                    </div>
+                </div>
+                <div class="app-card" onclick="showPlaneCrash()">
+                    <div class="app-content">
+                        <div class="app-icon">✈️</div>
+                        <div class="app-category" data-category="simulation">Simulation</div>
+                        <h3 class="app-title">Plane Crash</h3>
+                        <p class="app-desc">Realistic plane crash simulation with physics-based mechanics and environmental effects</p>
+                    </div>
+                </div>
+                <div class="app-card" onclick="showUpsetAI()">
+                    <div class="app-content">
+                        <div class="app-icon">🤖</div>
+                        <div class="app-category" data-category="interactive">Interactive</div>
+                        <h3 class="app-title">Upset AI</h3>
+                        <p class="app-desc">Interactive AI chatbot that reacts to your messages - chat normally or try to make it angry!</p>
+                    </div>
+                </div>
+                <div class="app-card" onclick="showVolleyball()">
+                    <div class="app-content">
+                        <div class="app-icon">🏐</div>
+                        <div class="app-category" data-category="sports">Sports</div>
+                        <h3 class="app-title">Beach Volleyball Championship</h3>
+                        <p class="app-desc">Realistic 4v4 beach volleyball with advanced AI, physics-based gameplay, serves, spikes, and tournament mode</p>
                     </div>
                 </div>
             </div>
@@ -1515,6 +1547,26 @@
             document.getElementById('towerDefenseGameContainer').classList.add('active');
             loadTowerDefenseGame();
             hideAllHintButtons();
+        }
+
+        function showPotionMixer() {
+            // Navigate to the Potion Mixer game
+            window.location.href = 'potion_mixer.html';
+        }
+
+        function showPlaneCrash() {
+            // Navigate to the Plane Crash simulation
+            window.location.href = 'plane_crash.html';
+        }
+
+        function showUpsetAI() {
+            // Navigate to the Upset AI chatbot
+            window.location.href = 'upset_ai.html';
+        }
+
+        function showVolleyball() {
+            // Navigate to the Beach Volleyball Championship game
+            window.location.href = 'volleyball.html';
         }
 
         function closeGame() {

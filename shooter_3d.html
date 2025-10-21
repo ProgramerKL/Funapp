@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOME INVASION - 3D Defense Shooter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            overflow: hidden;
+        }
+
+        #gameCanvas {
+            display: block;
+            background: #1a1a1a;
+        }
+
+        body.playing {
+            cursor: none;
+        }
+
+        #ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            color: white;
+        }
+
+        #hud {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 18px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .hud-item {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bar {
+            width: 200px;
+            height: 20px;
+            background: rgba(0,0,0,0.5);
+            border: 2px solid #fff;
+        }
+
+        .bar-fill {
+            height: 100%;
+            transition: width 0.2s;
+        }
+
+        .bar-fill.health {
+            background: linear-gradient(90deg, #00ff00, #00aa00);
+        }
+
+        .bar-fill.ammo {
+            background: linear-gradient(90deg, #ffaa00, #ff6600);
+        }
+
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30px;
+            height: 30px;
+        }
+
+        #crosshair::before, #crosshair::after {
+            content: '';
+            position: absolute;
+            background: rgba(255,255,255,0.8);
+        }
+
+        #crosshair::before {
+            left: 50%;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            transform: translateX(-50%);
+        }
+
+        #crosshair::after {
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            transform: translateY(-50%);
+        }
+
+        #score {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        #buildMenu {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            padding: 20px;
+            border: 2px solid #00ff00;
+            display: none;
+        }
+
+        #buildMenu.show { display: block; }
+
+        .build-button {
+            background: #333;
+            color: white;
+            border: 2px solid #00ff00;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            pointer-events: all;
+        }
+
+        .build-button:hover { background: #444; }
+        .build-button.active { background: #00ff00; color: black; }
+
+        #gameOver, #startScreen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: rgba(0,0,0,0.9);
+            padding: 40px;
+            border: 3px solid #ff0000;
+            display: none;
+            pointer-events: all;
+        }
+
+        #gameOver.show, #startScreen.show { display: block; }
+
+        #startScreen h1, #gameOver h1 {
+            color: #ff0000;
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #ff0000;
+        }
+
+        button {
+            background: #ff0000;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 20px;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            margin-top: 20px;
+            pointer-events: all;
+            position: relative;
+            z-index: 1000;
+        }
+
+        button:hover { background: #cc0000; }
+
+        #startScreen p {
+            color: white;
+            font-size: 16px;
+            margin: 8px 0;
+        }
+
+        #muzzleFlash {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,200,100,0.8), transparent 60%);
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        #hitMarker {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #hitMarker::before, #hitMarker::after {
+            content: '';
+            position: absolute;
+            background: #ff0000;
+            width: 20px;
+            height: 3px;
+        }
+
+        #hitMarker::before {
+            top: 10px;
+            left: 0;
+            transform: rotate(45deg);
+        }
+
+        #hitMarker::after {
+            top: 10px;
+            right: 0;
+            transform: rotate(-45deg);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="ui">
+        <div id="startScreen" class="show">
+            <h1>HOME INVASION</h1>
+            <p style="color: #ff0000; font-size: 20px; margin-bottom: 20px;">🚨 DEFEND YOUR HOUSE 🚨</p>
+            <p>WASD - Move</p>
+            <p>Mouse - Look Around</p>
+            <p>Left Click - Shoot</p>
+            <p>R - Reload</p>
+            <p>B - Build Menu</p>
+            <button id="startButton">START DEFENSE</button>
+        </div>
+
+        <div id="crosshair"></div>
+        <div id="muzzleFlash"></div>
+        <div id="hitMarker"></div>
+
+        <div id="score">
+            WEAPON: <span id="currentWeapon" style="color: #ffaa00;">PISTOL</span><br>
+            KILLS: <span id="killCount">0</span><br>
+            WAVE: <span id="waveCount">1</span><br>
+            MONEY: $<span id="moneyCount">500</span>
+        </div>
+
+        <div id="prepTimer" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 48px; color: #00ff00; text-shadow: 0 0 20px #00ff00; display: none; pointer-events: none;">
+            <span id="prepTimerLabel">PREP TIME</span>: <span id="prepTimeLeft">30</span>s<br>
+            <span style="font-size: 24px;">Press G for SHOP | Press B to BUILD</span><br>
+            <button id="skipButton" style="font-size: 24px; margin-top: 20px; padding: 15px 40px; pointer-events: all;" onclick="skipPrepTime()">SKIP WAIT (SPACE)</button>
+        </div>
+
+        <div id="shopMenu" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); padding: 30px; border: 3px solid #ffaa00; display: none; pointer-events: all; max-height: 80vh; overflow-y: auto;">
+            <h2 style="color: #ffaa00; margin-bottom: 20px;">SHOP - Press G to close</h2>
+            <h3 style="color: #fff; margin-top: 20px;">WEAPONS</h3>
+            <button class="build-button" onclick="buyWeapon('pistol')">PISTOL - FREE (Current)</button>
+            <button class="build-button" onclick="buyWeapon('smg')">SMG - $800 (Fast fire)</button>
+            <button class="build-button" onclick="buyWeapon('shotgun')">SHOTGUN - $1200 (5 pellets)</button>
+            <button class="build-button" onclick="buyWeapon('rifle')">RIFLE - $1500 (High damage)</button>
+            <button class="build-button" onclick="buyWeapon('sniper')">SNIPER - $2000 (One shot kill)</button>
+            <h3 style="color: #fff; margin-top: 20px;">ARMOR</h3>
+            <button class="build-button" onclick="buyArmor('light')">LIGHT ARMOR - $600 (+50 HP)</button>
+            <button class="build-button" onclick="buyArmor('medium')">MEDIUM ARMOR - $1200 (+100 HP)</button>
+            <button class="build-button" onclick="buyArmor('heavy')">HEAVY ARMOR - $2000 (+200 HP)</button>
+        </div>
+
+        <div id="buildMenu">
+            <h3 style="margin-bottom: 10px;">BUILD (Press B to close)</h3>
+            <button class="build-button" onclick="selectBuild('barricade')">BARRICADE $100</button>
+            <button class="build-button" onclick="selectBuild('spike')">SPIKE TRAP $150</button>
+            <button class="build-button" onclick="selectBuild('turret')">TURRET $300</button>
+            <button class="build-button" onclick="selectBuild('mine')">MINE $200</button>
+            <button class="build-button" onclick="selectBuild('wall')">WALL $80</button>
+            <button class="build-button" onclick="selectBuild('tesla')">TESLA COIL $400</button>
+            <button class="build-button" onclick="selectBuild('freeze')">FREEZE TRAP $250</button>
+            <button class="build-button" onclick="selectBuild('laser')">LASER GRID $350</button>
+            <p style="margin-top: 10px;">Click to place</p>
+        </div>
+
+        <div id="hud">
+            <div class="hud-item">
+                <span>HEALTH:</span>
+                <div class="bar">
+                    <div class="bar-fill health" id="healthBar" style="width: 100%"></div>
+                </div>
+            </div>
+            <div class="hud-item">
+                <span>AMMO:</span>
+                <div class="bar">
+                    <div class="bar-fill ammo" id="ammoBar" style="width: 100%"></div>
+                </div>
+                <span id="ammoText">30/120</span>
+            </div>
+        </div>
+
+        <div id="gameOver">
+            <h1>HOUSE OVERRUN</h1>
+            <p>KILLS: <span id="finalKills">0</span></p>
+            <p>WAVES: <span id="finalWaves">0</span></p>
+            <button id="restartButton">TRY AGAIN</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let gameRunning = false;
+        let gameStarted = false;
+
+        const player = {
+            x: 0, y: 0, z: -2,
+            angle: 0, pitch: 0,
+            health: 100, speed: 0.08
+        };
+
+        const weaponTypes = {
+            pistol: { ammo: 30, maxAmmo: 30, reserveAmmo: 120, damage: 35, fireRate: 150, pellets: 1, cost: 0 },
+            smg: { ammo: 40, maxAmmo: 40, reserveAmmo: 200, damage: 20, fireRate: 80, pellets: 1, cost: 800 },
+            shotgun: { ammo: 8, maxAmmo: 8, reserveAmmo: 32, damage: 30, fireRate: 800, pellets: 5, cost: 1200 },
+            rifle: { ammo: 25, maxAmmo: 25, reserveAmmo: 100, damage: 60, fireRate: 200, pellets: 1, cost: 1500 },
+            sniper: { ammo: 5, maxAmmo: 5, reserveAmmo: 20, damage: 150, fireRate: 1200, pellets: 1, cost: 2000 }
+        };
+
+        let currentWeapon = 'pistol';
+        const weapon = { ...weaponTypes.pistol, lastFire: 0, reloading: false };
+
+        let money = 500, kills = 0, wave = 1;
+        let enemies = [], bullets = [], buildings = [];
+        let enemiesPerWave = 5, enemiesSpawned = 0, spawnTimer = 0;
+        const keys = {};
+        let mouseLocked = false;
+        let buildMode = false, selectedBuild = null;
+        let prepPhase = true, prepTimeRemaining = 30;
+        let playerMaxHealth = 100, playerArmor = 0;
+        let currentSpawnPoint = 0; // Track spawn point for each wave
+
+        // Realistic house layout
+        const house = {
+            // Outer walls
+            walls: [
+                {x1: -10, z1: -10, x2: 10, z2: -10}, // Front
+                {x1: -10, z1: 10, x2: 10, z2: 10},   // Back
+                {x1: -10, z1: -10, x2: -10, z2: 10}, // Left
+                {x1: 10, z1: -10, x2: 10, z2: 10},   // Right
+            ],
+            // Interior walls (rooms)
+            interior: [
+                {x1: -10, z1: 0, x2: -3, z2: 0},    // Living room divider
+                {x1: 3, z1: 0, x2: 10, z2: 0},      // Kitchen divider
+                {x1: 0, z1: -10, x2: 0, z2: -3},    // Hallway wall 1
+                {x1: 0, z1: 3, x2: 0, z2: 10},      // Hallway wall 2
+            ],
+            // Furniture
+            furniture: [
+                {x: -6, z: -6, w: 2, h: 1, type: 'couch'},
+                {x: 6, z: -6, w: 1.5, h: 1.5, type: 'table'},
+                {x: -6, z: 6, w: 2, h: 0.8, type: 'counter'},
+                {x: 6, z: 6, w: 1, h: 1, type: 'fridge'},
+            ],
+            // Doorways (gaps in walls)
+            doors: [
+                {x: 0, z: -10, width: 1.5}, // Front door
+                {x: 0, z: 10, width: 1.5},  // Back door
+                {x: -10, z: 0, width: 1.5}, // Side door
+            ]
+        };
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Button event listeners
+        document.getElementById('startButton').addEventListener('click', (e) => {
+            e.stopPropagation();
+            startGame();
+        });
+
+        document.getElementById('restartButton').addEventListener('click', (e) => {
+            e.stopPropagation();
+            restartGame();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            keys[key] = true;
+
+            // Prevent default browser behavior for game keys
+            if (gameRunning && ['w', 'a', 's', 'd', ' ', 'r', 'b', 'g'].includes(key)) {
+                e.preventDefault();
+            }
+
+            if (key === 'r' && gameRunning) reload();
+            if (key === 'b' && gameRunning) {
+                buildMode = !buildMode;
+                document.getElementById('buildMenu').classList.toggle('show', buildMode);
+                if (buildMode) document.getElementById('shopMenu').style.display = 'none';
+            }
+            if (key === 'g' && gameRunning) {
+                const shop = document.getElementById('shopMenu');
+                shop.style.display = shop.style.display === 'none' ? 'block' : 'none';
+                if (shop.style.display === 'block') {
+                    buildMode = false;
+                    document.getElementById('buildMenu').classList.remove('show');
+                }
+            }
+            if (e.key === ' ' && gameRunning && prepPhase) {
+                skipPrepTime();
+            }
+        });
+
+        document.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
+
+        canvas.addEventListener('click', () => {
+            if (!gameStarted) return;
+            if (!mouseLocked) canvas.requestPointerLock();
+            if (gameRunning && mouseLocked) {
+                buildMode && selectedBuild ? placeBuild() : shoot();
+            }
+        });
+
+        document.addEventListener('pointerlockchange', () => {
+            mouseLocked = document.pointerLockElement === canvas;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (mouseLocked && gameRunning) {
+                player.angle += e.movementX * 0.003;
+                player.pitch -= e.movementY * 0.003;
+                player.pitch = Math.max(-Math.PI/3, Math.min(Math.PI/3, player.pitch));
+            }
+        });
+
+        function startGame() {
+            document.getElementById('startScreen').classList.remove('show');
+            document.body.classList.add('playing');
+            gameStarted = true;
+            gameRunning = true;
+            canvas.requestPointerLock();
+            resetGame();
+        }
+
+        function skipPrepTime() {
+            if (prepPhase) {
+                prepPhase = false;
+                prepTimeRemaining = 0;
+                document.getElementById('prepTimer').style.display = 'none';
+            }
+        }
+
+        function resetGame() {
+            player.x = 0; player.z = -2; player.health = 100;
+            weapon.ammo = 30; weapon.reserveAmmo = 120;
+            enemies = []; bullets = []; buildings = [];
+            kills = 0; wave = 1; money = 500;
+            enemiesPerWave = 5; enemiesSpawned = 0; spawnTimer = 0;
+            buildMode = false; selectedBuild = null;
+            prepPhase = true; prepTimeRemaining = 30;
+            document.getElementById('buildMenu').classList.remove('show');
+            document.getElementById('prepTimer').style.display = 'block';
+            updateUI();
+        }
+
+        function restartGame() {
+            document.getElementById('gameOver').classList.remove('show');
+            document.body.classList.add('playing');
+            gameRunning = true;
+            resetGame();
+            canvas.requestPointerLock();
+        }
+
+        function shoot() {
+            const now = Date.now();
+
+            // Auto-reload if out of ammo
+            if (weapon.ammo <= 0 && weapon.reserveAmmo > 0 && !weapon.reloading) {
+                reload();
+                return;
+            }
+
+            if (now - weapon.lastFire < weapon.fireRate || weapon.ammo <= 0 || weapon.reloading) return;
+
+            weapon.lastFire = now;
+            weapon.ammo--;
+
+            document.getElementById('muzzleFlash').style.opacity = '1';
+            setTimeout(() => document.getElementById('muzzleFlash').style.opacity = '0', 50);
+
+            // Fire multiple pellets for shotgun
+            for (let i = 0; i < (weapon.pellets || 1); i++) {
+                const spread = weapon.pellets > 1 ? (Math.random() - 0.5) * 0.15 : 0;
+                const spreadY = weapon.pellets > 1 ? (Math.random() - 0.5) * 0.15 : 0;
+
+                bullets.push({
+                    x: player.x, y: 1, z: player.z,
+                    dx: Math.cos(player.angle + spread) * Math.cos(player.pitch + spreadY),
+                    dy: Math.sin(player.pitch + spreadY),
+                    dz: Math.sin(player.angle + spread) * Math.cos(player.pitch + spreadY),
+                    damage: weapon.damage
+                });
+            }
+            updateUI();
+        }
+
+        function reload() {
+            if (weapon.reloading || weapon.ammo === weapon.maxAmmo || weapon.reserveAmmo <= 0) return;
+            weapon.reloading = true;
+            setTimeout(() => {
+                const need = weapon.maxAmmo - weapon.ammo;
+                const take = Math.min(need, weapon.reserveAmmo);
+                weapon.ammo += take;
+                weapon.reserveAmmo -= take;
+                weapon.reloading = false;
+                updateUI();
+            }, 1500);
+        }
+
+        function buyWeapon(type) {
+            const wepType = weaponTypes[type];
+            if (money < wepType.cost) return alert('Not enough money!');
+            if (type === currentWeapon) return;
+
+            money -= wepType.cost;
+            currentWeapon = type;
+            weapon.ammo = wepType.ammo;
+            weapon.maxAmmo = wepType.maxAmmo;
+            weapon.reserveAmmo = wepType.reserveAmmo;
+            weapon.damage = wepType.damage;
+            weapon.fireRate = wepType.fireRate;
+            weapon.pellets = wepType.pellets;
+            updateUI();
+        }
+
+        function buyArmor(type) {
+            const costs = { light: 600, medium: 1200, heavy: 2000 };
+            const hp = { light: 50, medium: 100, heavy: 200 };
+
+            if (money < costs[type]) return alert('Not enough money!');
+
+            money -= costs[type];
+            playerMaxHealth += hp[type];
+            player.health = Math.min(player.health + hp[type], playerMaxHealth);
+            updateUI();
+        }
+
+        function selectBuild(type) {
+            selectedBuild = type;
+            document.querySelectorAll('.build-button').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function placeBuild() {
+            const costs = {
+                barricade: 100, spike: 150, turret: 300, mine: 200,
+                wall: 80, tesla: 400, freeze: 250, laser: 350
+            };
+            if (money < costs[selectedBuild]) return;
+
+            // Calculate placement position directly in front
+            // Rotate by 90 degrees (PI/2) to align with camera view
+            const distance = 4; // 4 units in front
+
+            const forwardX = Math.cos(player.angle + Math.PI/2);
+            const forwardZ = Math.sin(player.angle + Math.PI/2);
+
+            const px = player.x + forwardX * distance;
+            const pz = player.z + forwardZ * distance;
+
+            // Snap to grid for consistent placement
+            const gridSize = 1;
+            const snappedX = Math.round(px / gridSize) * gridSize;
+            const snappedZ = Math.round(pz / gridSize) * gridSize;
+
+            const buildingData = {
+                type: selectedBuild, x: snappedX, z: snappedZ,
+                health: (selectedBuild === 'barricade' || selectedBuild === 'wall') ? 100 : 1,
+                lastFire: 0
+            };
+
+            // Special properties for new traps
+            if (selectedBuild === 'freeze') {
+                buildingData.slowEffect = 0.5; // Slow enemies to 50% speed
+                buildingData.range = 2;
+            } else if (selectedBuild === 'tesla') {
+                buildingData.damage = 15;
+                buildingData.range = 2; // Reduced from 3 to 2
+                buildingData.chainCount = 2;
+            } else if (selectedBuild === 'laser') {
+                buildingData.damage = 5;
+                buildingData.continuous = true;
+            }
+
+            buildings.push(buildingData);
+
+            money -= costs[selectedBuild];
+            updateUI();
+        }
+
+        function spawnEnemy() {
+            const spawns = [
+                {x: 0, z: -15, name: 'NORTH'},
+                {x: 0, z: 15, name: 'SOUTH'},
+                {x: -15, z: 0, name: 'WEST'},
+                {x: 15, z: 0, name: 'EAST'}
+            ];
+            const s = spawns[currentSpawnPoint]; // Use same spawn point for entire wave
+
+            enemies.push({
+                x: s.x, y: 0, z: s.z,
+                health: 100,
+                maxHealth: 100,
+                speed: 0.05,
+                damage: 15,
+                lastAttack: 0
+            });
+        }
+
+        function updateEnemies() {
+            const now = Date.now();
+            enemies.forEach((e, i) => {
+                const dx = player.x - e.x;
+                const dz = player.z - e.z;
+                const dist = Math.sqrt(dx*dx + dz*dz);
+
+                // Reset speed multiplier
+                let speedMultiplier = 1;
+
+                // Check trap effects
+                buildings.forEach((b, bi) => {
+                    const bdx = e.x - b.x;
+                    const bdz = e.z - b.z;
+                    const bdist = Math.sqrt(bdx*bdx + bdz*bdz);
+
+                    // Contact traps
+                    if (bdist < 0.7) {
+                        if (b.type === 'mine') {
+                            enemies.splice(i, 1);
+                            buildings.splice(bi, 1);
+                            kills++;
+                            money += 50;
+                            updateUI();
+                            return;
+                        } else if (b.type === 'spike') {
+                            e.health -= 3;
+                        } else if (b.type === 'laser' && b.continuous) {
+                            e.health -= b.damage;
+                        }
+                    }
+
+                    // Area effect traps
+                    if (b.type === 'freeze' && bdist < b.range) {
+                        speedMultiplier = Math.min(speedMultiplier, b.slowEffect);
+                    } else if (b.type === 'tesla' && bdist < b.range && now - b.lastFire > 1000) {
+                        e.health -= b.damage;
+                        b.lastFire = now;
+                    }
+                });
+
+                // Check if enemy died from traps
+                if (e.health <= 0) {
+                    enemies.splice(i, 1);
+                    kills++;
+                    money += 50;
+                    updateUI();
+                    return;
+                }
+
+                // Move towards player
+                if (dist > 1.5) {
+                    e.x += (dx/dist) * e.speed * speedMultiplier;
+                    e.z += (dz/dist) * e.speed * speedMultiplier;
+                } else if (now - e.lastAttack > 1000) {
+                    e.lastAttack = now;
+                    player.health -= e.damage;
+                    if (player.health <= 0) gameOver();
+                    updateUI();
+                }
+            });
+        }
+
+        function updateBullets() {
+            bullets = bullets.filter(b => {
+                b.x += b.dx * 0.5;
+                b.y += b.dy * 0.5;
+                b.z += b.dz * 0.5;
+
+                for (let i = 0; i < enemies.length; i++) {
+                    const e = enemies[i];
+                    const dx = b.x - e.x;
+                    const dy = b.y - e.y;
+                    const dz = b.z - e.z;
+                    const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+
+                    // Very large hitbox for very easy hits
+                    if (dist < 2.5) {
+                        e.health -= b.damage;
+
+                        const hit = document.getElementById('hitMarker');
+                        hit.style.opacity = '1';
+                        setTimeout(() => hit.style.opacity = '0', 100);
+
+                        if (e.health <= 0) {
+                            enemies.splice(i, 1);
+                            kills++;
+                            money += 50;
+                            updateUI();
+                        }
+                        return false;
+                    }
+                }
+                return Math.sqrt(b.x*b.x + b.z*b.z) < 50;
+            });
+        }
+
+        function updateTurrets() {
+            const now = Date.now();
+            buildings.forEach(b => {
+                if (b.type === 'turret' && now - b.lastFire > 500) {
+                    let near = null, nearD = 999;
+                    enemies.forEach(e => {
+                        const d = Math.sqrt((e.x-b.x)**2 + (e.z-b.z)**2);
+                        if (d < 5 && d < nearD) { near = e; nearD = d; } // Reduced from 10 to 5
+                    });
+
+                    if (near) {
+                        const dx = near.x - b.x;
+                        const dz = near.z - b.z;
+                        const d = Math.sqrt(dx*dx + dz*dz);
+                        bullets.push({
+                            x: b.x, y: 0.5, z: b.z,
+                            dx: dx/d, dy: 0, dz: dz/d,
+                            damage: 25
+                        });
+                        b.lastFire = now;
+                    }
+                }
+            });
+        }
+
+        function updateUI() {
+            document.getElementById('healthBar').style.width = (player.health/playerMaxHealth*100) + '%';
+            document.getElementById('ammoBar').style.width = (weapon.ammo/weapon.maxAmmo*100) + '%';
+            document.getElementById('ammoText').textContent = weapon.ammo + '/' + weapon.reserveAmmo;
+            document.getElementById('killCount').textContent = kills;
+            document.getElementById('waveCount').textContent = wave;
+            document.getElementById('moneyCount').textContent = money;
+            document.getElementById('currentWeapon').textContent = currentWeapon.toUpperCase();
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            document.body.classList.remove('playing');
+            document.getElementById('gameOver').classList.add('show');
+            document.getElementById('finalKills').textContent = kills;
+            document.getElementById('finalWaves').textContent = wave;
+            document.exitPointerLock();
+        }
+
+        function render() {
+            // Sky gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#1a1a2e');
+            gradient.addColorStop(1, '#16213e');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            ctx.translate(canvas.width/2, canvas.height/2);
+
+            // Floor - realistic wood texture with lighting
+            for (let x = -20; x <= 20; x++) {
+                for (let z = -20; z <= 20; z++) {
+                    const wx = x - player.x;
+                    const wz = z - player.z;
+                    const rx = wx * Math.cos(-player.angle) - wz * Math.sin(-player.angle);
+                    const rz = wx * Math.sin(-player.angle) + wz * Math.cos(-player.angle);
+
+                    if (rz > 0) {
+                        const sx = (rx/rz) * 300;
+                        const sy = (0.5/rz) * 300 - player.pitch * 200;
+                        const sz = 50/rz;
+
+                        // Distance-based lighting (dimmer at distance)
+                        const lightFactor = Math.max(0.2, Math.min(1, 8 / rz));
+
+                        // Wood grain pattern (checkerboard with variation)
+                        const checker = (Math.floor(wx) + Math.floor(wz)) % 2;
+                        const baseColor = checker === 0 ?
+                            `rgba(139,90,43,${lightFactor})` :
+                            `rgba(160,105,55,${lightFactor})`;
+
+                        ctx.fillStyle = baseColor;
+                        ctx.fillRect(sx-sz/2, sy-sz/2, sz, sz);
+
+                        // Add subtle grain lines
+                        ctx.strokeStyle = `rgba(90,60,30,${lightFactor * 0.3})`;
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(sx-sz/2, sy-sz/2, sz, sz);
+                    }
+                }
+            }
+
+            // Ceiling - concrete texture with shadows
+            for (let x = -20; x <= 20; x++) {
+                for (let z = -20; z <= 20; z++) {
+                    const wx = x - player.x;
+                    const wz = z - player.z;
+                    const rx = wx * Math.cos(-player.angle) - wz * Math.sin(-player.angle);
+                    const rz = wx * Math.sin(-player.angle) + wz * Math.cos(-player.angle);
+
+                    if (rz > 0) {
+                        const sx = (rx/rz) * 300;
+                        const sy = (-3/rz) * 300 - player.pitch * 200;
+                        const sz = 50/rz;
+
+                        const lightFactor = Math.max(0.15, Math.min(0.6, 5 / rz));
+
+                        // Concrete texture
+                        const variation = ((wx * 7 + wz * 11) % 20) / 100;
+                        ctx.fillStyle = `rgba(${200 + variation * 20},${200 + variation * 20},${200 + variation * 20},${lightFactor})`;
+                        ctx.fillRect(sx-sz/2, sy-sz/2, sz, sz);
+
+                        // Panel lines
+                        ctx.strokeStyle = `rgba(150,150,150,${lightFactor * 0.4})`;
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(sx-sz/2, sy-sz/2, sz, sz);
+                    }
+                }
+            }
+
+            // Walls - realistic brick/concrete with depth shading
+            const drawWall = (wall) => {
+                const d1x = wall.x1 - player.x, d1z = wall.z1 - player.z;
+                const d2x = wall.x2 - player.x, d2z = wall.z2 - player.z;
+                const r1x = d1x * Math.cos(-player.angle) - d1z * Math.sin(-player.angle);
+                const r1z = d1x * Math.sin(-player.angle) + d1z * Math.cos(-player.angle);
+                const r2x = d2x * Math.cos(-player.angle) - d2z * Math.sin(-player.angle);
+                const r2z = d2x * Math.sin(-player.angle) + d2z * Math.cos(-player.angle);
+
+                if (r1z > 0 || r2z > 0) {
+                    const s1x = (r1x / Math.max(r1z,0.1)) * 300;
+                    const s1y = (-1.5 / Math.max(r1z,0.1)) * 300 - player.pitch * 200;
+                    const s2x = (r2x / Math.max(r2z,0.1)) * 300;
+                    const s2y = (-1.5 / Math.max(r2z,0.1)) * 300 - player.pitch * 200;
+
+                    // Distance-based lighting
+                    const avgDist = (Math.max(r1z, 0.1) + Math.max(r2z, 0.1)) / 2;
+                    const lightFactor = Math.max(0.3, Math.min(1, 10 / avgDist));
+
+                    // Create gradient for depth perception
+                    const wallGradient = ctx.createLinearGradient(s1x, s1y, s1x, s1y + 300);
+                    wallGradient.addColorStop(0, `rgba(220,220,220,${lightFactor})`);
+                    wallGradient.addColorStop(1, `rgba(180,180,180,${lightFactor})`);
+
+                    ctx.fillStyle = wallGradient;
+                    ctx.beginPath();
+                    ctx.moveTo(s1x, s1y);
+                    ctx.lineTo(s2x, s2y);
+                    ctx.lineTo(s2x, s2y + 300);
+                    ctx.lineTo(s1x, s1y + 300);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Brick pattern lines
+                    ctx.strokeStyle = `rgba(150,150,150,${lightFactor * 0.5})`;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            };
+
+            house.walls.forEach(drawWall);
+            house.interior.forEach(drawWall);
+
+            // Furniture
+            house.furniture.forEach(f => {
+                const dx = f.x - player.x;
+                const dz = f.z - player.z;
+                const rx = dx * Math.cos(-player.angle) - dz * Math.sin(-player.angle);
+                const rz = dx * Math.sin(-player.angle) + dz * Math.cos(-player.angle);
+
+                if (rz > 0) {
+                    const sx = (rx/rz) * 300;
+                    const sy = (0.3/rz) * 300 - player.pitch * 200;
+                    const sw = (f.w/rz) * 150;
+                    const sh = (f.h/rz) * 150;
+
+                    ctx.fillStyle = f.type === 'couch' ? '#8B4513' : f.type === 'table' ? '#654321' : '#AAA';
+                    ctx.fillRect(sx-sw/2, sy-sh, sw, sh);
+                }
+            });
+
+            // Buildings/traps - LARGER AND MORE VISIBLE
+            buildings.forEach(b => {
+                const dx = b.x - player.x;
+                const dz = b.z - player.z;
+                const rx = dx * Math.cos(-player.angle) - dz * Math.sin(-player.angle);
+                const rz = dx * Math.sin(-player.angle) + dz * Math.cos(-player.angle);
+
+                if (rz > 0) {
+                    const sx = (rx/rz) * 300;
+                    const sy = (0.5/rz) * 300 - player.pitch * 200;
+                    const sz = (0.8/rz) * 250; // INCREASED SIZE from 0.5/200 to 0.8/250
+
+                    if (b.type === 'barricade') {
+                        ctx.fillStyle = '#CD853F'; // Brighter brown
+                        ctx.fillRect(sx-sz*1.2, sy-sz*2.5, sz*2.4, sz*2.5);
+                        ctx.strokeStyle = '#8B4513';
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(sx-sz*1.2, sy-sz*2.5, sz*2.4, sz*2.5);
+                    } else if (b.type === 'spike') {
+                        ctx.fillStyle = '#999'; // Brighter gray
+                        ctx.strokeStyle = '#333';
+                        ctx.lineWidth = 3;
+                        ctx.beginPath();
+                        ctx.moveTo(sx-sz*1.2, sy);
+                        ctx.lineTo(sx, sy-sz*1.5);
+                        ctx.lineTo(sx+sz*1.2, sy);
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.stroke();
+                    } else if (b.type === 'turret') {
+                        ctx.fillStyle = '#666'; // Brighter gray
+                        ctx.fillRect(sx-sz*0.7, sy-sz*1.5, sz*1.4, sz*1.5);
+                        ctx.fillStyle = '#ff3333'; // Brighter red
+                        ctx.fillRect(sx-sz*0.4, sy-sz*1.8, sz*0.8, sz*0.5);
+                        ctx.strokeStyle = '#000';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(sx-sz*0.7, sy-sz*1.5, sz*1.4, sz*1.5);
+                    } else if (b.type === 'mine') {
+                        ctx.fillStyle = '#ff3333'; // Brighter red
+                        ctx.strokeStyle = '#8B0000';
+                        ctx.lineWidth = 3;
+                        ctx.beginPath();
+                        ctx.arc(sx, sy-sz*0.3, sz*0.7, 0, Math.PI*2);
+                        ctx.fill();
+                        ctx.stroke();
+                    } else if (b.type === 'wall') {
+                        ctx.fillStyle = '#777'; // Brighter gray
+                        ctx.fillRect(sx-sz*1.2, sy-sz*2.5, sz*2.4, sz*2.5);
+                        ctx.strokeStyle = '#444';
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(sx-sz*1.2, sy-sz*2.5, sz*2.4, sz*2.5);
+                    } else if (b.type === 'tesla') {
+                        ctx.fillStyle = '#3366ff'; // Brighter blue
+                        ctx.fillRect(sx-sz*0.7, sy-sz*2, sz*1.4, sz*2);
+                        ctx.fillStyle = '#00ffff'; // Bright cyan
+                        ctx.strokeStyle = '#0ff';
+                        ctx.lineWidth = 3;
+                        ctx.beginPath();
+                        ctx.arc(sx, sy-sz*2, sz*0.5, 0, Math.PI*2);
+                        ctx.fill();
+                        ctx.stroke();
+                    } else if (b.type === 'freeze') {
+                        ctx.fillStyle = '#33ccff'; // Brighter cyan
+                        ctx.beginPath();
+                        ctx.arc(sx, sy-sz*0.7, sz*0.8, 0, Math.PI*2);
+                        ctx.fill();
+                        ctx.strokeStyle = '#00ffff';
+                        ctx.lineWidth = 4;
+                        ctx.beginPath();
+                        ctx.arc(sx, sy-sz*0.7, sz*1.3, 0, Math.PI*2);
+                        ctx.stroke();
+                    } else if (b.type === 'laser') {
+                        ctx.fillStyle = '#ff33ff'; // Brighter magenta
+                        ctx.fillRect(sx-sz*0.5, sy-sz*1.5, sz, sz*1.5);
+                        ctx.fillStyle = '#ff0000';
+                        ctx.fillRect(sx-sz*0.4, sy, sz*0.8, 4);
+                        ctx.strokeStyle = '#000';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(sx-sz*0.5, sy-sz*1.5, sz, sz*1.5);
+                    }
+                }
+            });
+
+            // Enemies - realistic alien creatures with shadows
+            enemies.forEach(e => {
+                const dx = e.x - player.x;
+                const dy = e.y - player.y;
+                const dz = e.z - player.z;
+                const rx = dx * Math.cos(-player.angle) - dz * Math.sin(-player.angle);
+                const rz = dx * Math.sin(-player.angle) + dz * Math.cos(-player.angle);
+
+                if (rz > 0) {
+                    const sx = (rx/rz) * 300;
+                    const sy = ((dy-0.2)/rz) * 300 - player.pitch * 200;
+                    const sz = (0.5/rz) * 200;
+
+                    const lightFactor = Math.max(0.4, Math.min(1, 8 / rz));
+
+                    // Shadow beneath enemy
+                    ctx.fillStyle = `rgba(0,0,0,${0.3 * lightFactor})`;
+                    ctx.beginPath();
+                    ctx.ellipse(sx, sy + sz, sz * 0.6, sz * 0.3, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Enemy body with gradient for depth
+                    const bodyGradient = ctx.createLinearGradient(sx - sz/2, sy - sz, sx + sz/2, sy + sz);
+                    bodyGradient.addColorStop(0, `rgba(100,20,20,${lightFactor})`);
+                    bodyGradient.addColorStop(0.5, `rgba(139,0,0,${lightFactor})`);
+                    bodyGradient.addColorStop(1, `rgba(80,0,0,${lightFactor})`);
+                    ctx.fillStyle = bodyGradient;
+                    ctx.fillRect(sx-sz/2, sy-sz, sz, sz*2);
+
+                    // Add dark outline for definition
+                    ctx.strokeStyle = `rgba(50,0,0,${lightFactor})`;
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(sx-sz/2, sy-sz, sz, sz*2);
+
+                    // Glowing eyes
+                    const eyeGlow = ctx.createRadialGradient(sx-sz/3, sy-sz*0.7, 0, sx-sz/3, sy-sz*0.7, sz/4);
+                    eyeGlow.addColorStop(0, `rgba(255,255,0,${lightFactor})`);
+                    eyeGlow.addColorStop(1, `rgba(255,200,0,${lightFactor * 0.3})`);
+                    ctx.fillStyle = eyeGlow;
+                    ctx.beginPath();
+                    ctx.arc(sx-sz/3, sy-sz*0.7, sz/6, 0, Math.PI*2);
+                    ctx.fill();
+
+                    const eyeGlow2 = ctx.createRadialGradient(sx+sz/6, sy-sz*0.7, 0, sx+sz/6, sy-sz*0.7, sz/4);
+                    eyeGlow2.addColorStop(0, `rgba(255,255,0,${lightFactor})`);
+                    eyeGlow2.addColorStop(1, `rgba(255,200,0,${lightFactor * 0.3})`);
+                    ctx.fillStyle = eyeGlow2;
+                    ctx.beginPath();
+                    ctx.arc(sx+sz/6, sy-sz*0.7, sz/6, 0, Math.PI*2);
+                    ctx.fill();
+
+                    // Health bar with better styling
+                    const hp = e.health / e.maxHealth;
+                    const barWidth = sz;
+                    const barHeight = 6;
+
+                    // Bar background
+                    ctx.fillStyle = `rgba(40,40,40,${lightFactor})`;
+                    ctx.fillRect(sx-barWidth/2 - 1, sy-sz*1.35 - 1, barWidth + 2, barHeight + 2);
+
+                    // Health bar fill with gradient
+                    const hpGradient = ctx.createLinearGradient(sx-barWidth/2, 0, sx+barWidth/2, 0);
+                    if (hp > 0.5) {
+                        hpGradient.addColorStop(0, `rgba(0,255,0,${lightFactor})`);
+                        hpGradient.addColorStop(1, `rgba(0,200,0,${lightFactor})`);
+                    } else if (hp > 0.25) {
+                        hpGradient.addColorStop(0, `rgba(255,165,0,${lightFactor})`);
+                        hpGradient.addColorStop(1, `rgba(255,140,0,${lightFactor})`);
+                    } else {
+                        hpGradient.addColorStop(0, `rgba(255,0,0,${lightFactor})`);
+                        hpGradient.addColorStop(1, `rgba(200,0,0,${lightFactor})`);
+                    }
+                    ctx.fillStyle = hpGradient;
+                    ctx.fillRect(sx-barWidth/2, sy-sz*1.35, barWidth * hp, barHeight);
+                }
+            });
+
+            ctx.restore();
+        }
+
+        function gameLoop() {
+            if (gameRunning) {
+                if (keys['w']) { player.x += Math.cos(player.angle) * player.speed; player.z += Math.sin(player.angle) * player.speed; }
+                if (keys['s']) { player.x -= Math.cos(player.angle) * player.speed; player.z -= Math.sin(player.angle) * player.speed; }
+                if (keys['a']) { player.x += Math.cos(player.angle - Math.PI/2) * player.speed; player.z += Math.sin(player.angle - Math.PI/2) * player.speed; }
+                if (keys['d']) { player.x += Math.cos(player.angle + Math.PI/2) * player.speed; player.z += Math.sin(player.angle + Math.PI/2) * player.speed; }
+
+                player.x = Math.max(-9, Math.min(9, player.x));
+                player.z = Math.max(-9, Math.min(9, player.z));
+
+                // Prep phase countdown
+                if (prepPhase) {
+                    prepTimeRemaining -= 16 / 1000; // Convert ms to seconds
+                    document.getElementById('prepTimeLeft').textContent = Math.ceil(prepTimeRemaining);
+
+                    if (prepTimeRemaining <= 0) {
+                        prepPhase = false;
+                        document.getElementById('prepTimer').style.display = 'none';
+                    }
+                } else {
+                    // Only spawn enemies after prep phase
+                    spawnTimer += 16;
+                    if (enemiesSpawned < enemiesPerWave && spawnTimer > 2000) {
+                        spawnEnemy();
+                        enemiesSpawned++;
+                        spawnTimer = 0;
+                    } else if (enemies.length === 0 && enemiesSpawned >= enemiesPerWave) {
+                        // Wave complete - start 30 second break
+                        wave++;
+                        enemiesPerWave += 3;
+                        enemiesSpawned = 0;
+                        currentSpawnPoint = (currentSpawnPoint + 1) % 4; // Rotate spawn point
+                        weapon.reserveAmmo += 60;
+                        player.health = Math.min(playerMaxHealth, player.health + 25);
+                        money += 200;
+
+                        // Start break phase
+                        prepPhase = true;
+                        prepTimeRemaining = 30;
+                        document.getElementById('prepTimer').style.display = 'block';
+                        document.getElementById('prepTimerLabel').textContent = 'BREAK TIME';
+                        document.getElementById('prepTimerLabel').style.color = '#ffaa00';
+
+                        updateUI();
+                    }
+
+                    updateEnemies();
+                    updateBullets();
+                    updateTurrets();
+                }
+            }
+
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>

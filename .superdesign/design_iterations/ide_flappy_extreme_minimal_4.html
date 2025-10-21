@@ -559,14 +559,14 @@
                     isFlapping: false,
                     lastFlapTime: 0,
                     energy: 100,
-                    windResistance: 0.992  // Less wind resistance to maintain forward momentum
+                    windResistance: 0.95  // More wind resistance to slow down horizontal movement
                 };
                 
                 // Balanced realistic physics settings
                 this.baseDifficulty = {
-                    gravity: 0.42,  // Moderate gravity
-                    flapPower: -6.8,  // Slightly reduced flap strength for lower jumps
-                    pipeSpeed: 2.2,  // More manageable speed
+                    gravity: 0.55,  // Increased gravity for more responsive feel
+                    flapPower: -6.0,  // Increased flap strength for higher jumps
+                    pipeSpeed: 4.0,  // Even faster, more exciting speed
                     pipeGap: 280,   // Comfortable gap between pipes
                     pipeSpacing: 320,  // Better spacing
                     airResistance: 0.014,  // Moderate air resistance
@@ -855,7 +855,7 @@
                         this.bird.energy = Math.max(25, this.bird.energy - 1.8);
                         
                         // Add forward momentum from wing movement (affects screen speed)
-                        this.bird.horizontalVelocity += 0.3;
+                        this.bird.horizontalVelocity += 0.1;
                         
                         // Reset flapping state after animation
                         setTimeout(() => {
@@ -899,8 +899,8 @@
                 const forwardWind = Math.sin(windTime * 1.3) * 0.05;
                 this.bird.horizontalVelocity += windStrength * 0.3 + forwardWind;
                 
-                // Moderate thermal currents (warm air updrafts)
-                const thermalFrequency = this.level > 5 ? 0.005 : 0.003; // Moderate frequency
+                // Moderate thermal currents (warm air updrafts) - reduced frequency
+                const thermalFrequency = this.level > 5 ? 0.001 : 0.0005; // Much lower frequency
                 if (Math.random() < thermalFrequency) {
                     const thermalX = Math.random() * this.width;
                     const thermalStrength = 0.3 + Math.random() * 0.4; // Moderate strength
@@ -933,19 +933,10 @@
                 
                 // Horizontal wind resistance
                 this.bird.horizontalVelocity *= this.bird.windResistance;
-                
-                // Update horizontal position with wind
-                this.bird.x += this.bird.horizontalVelocity;
-                
-                // Keep bird within screen bounds horizontally
-                if (this.bird.x < 50) {
-                    this.bird.x = 50;
-                    this.bird.horizontalVelocity = 0;
-                }
-                if (this.bird.x > this.width - 50) {
-                    this.bird.x = this.width - 50;
-                    this.bird.horizontalVelocity = 0;
-                }
+
+                // Constant forward movement for camera following
+                const baseForwardSpeed = 3;
+                this.bird.x += baseForwardSpeed + this.bird.horizontalVelocity;
                 
                 // Realistic terminal velocity with bird mass
                 const terminalVelocity = 7 + (this.bird.mass * 2);
@@ -957,8 +948,8 @@
                     const turbulence = Math.sin(Date.now() * 0.01) * 0.1;
                     this.bird.velocity += turbulence;
                     
-                    // Occasional gusts of wind
-                    if (Math.random() < 0.05) {
+                    // Occasional gusts of wind - reduced frequency
+                    if (Math.random() < 0.01) {
                         this.difficulty.windEffect = (Math.random() - 0.5) * 0.3;
                     }
                 }
@@ -972,8 +963,8 @@
                     // More frequent thermal currents
                     this.difficulty.thermalCurrent = 0.15;
                     
-                    // Variable gravity zones
-                    if (Math.random() < 0.02) {
+                    // Variable gravity zones - reduced frequency
+                    if (Math.random() < 0.005) {
                         const gravityZone = Math.random() * this.width;
                         if (Math.abs(this.bird.x - gravityZone) < 80) {
                             this.bird.velocity += 0.2; // Localized gravity wells
@@ -997,20 +988,17 @@
                     this.bird.wingAngle = Math.sin(glideTime) * 8;
                 }
                 
-                // Generate pipes with spacing
-                if (this.pipes.length === 0 || this.pipes[this.pipes.length - 1].x < this.width - this.difficulty.pipeSpacing) {
+                // Generate pipes with spacing - spawn ahead of bird
+                if (this.pipes.length === 0 || this.pipes[this.pipes.length - 1].x < this.bird.x + this.width - this.difficulty.pipeSpacing) {
                     this.generatePipe();
                 }
                 
-                // Calculate dynamic speed based on bird's forward momentum
-                const baseSpeed = this.difficulty.pipeSpeed;
-                const birdForwardMomentum = Math.abs(this.bird.horizontalVelocity) + 1; // Add base momentum
-                const energyFactor = this.bird.energy / 100; // Tired bird flies slower
-                const dynamicSpeed = baseSpeed * birdForwardMomentum * energyFactor;
-                
-                // Update pipes with speed that follows bird's movement
+                // Pipes don't move - bird moves forward instead
+                // Keep pipes stationary in world space
+
+                // Update pipes (for animations only)
                 this.pipes.forEach(pipe => {
-                    pipe.x -= Math.max(0.5, Math.min(6, dynamicSpeed)); // Keep within reasonable bounds
+                    // Pipes stay in place - no horizontal movement
                     
                     // Add subtle swaying animation for realism
                     pipe.swayOffset += 0.02;
@@ -1036,15 +1024,18 @@
                     }
                 });
                 
-                // Remove pipes and update score
+                // Remove pipes and update score when bird passes them
                 this.pipes = this.pipes.filter(pipe => {
-                    if (pipe.x + this.pipeWidth < 0) {
-                        if (!pipe.scored) {
-                            this.score++;
-                            pipe.scored = true;
-                            this.checkLevelUp();
-                            this.updateUI();
-                        }
+                    // Score when bird passes the pipe
+                    if (!pipe.scored && this.bird.x > pipe.x + this.pipeWidth) {
+                        this.score++;
+                        pipe.scored = true;
+                        this.checkLevelUp();
+                        this.updateUI();
+                    }
+
+                    // Remove pipes that are far behind the bird
+                    if (pipe.x + this.pipeWidth < this.bird.x - this.width) {
                         return false;
                     }
                     return true;
@@ -1095,7 +1086,7 @@
                 gapY = Math.max(minGapY, Math.min(maxGapY, gapY));
                 
                 this.pipes.push({
-                    x: this.width,
+                    x: this.bird.x + this.width, // Spawn relative to bird position
                     topHeight: gapY,
                     bottomY: gapY + this.difficulty.pipeGap,
                     scored: false,
@@ -1142,29 +1133,33 @@
             }
             
             render() {
-                // Debug: Log render calls occasionally
-                if (Math.random() < 0.01) { // 1% chance to log
-                    console.log('Render called. GameState:', this.gameState, 'Bird position:', this.bird.x, this.bird.y);
-                }
-                
+                // Removed debug logging for smoother performance
+
+                // Camera offset to follow bird
+                const cameraX = this.bird.x - this.width / 3; // Keep bird at 1/3 from left edge
+
+                // Save context state and apply camera transform
+                this.ctx.save();
+                this.ctx.translate(-cameraX, 0);
+
                 // BRUTAL background that transforms with level
                 const intensityLevel = Math.min(1, this.level / 12);
                 const hueShift = this.level * 12; // MASSIVE color shifts
                 const time = Date.now() * 0.002;
-                
+
                 // Enhanced animated gradient background with multiple layers
-                const gradient = this.ctx.createLinearGradient(0, 0, 0, this.height);
+                const gradient = this.ctx.createLinearGradient(cameraX, 0, cameraX, this.height);
                 const baseHue1 = 200 - hueShift + Math.sin(time) * 15;
                 const baseHue2 = 120 - hueShift + Math.cos(time * 0.7) * 20;
                 const baseHue3 = 60 - hueShift + Math.sin(time * 1.2) * 12;
-                
+
                 gradient.addColorStop(0, `hsl(${baseHue1}, ${70 + intensityLevel * 30}%, ${85 - intensityLevel * 35}%)`);
                 gradient.addColorStop(0.3, `hsl(${baseHue2}, ${65 + intensityLevel * 35}%, ${80 - intensityLevel * 30}%)`);
                 gradient.addColorStop(0.6, `hsl(${baseHue3}, ${60 + intensityLevel * 40}%, ${75 - intensityLevel * 35}%)`);
                 gradient.addColorStop(0.8, `hsl(${baseHue3 - 15}, ${70 + intensityLevel * 30}%, ${85 - intensityLevel * 40}%)`);
                 gradient.addColorStop(1, `hsl(${baseHue3 - 30}, ${80 + intensityLevel * 20}%, ${90 - intensityLevel * 45}%)`);
                 this.ctx.fillStyle = gradient;
-                this.ctx.fillRect(0, 0, this.width, this.height);
+                this.ctx.fillRect(cameraX, 0, this.width, this.height);
                 
                 // Add subtle moving clouds in background
                 this.drawBackgroundClouds();
@@ -1179,8 +1174,8 @@
                     this.drawStormClouds();
                 }
                 
-                // Lightning effects in nightmare mode
-                if (this.nightmareMode && Math.random() < 0.05) {
+                // Lightning effects in nightmare mode - reduced frequency
+                if (this.nightmareMode && Math.random() < 0.01) {
                     this.drawLightning();
                 }
                 
@@ -1197,9 +1192,12 @@
                 
                 // Draw thermal effects if any
                 this.drawThermalEffects();
-                
+
                 // Draw original enhanced bird
                 this.drawExtremeBird();
+
+                // Restore context state (undo camera transform)
+                this.ctx.restore();
             }
             
             drawThermalEffects() {
@@ -1426,21 +1424,21 @@
                     this.ctx.strokeRect(4, 4, this.width - 8, this.height - 8);
                 }
                 
-                // Screen shake effect for chaos mode
-                if (this.chaosMode && Math.random() < 0.05) {
-                    const shakeX = (Math.random() - 0.5) * 4;
-                    const shakeY = (Math.random() - 0.5) * 4;
+                // Screen shake effect for chaos mode - much reduced
+                if (this.chaosMode && Math.random() < 0.005) {
+                    const shakeX = (Math.random() - 0.5) * 2;
+                    const shakeY = (Math.random() - 0.5) * 2;
                     this.ctx.translate(shakeX, shakeY);
                 }
             }
             
             updateAndDrawSimpleParticles() {
-                // Gentle floating particles that complement the natural bird
-                if (Math.random() < 0.02) {
+                // Gentle floating particles that complement the natural bird - reduced frequency
+                if (Math.random() < 0.005) {
                     this.particles.push({
-                        x: this.width + 5,
+                        x: this.bird.x + this.width + 5, // Spawn relative to bird/camera position
                         y: Math.random() * this.height,
-                        vx: -0.8 - Math.random() * 0.4,
+                        vx: 0, // Stationary in world space
                         vy: (Math.random() - 0.5) * 0.2,
                         size: 0.8 + Math.random() * 1.5,
                         life: 1.0,
@@ -1454,8 +1452,9 @@
                     particle.y += particle.vy + Math.sin(Date.now() * 0.002 + particle.twinkle) * 0.1;
                     particle.life -= 0.008;
                     particle.twinkle += 0.05;
-                    
-                    if (particle.life > 0 && particle.x > -10) {
+
+                    // Keep particles that are alive and not too far behind the bird
+                    if (particle.life > 0 && particle.x > this.bird.x - this.width) {
                         const alpha = Math.sin(particle.twinkle) * 0.3 + 0.7;
                         this.ctx.globalAlpha = particle.life * alpha;
                         this.ctx.fillStyle = particle.color;
