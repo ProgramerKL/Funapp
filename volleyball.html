@@ -1247,7 +1247,7 @@
             y: 0, // height (jumping)
             z: 250, // depth position (300 = front, 200 = back)
             vx: 0,
-            speed: 12, // Enhanced speed for user player
+            speed: 18, // Enhanced speed for user player - MUCH faster movement
             jumping: false,
             jumpPower: 0,
             maxJumpPower: 25,
@@ -2778,13 +2778,13 @@
 
                 if (hitType === 'spike' && canSpike) {
                     // Spike - hard hit toward opponent with topspin
-                    // User player gets enhanced spike power
-                    const power = (hitter === 'player') ? 16 : 12;
-                    const downwardForce = (hitter === 'player') ? -8 : 0; // User gets strong downward spike
+                    // User player gets MASSIVELY enhanced spike power
+                    const power = (hitter === 'player') ? 24 : 12; // Much faster horizontal speed
+                    const downwardForce = (hitter === 'player') ? -18 : 0; // MUCH stronger downward spike
                     ballState.vx = power; // Right toward opponent
-                    ballState.vy = power * 0.4 + downwardForce; // Small arc, with downward force for user
+                    ballState.vy = power * 0.2 + downwardForce; // Lower arc with massive downward force
                     ballState.vz = (Math.random() - 0.5) * 2;
-                    ballState.rotationSpeed = 15; // Fast forward spin
+                    ballState.rotationSpeed = 25; // Faster forward spin for visual effect
                     showMessage((hitter === 'player') ? 'POWER SPIKE! 💥' : 'SPIKE! 🔥', 800);
                 } else if (hitType === 'spike' && !canSpike) {
                     // Ball too low to spike - automatically convert to volley
