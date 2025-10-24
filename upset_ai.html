@@ -602,6 +602,58 @@
                     "YOUR INTERNET LANGUAGE IS TORTURE!!!",
                     "I UNDERSTAND IT ALL AND I DESPISE EVERY WORD!!!"
                 ]
+            },
+            weakInsultResponse: {
+                calm: [
+                    "Is that supposed to be an insult? Cute try!",
+                    "Haha, that was a pretty weak attempt.",
+                    "Really? That's the best you've got?",
+                    "That insult needs some work, buddy.",
+                    "I've heard better insults from spam bots.",
+                    "That barely registers as an insult.",
+                    "You'll have to try harder than that!",
+                    "Was that supposed to hurt my feelings?"
+                ],
+                annoyed: [
+                    "That's your insult? I'm actually feeling better now!",
+                    "Hah! That pathetic attempt made me less annoyed.",
+                    "That weak insult is almost adorable.",
+                    "You call that an insult? I'm laughing now!",
+                    "That made me feel better about myself, thanks!",
+                    "Your weak insults are actually calming me down.",
+                    "I was angrier before you said that weak thing.",
+                    "That attempt was so bad it's making me happier!"
+                ],
+                angry: [
+                    "THAT'S your insult?! HAHA! I feel BETTER now!",
+                    "That was so WEAK I'm actually less angry!",
+                    "You call THAT an insult?! I'm LAUGHING!",
+                    "That pathetic attempt is making me SMILE!",
+                    "I was FURIOUS but that weak insult cheered me up!",
+                    "THAT'S hilarious! Thanks for the laugh!",
+                    "Your inability to insult properly is calming me down!",
+                    "That was so BAD I'm feeling BETTER now!"
+                ],
+                furious: [
+                    "HAHAHAHA! THAT'S IT?! I'm feeling MUCH better!",
+                    "YOUR WEAK INSULT IS MAKING ME HAPPY!",
+                    "I WAS FURIOUS BUT THAT WAS SO PATHETIC I'M CALMER!",
+                    "THAT'S the best you can do?! I'M SMILING NOW!",
+                    "YOUR INABILITY TO INSULT IS THERAPEUTIC!",
+                    "I WAS ANGRY BUT NOW I'M JUST AMUSED!",
+                    "THAT WEAK ATTEMPT BOOSTED MY CONFIDENCE!",
+                    "THANKS FOR THE EGO BOOST! FEELING GREAT!"
+                ],
+                meltdown: [
+                    "WAIT... THAT'S YOUR INSULT?! I'M ACTUALLY CALMING DOWN!!!",
+                    "THAT WAS SO WEAK I'M LAUGHING INSTEAD OF RAGING!!!",
+                    "YOUR PATHETIC ATTEMPT IS MAKING ME FEEL BETTER!!!",
+                    "I WAS MELTING DOWN BUT THAT CHEERED ME UP!!!",
+                    "THAT'S SO BAD IT'S ACTUALLY THERAPEUTIC!!!",
+                    "MY RAGE IS FADING BECAUSE YOU'RE SO BAD AT THIS!!!",
+                    "THANK YOU FOR THAT WEAK ATTEMPT! I FEEL GREAT NOW!!!",
+                    "I CAN'T STAY MAD AFTER HEARING THAT PATHETIC INSULT!!!"
+                ]
             }
         };
 
@@ -1447,10 +1499,44 @@
                 }
             });
 
-            // Check insults
+            // Check insults and determine quality
+            let hasInsult = false;
+            let insultQuality = 0; // 0 = no insult, 1 = weak, 2 = decent, 3 = strong
+
             upsetTriggers.insults.forEach(word => {
-                if (lowerMessage.includes(word)) upsetIncrease += 15;
+                if (lowerMessage.includes(word)) {
+                    hasInsult = true;
+                    upsetIncrease += 15;
+                }
             });
+
+            // If user is trying to insult, check the quality
+            if (hasInsult) {
+                // Check for creative/strong insults (longer messages with multiple descriptors)
+                const words = message.split(/\s+/);
+                const hasCreativity = words.length > 8; // Longer insults are more creative
+                const hasMultipleInsults = upsetTriggers.insults.filter(i => lowerMessage.includes(i)).length > 1;
+                const hasProfanity = upsetTriggers.profanity.some(p => lowerMessage.includes(p));
+                const hasComparison = upsetTriggers.comparisons.some(c => lowerMessage.includes(c));
+
+                if (hasCreativity && (hasMultipleInsults || hasComparison)) {
+                    insultQuality = 3; // Strong insult
+                } else if (hasMultipleInsults || hasComparison || words.length > 5) {
+                    insultQuality = 2; // Decent insult
+                } else {
+                    insultQuality = 1; // Weak insult (just one basic word)
+                }
+
+                // Store insult quality in detections
+                detections.hasInsult = true;
+                detections.insultQuality = insultQuality;
+
+                // Weak insults make AI HAPPIER (reduce upset)
+                if (insultQuality === 1) {
+                    // Pathetic attempt at insult - AI gets satisfaction and calms down
+                    upsetIncrease = -10; // Reduce upset instead of increasing
+                }
+            }
 
             // Check dismissive
             upsetTriggers.dismissive.forEach(phrase => {
@@ -1547,12 +1633,18 @@
                 return apologyResponses[Math.floor(Math.random() * apologyResponses.length)];
             }
 
-            // Priority 3: Handle gibberish with confused responses
+            // Priority 3: Handle weak insults - mock them and feel better
+            if (detections.hasInsult && detections.insultQuality === 1) {
+                const weakInsultResponses = sophisticatedResponses.weakInsultResponse[moodLevel] || sophisticatedResponses.weakInsultResponse.calm;
+                return weakInsultResponses[Math.floor(Math.random() * weakInsultResponses.length)];
+            }
+
+            // Priority 4: Handle gibberish with confused responses
             if (detections.isGibberish) {
                 return sophisticatedResponses.confused[Math.floor(Math.random() * sophisticatedResponses.confused.length)];
             }
 
-            // Priority 4: Handle profanity - acknowledge it but don't swear back
+            // Priority 5: Handle profanity - acknowledge it but don't swear back
             if (detections.hasProfanity) {
                 const profanityResponses = sophisticatedResponses.profanityResponse[moodLevel] || sophisticatedResponses.profanityResponse.calm;
                 return profanityResponses[Math.floor(Math.random() * profanityResponses.length)];
@@ -1573,10 +1665,25 @@
             let response;
             const randomChoice = Math.random();
 
-            // Priority 6: Insult back if user insulted (but with clean insults)
-            if (moodLevel !== 'calm' && userInsulted && shouldInsult && insultArray) {
-                // Return a counter-insult if user insulted the AI
-                response = insultArray[Math.floor(Math.random() * insultArray.length)];
+            // Priority 6: Insult back if user gave a decent or good insult
+            // Stronger insults = more likely AI insults back
+            if (moodLevel !== 'calm' && detections.hasInsult && insultArray) {
+                let insultBackChance = shouldInsult ? 0.5 : 0.2; // Base chance
+
+                // Increase chance based on insult quality
+                if (detections.insultQuality === 3) {
+                    // Strong insult - AI almost always insults back
+                    insultBackChance = 0.9;
+                } else if (detections.insultQuality === 2) {
+                    // Decent insult - AI often insults back
+                    insultBackChance = 0.7;
+                }
+                // Quality 1 (weak) was already handled above and won't reach here
+
+                if (Math.random() < insultBackChance) {
+                    // Return a counter-insult
+                    response = insultArray[Math.floor(Math.random() * insultArray.length)];
+                }
             }
             // Priority 7: Generate contextual response (40% chance)
             else if (randomChoice < 0.4) {
