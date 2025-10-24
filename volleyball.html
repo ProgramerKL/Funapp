@@ -2084,8 +2084,9 @@
                 );
 
                 // Check if ball is not too close to net (avoid hitting into net)
+                // On touches 1-2, always hit to pass to teammates regardless of position
                 const distFromNet = Math.abs(ballState.x - netX);
-                const safeToHit = distFromNet > 100 || ballState.y > 80;
+                const safeToHit = gameState.touchCount < 3 || distFromNet > 100 || ballState.y > 80;
 
                 if (distToBall < 70 && Math.random() < aiSettings.hitChance && safeToHit) {
                     if (ballState.y > 50 && !cpuState.jumping) {
@@ -2184,8 +2185,9 @@
                 );
 
                 // Check if ball is not too close to net (avoid hitting into net)
+                // On touches 1-2, always hit to pass to teammates regardless of position
                 const distFromNet = Math.abs(ballState.x - netX);
-                const safeToHit = distFromNet > 100 || ballState.y > 80;
+                const safeToHit = gameState.touchCount < 3 || distFromNet > 100 || ballState.y > 80;
 
                 if (distToBall < 70 && gameState.lastHitter !== 'cpu' && gameState.lastHitter !== 'cpu2' && gameState.lastHitter !== 'cpu3' && gameState.lastHitter !== 'cpu4' && Math.random() < aiSettings.hitChance && safeToHit) {
                     if (ballState.y > 50 && !cpu2State.jumping) {
@@ -2284,8 +2286,9 @@
                 );
 
                 // Check if ball is not too close to net (avoid hitting into net)
+                // On touches 1-2, always hit to pass to teammates regardless of position
                 const distFromNet = Math.abs(ballState.x - netX);
-                const safeToHit = distFromNet > 100 || ballState.y > 80;
+                const safeToHit = gameState.touchCount < 3 || distFromNet > 100 || ballState.y > 80;
 
                 if (distToBall < 70 && gameState.lastHitter !== 'cpu' && gameState.lastHitter !== 'cpu2' && gameState.lastHitter !== 'cpu3' && gameState.lastHitter !== 'cpu4' && Math.random() < aiSettings.hitChance && safeToHit) {
                     if (ballState.y > 50 && !cpu3State.jumping) {
@@ -2384,8 +2387,9 @@
                 );
 
                 // Check if ball is not too close to net (avoid hitting into net)
+                // On touches 1-2, always hit to pass to teammates regardless of position
                 const distFromNet = Math.abs(ballState.x - netX);
-                const safeToHit = distFromNet > 100 || ballState.y > 80;
+                const safeToHit = gameState.touchCount < 3 || distFromNet > 100 || ballState.y > 80;
 
                 if (distToBall < 70 && gameState.lastHitter !== 'cpu' && gameState.lastHitter !== 'cpu2' && gameState.lastHitter !== 'cpu3' && gameState.lastHitter !== 'cpu4' && Math.random() < aiSettings.hitChance && safeToHit) {
                     if (ballState.y > 50 && !cpu4State.jumping) {
@@ -2673,8 +2677,9 @@
                 );
 
                 // Check if ball is not too close to net (avoid hitting into net)
+                // On touches 1-2, always hit to pass to teammates regardless of position
                 const distFromNet = Math.abs(ballState.x - netX);
-                const safeToHit = distFromNet > 100 || ballState.y > 80; // Only hit if far from net or ball is high
+                const safeToHit = gameState.touchCount < 3 || distFromNet > 100 || ballState.y > 80; // Always hit on touches 1-2 for passing
 
                 if (player2Dist < 70 && safeToHit) {
                     if (ballState.y > 50 && !player2State.jumping) {
@@ -2694,8 +2699,9 @@
                 );
 
                 // Check if ball is not too close to net (avoid hitting into net)
+                // On touches 1-2, always hit to pass to teammates regardless of position
                 const distFromNet = Math.abs(ballState.x - netX);
-                const safeToHit = distFromNet > 100 || ballState.y > 80;
+                const safeToHit = gameState.touchCount < 3 || distFromNet > 100 || ballState.y > 80;
 
                 if (player3Dist < 70 && safeToHit) {
                     if (ballState.y > 50 && !player3State.jumping) {
@@ -2715,8 +2721,9 @@
                 );
 
                 // Check if ball is not too close to net (avoid hitting into net)
+                // On touches 1-2, always hit to pass to teammates regardless of position
                 const distFromNet = Math.abs(ballState.x - netX);
-                const safeToHit = distFromNet > 100 || ballState.y > 80;
+                const safeToHit = gameState.touchCount < 3 || distFromNet > 100 || ballState.y > 80;
 
                 if (player4Dist < 70 && safeToHit) {
                     if (ballState.y > 50 && !player4State.jumping) {
