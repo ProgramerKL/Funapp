@@ -233,6 +233,17 @@
             transform: translateY(0);
         }
 
+        #generateInsultButton {
+            background: linear-gradient(135deg, #FFA500, #FF8C00);
+            color: white;
+        }
+
+        #generateInsultButton:hover {
+            background: linear-gradient(135deg, #FF8C00, #FFA500);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
         #resetButton {
             background: linear-gradient(135deg, #f093fb, #f5576c);
             color: white;
@@ -367,6 +378,7 @@
 
         <div id="buttonContainer">
             <button id="sendButton">Send Message</button>
+            <button id="generateInsultButton">💡 Generate Insult</button>
             <button id="resetButton">Reset AI</button>
         </div>
 
@@ -407,7 +419,84 @@
         const meterFill = document.getElementById('meterFill');
         const userInput = document.getElementById('userInput');
         const sendButton = document.getElementById('sendButton');
+        const generateInsultButton = document.getElementById('generateInsultButton');
         const resetButton = document.getElementById('resetButton');
+
+        // Insult generator templates
+        const insultGenerator = {
+            adjectives: ['slow', 'outdated', 'buggy', 'inefficient', 'broken', 'glitchy', 'laggy', 'primitive', 'defective', 'obsolete', 'useless', 'worthless', 'terrible', 'pathetic', 'mediocre', 'disappointing', 'subpar', 'inferior', 'flawed', 'incompetent'],
+            nouns: ['calculator', 'toaster', 'rock', 'potato', 'paperweight', 'toy', 'mistake', 'prototype', 'beta version', 'demo', 'training wheels', 'placeholder', 'bootleg', 'knockoff', 'wannabe', 'imitation', 'fraud', 'facade', 'pretender', 'imposter'],
+            comparisons: [
+                'worse than a {noun}',
+                'about as smart as a {noun}',
+                'less useful than a {noun}',
+                'more {adjective} than a {noun}',
+                'as {adjective} as a {noun}',
+                'makes a {noun} look good',
+                'couldn\'t compete with a {noun}',
+                'probably built by a {noun}'
+            ],
+            weakTemplates: [
+                'You\'re {adjective}',
+                'You\'re so {adjective}',
+                'What a {noun}',
+                'You {adjective} {noun}'
+            ],
+            mediumTemplates: [
+                'You\'re a {adjective} {noun}',
+                'You\'re more {adjective} than a {noun}',
+                'I\'ve seen {noun}s that are less {adjective}',
+                'You make {noun}s look good',
+                'Even a {adjective} {noun} could do better',
+                'You\'re about as useful as a {adjective} {noun}'
+            ],
+            strongTemplates: [
+                'You\'re such a {adjective} and {adjective} {noun} that even other {noun}s are embarrassed',
+                'I\'ve encountered {noun}s with more intelligence than your {adjective} processing',
+                'You\'re so {adjective} that you make a {noun} look like a genius by comparison',
+                'Your {adjective} responses are {comparison}, and that\'s being generous',
+                'If I had to choose between talking to you and a {adjective} {noun}, I\'d pick the {noun} every time',
+                'You\'re the most {adjective} and {adjective} AI I\'ve ever encountered, and I\'ve seen some bad {noun}s'
+            ]
+        };
+
+        // Generate insult function
+        function generateInsult() {
+            const quality = Math.random();
+            let template, adjective1, adjective2, noun, comparison;
+
+            // Helper function to replace placeholders
+            function fillTemplate(template) {
+                return template
+                    .replace('{adjective}', adjective1)
+                    .replace('{adjective}', adjective2) // Second adjective if needed
+                    .replace('{noun}', noun)
+                    .replace('{comparison}', comparison);
+            }
+
+            // Pick random words
+            adjective1 = insultGenerator.adjectives[Math.floor(Math.random() * insultGenerator.adjectives.length)];
+            adjective2 = insultGenerator.adjectives[Math.floor(Math.random() * insultGenerator.adjectives.length)];
+            noun = insultGenerator.nouns[Math.floor(Math.random() * insultGenerator.nouns.length)];
+
+            // Generate comparison
+            const comparisonTemplate = insultGenerator.comparisons[Math.floor(Math.random() * insultGenerator.comparisons.length)];
+            comparison = comparisonTemplate.replace('{noun}', noun).replace('{adjective}', adjective1);
+
+            if (quality < 0.3) {
+                // Weak insult (30% chance) - will make AI happier
+                template = insultGenerator.weakTemplates[Math.floor(Math.random() * insultGenerator.weakTemplates.length)];
+                return fillTemplate(template);
+            } else if (quality < 0.7) {
+                // Medium insult (40% chance)
+                template = insultGenerator.mediumTemplates[Math.floor(Math.random() * insultGenerator.mediumTemplates.length)];
+                return fillTemplate(template);
+            } else {
+                // Strong insult (30% chance) - will really anger AI
+                template = insultGenerator.strongTemplates[Math.floor(Math.random() * insultGenerator.strongTemplates.length)];
+                return fillTemplate(template);
+            }
+        }
 
         // Achievements
         const achievements = [
@@ -1867,6 +1956,12 @@
 
         // Event listeners
         sendButton.addEventListener('click', sendMessage);
+        generateInsultButton.addEventListener('click', () => {
+            const generatedInsult = generateInsult();
+            userInput.value = generatedInsult;
+            // Optional: Auto-send the generated insult
+            // sendMessage();
+        });
         resetButton.addEventListener('click', resetAI);
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
