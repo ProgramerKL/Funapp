@@ -1238,7 +1238,8 @@
             rotation: 0, // ball rotation angle in degrees
             rotationSpeed: 0, // rotation speed
             mass: 1, // Ball mass for physics calculations
-            airDrag: 0.0005 // Air resistance coefficient (reduced from 0.002)
+            airDrag: 0.0005, // Air resistance coefficient (reduced from 0.002)
+            hitOpponentBody: false // Track if ball hit opponent's body
         };
 
         // Player state (side-view: X = horizontal, Y = height, Z = depth)
@@ -1483,6 +1484,7 @@
             ballState.scored = false;
             ballState.rotation = 0;
             ballState.rotationSpeed = 0;
+            ballState.hitOpponentBody = false;
             gameState.ballInPlay = false;
             gameState.lastHitBy = null;
             gameState.touchCount = 0;
@@ -1612,6 +1614,7 @@
             gameState.lastHitBy = 'player';
             ballState.firstBounce = false;
             ballState.scored = false;
+            ballState.hitOpponentBody = false;
             gameState.touchCount = 0;
             gameState.currentSide = 'player';
 
@@ -2640,6 +2643,61 @@
                         player4State.jumpPower = player4State.maxJumpPower;
                     }
                     hitBall('player4');
+                }
+            }
+
+            // Check if player's powerful spike hits an opponent player (causes them to fail to receive)
+            if (gameState.ballInPlay && ballState.x > netX && ballState.y > 5 && gameState.lastHitter === 'player') {
+                // Check if ball is moving fast (player spike)
+                const ballSpeed = Math.sqrt(ballState.vx * ballState.vx + ballState.vy * ballState.vy);
+                const isPowerfulSpike = ballSpeed > 25 && ballState.vy < -10; // Fast and downward
+
+                if (isPowerfulSpike) {
+                    // Check if ball hits any CPU player
+                    const hitDistance = 60; // Distance to detect "body hit"
+
+                    const cpuBodyDist = Math.sqrt(
+                        Math.pow(ballState.x - cpuState.x, 2) +
+                        Math.pow(ballState.y - cpuState.y, 2) +
+                        Math.pow(ballState.z - cpuState.z, 2)
+                    );
+                    const cpu2BodyDist = Math.sqrt(
+                        Math.pow(ballState.x - cpu2State.x, 2) +
+                        Math.pow(ballState.y - cpu2State.y, 2) +
+                        Math.pow(ballState.z - cpu2State.z, 2)
+                    );
+                    const cpu3BodyDist = Math.sqrt(
+                        Math.pow(ballState.x - cpu3State.x, 2) +
+                        Math.pow(ballState.y - cpu3State.y, 2) +
+                        Math.pow(ballState.z - cpu3State.z, 2)
+                    );
+                    const cpu4BodyDist = Math.sqrt(
+                        Math.pow(ballState.x - cpu4State.x, 2) +
+                        Math.pow(ballState.y - cpu4State.y, 2) +
+                        Math.pow(ballState.z - cpu4State.z, 2)
+                    );
+
+                    // Chance for opponent to fail receiving spike (30% chance at hardest difficulty)
+                    const aiSettings = getAISettings(gameState.opponentDifficulty, true);
+                    const failChance = 1 - (aiSettings.accuracy * 0.3); // 30% fail at max accuracy
+
+                    if ((cpuBodyDist < hitDistance || cpu2BodyDist < hitDistance ||
+                         cpu3BodyDist < hitDistance || cpu4BodyDist < hitDistance) &&
+                        Math.random() < failChance) {
+
+                        // Ball hits opponent and deflects out of bounds!
+                        ballState.vx = ballState.vx * 0.3; // Slow down dramatically
+                        ballState.vy = Math.abs(ballState.vy) * 0.4; // Bounce up weakly
+                        ballState.vz = (Math.random() - 0.5) * 8; // Random sideways deflection
+
+                        // Mark that ball hit opponent body
+                        ballState.hitOpponentBody = true;
+
+                        showMessage('BODY HIT! 💥', 1000);
+
+                        // Prevent CPU from hitting it back immediately
+                        gameState.lastHitter = 'bodyHit';
+                    }
                 }
             }
 
