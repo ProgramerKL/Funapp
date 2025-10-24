@@ -2677,9 +2677,9 @@
                         Math.pow(ballState.z - cpu4State.z, 2)
                     );
 
-                    // Chance for opponent to fail receiving spike (30% chance at hardest difficulty)
+                    // Chance for opponent to fail receiving spike - VERY HIGH chance
                     const aiSettings = getAISettings(gameState.opponentDifficulty, true);
-                    const failChance = 1 - (aiSettings.accuracy * 0.3); // 30% fail at max accuracy
+                    const failChance = 1 - (aiSettings.accuracy * 0.1); // Only 10% success at max accuracy = 90% fail!
 
                     if ((cpuBodyDist < hitDistance || cpu2BodyDist < hitDistance ||
                          cpu3BodyDist < hitDistance || cpu4BodyDist < hitDistance) &&
