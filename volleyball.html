@@ -2647,14 +2647,14 @@
             }
 
             // Check if player's powerful spike hits an opponent player (causes them to fail to receive)
-            if (gameState.ballInPlay && ballState.x > netX && ballState.y > 5 && gameState.lastHitter === 'player') {
+            if (gameState.ballInPlay && ballState.x > netX && ballState.y > 5 && gameState.lastHitter === 'player' && !ballState.scored) {
                 // Check if ball is moving fast (player spike)
                 const ballSpeed = Math.sqrt(ballState.vx * ballState.vx + ballState.vy * ballState.vy);
                 const isPowerfulSpike = ballSpeed > 25 && ballState.vy < -10; // Fast and downward
 
                 if (isPowerfulSpike) {
                     // Check if ball hits any CPU player
-                    const hitDistance = 60; // Distance to detect "body hit"
+                    const hitDistance = 80; // Increased distance to detect "body hit"
 
                     const cpuBodyDist = Math.sqrt(
                         Math.pow(ballState.x - cpuState.x, 2) +
@@ -2685,21 +2685,24 @@
                          cpu3BodyDist < hitDistance || cpu4BodyDist < hitDistance) &&
                         Math.random() < failChance) {
 
-                        // Ball hits opponent and deflects WILDLY out of bounds!
-                        // Deflect WAY backward past the opponent baseline
-                        ballState.vx = Math.abs(ballState.vx) * 1.5; // Send it FLYING toward opponent baseline (positive = right)
-                        ballState.vy = -Math.abs(ballState.vy) * 0.2; // Continue downward fast
-                        ballState.vz = (Math.random() - 0.5) * 30; // MASSIVE sideways deflection
+                        // BODY HIT! Opponent fails to receive - INSTANT POINT FOR PLAYER!
+                        console.log('💥 BODY HIT! Opponent overwhelmed by powerful spike!');
 
-                        // Mark that ball hit opponent body
-                        ballState.hitOpponentBody = true;
+                        ballState.scored = true;
+                        gameState.playerScore++;
+                        gameState.serving = 'player';
 
-                        showMessage('BODY HIT! BALL OUT! 💥', 1500);
+                        showMessage('BODY HIT! YOU SCORE! 💥', 2000);
+                        makeCrowdCheer('left');
+                        updateScore();
 
-                        // Change lastHitBy to 'cpu' so player scores when ball goes out
-                        // (Body hit means opponent failed to return, so they "touched" it last)
-                        gameState.lastHitBy = 'cpu';
-                        gameState.lastHitter = 'bodyHit';
+                        console.log('🔵 PLAYER SCORED via BODY HIT! New score:', gameState.playerScore, '-', gameState.opponentScore);
+
+                        // Reset ball after short delay
+                        setTimeout(() => resetBall(), 1500);
+
+                        // Don't process any more collisions this frame
+                        return;
                     }
                 }
             }
