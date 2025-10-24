@@ -2076,7 +2076,7 @@
 
             // CPU hit ball (only if they weren't the last hitter and ball is in air) - with accuracy check and net avoidance
             if (gameState.ballInPlay && ballState.x > netX && ballState.y > 5 &&
-                gameState.lastHitter !== 'cpu' && gameState.lastHitter !== 'cpu2' && gameState.lastHitter !== 'cpu3' && gameState.lastHitter !== 'cpu4') {
+                gameState.lastHitter !== 'cpu') {
                 const distToBall = Math.sqrt(
                     Math.pow(ballState.x - cpuState.x, 2) +
                     Math.pow(ballState.y - cpuState.y, 2) +
@@ -2189,7 +2189,7 @@
                 const distFromNet = Math.abs(ballState.x - netX);
                 const safeToHit = true; // Always allow hitting for teammate passing
 
-                if (distToBall < 70 && gameState.lastHitter !== 'cpu' && gameState.lastHitter !== 'cpu2' && gameState.lastHitter !== 'cpu3' && gameState.lastHitter !== 'cpu4' && Math.random() < aiSettings.hitChance && safeToHit) {
+                if (distToBall < 70 && gameState.lastHitter !== 'cpu2' && Math.random() < aiSettings.hitChance && safeToHit) {
                     if (ballState.y > 50 && !cpu2State.jumping) {
                         cpu2State.jumping = true;
                         cpu2State.jumpPower = cpu2State.maxJumpPower;
@@ -2290,7 +2290,7 @@
                 const distFromNet = Math.abs(ballState.x - netX);
                 const safeToHit = true; // Always allow hitting for teammate passing
 
-                if (distToBall < 70 && gameState.lastHitter !== 'cpu' && gameState.lastHitter !== 'cpu2' && gameState.lastHitter !== 'cpu3' && gameState.lastHitter !== 'cpu4' && Math.random() < aiSettings.hitChance && safeToHit) {
+                if (distToBall < 70 && gameState.lastHitter !== 'cpu3' && Math.random() < aiSettings.hitChance && safeToHit) {
                     if (ballState.y > 50 && !cpu3State.jumping) {
                         cpu3State.jumping = true;
                         cpu3State.jumpPower = cpu3State.maxJumpPower;
@@ -2391,7 +2391,7 @@
                 const distFromNet = Math.abs(ballState.x - netX);
                 const safeToHit = true; // Always allow hitting for teammate passing
 
-                if (distToBall < 70 && gameState.lastHitter !== 'cpu' && gameState.lastHitter !== 'cpu2' && gameState.lastHitter !== 'cpu3' && gameState.lastHitter !== 'cpu4' && Math.random() < aiSettings.hitChance && safeToHit) {
+                if (distToBall < 70 && gameState.lastHitter !== 'cpu4' && Math.random() < aiSettings.hitChance && safeToHit) {
                     if (ballState.y > 50 && !cpu4State.jumping) {
                         cpu4State.jumping = true;
                         cpu4State.jumpPower = cpu4State.maxJumpPower;
@@ -2650,7 +2650,7 @@
             const hitRange = 70;
 
             // Player hitting ball (only if they weren't the last hitter and ball is in air)
-            if (ballState.x < netX && ballState.y > 5 && gameState.lastHitter !== 'player' && gameState.lastHitter !== 'player2' && gameState.lastHitter !== 'player3' && gameState.lastHitter !== 'player4') {
+            if (ballState.x < netX && ballState.y > 5 && gameState.lastHitter !== 'player') {
                 const playerDist = Math.sqrt(
                     Math.pow(ballState.x - playerState.x, 2) +
                     Math.pow(ballState.y - playerState.y, 2) +
@@ -2669,7 +2669,7 @@
             }
 
             // Player 2 (teammate AI) hitting ball - avoid hitting when too close to net or on ground
-            if (ballState.x < netX && ballState.y > 5 && gameState.lastHitter !== 'player' && gameState.lastHitter !== 'player2' && gameState.lastHitter !== 'player3' && gameState.lastHitter !== 'player4') {
+            if (ballState.x < netX && ballState.y > 5 && gameState.lastHitter !== 'player2') {
                 const player2Dist = Math.sqrt(
                     Math.pow(ballState.x - player2State.x, 2) +
                     Math.pow(ballState.y - player2State.y, 2) +
@@ -2691,7 +2691,7 @@
             }
 
             // Player 3 (teammate AI) hitting ball - avoid hitting when too close to net or on ground
-            if (ballState.x < netX && ballState.y > 5 && gameState.lastHitter !== 'player' && gameState.lastHitter !== 'player2' && gameState.lastHitter !== 'player3' && gameState.lastHitter !== 'player4') {
+            if (ballState.x < netX && ballState.y > 5 && gameState.lastHitter !== 'player3') {
                 const player3Dist = Math.sqrt(
                     Math.pow(ballState.x - player3State.x, 2) +
                     Math.pow(ballState.y - player3State.y, 2) +
@@ -2713,7 +2713,7 @@
             }
 
             // Player 4 (teammate AI) hitting ball - avoid hitting when too close to net or on ground
-            if (ballState.x < netX && ballState.y > 5 && gameState.lastHitter !== 'player' && gameState.lastHitter !== 'player2' && gameState.lastHitter !== 'player3' && gameState.lastHitter !== 'player4') {
+            if (ballState.x < netX && ballState.y > 5 && gameState.lastHitter !== 'player4') {
                 const player4Dist = Math.sqrt(
                     Math.pow(ballState.x - player4State.x, 2) +
                     Math.pow(ballState.y - player4State.y, 2) +
