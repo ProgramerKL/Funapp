@@ -2796,69 +2796,94 @@
                     // Auto hit for AI teammates - use varied hit types
                     const power = 12;
                     if (hitter === 'player2' || hitter === 'player3' || hitter === 'player4') {
-                        // AI teammates use smart hitting based on ball height and distance
+                        // AI teammates use smart hitting based on ball height, distance, and touch count
                         const distFromNet = Math.abs(ballState.x - netX);
                         const ballHeight = ballState.y;
+                        const currentTouch = gameState.touchCount;
 
                         // Decide hit type based on ball height and situation
                         const hitChoice = Math.random();
 
-                        if (ballHeight < 40) {
-                            // Low ball - use bump (60% chance) or volley (40% chance)
-                            if (hitChoice < 0.6) {
-                                // Bump - high defensive arc
-                                ballState.vx = power * 0.6;
-                                ballState.vy = power * 1.7;
-                                ballState.vz = (Math.random() - 0.5) * 1;
+                        // On touches 1-2, try to pass to teammates (set up for attack)
+                        // On touch 3, send it over the net
+                        const shouldSendOver = currentTouch >= 3;
+
+                        // Decision: Pass to teammate or send over net
+                        if (!shouldSendOver) {
+                            // Touches 1-2: Pass to teammate (set up the play)
+                            // Hit ball backward/upward to set up teammate for attack
+                            if (currentTouch === 1) {
+                                // First touch - bump/dig back to setter
+                                ballState.vx = -power * 0.4; // Backward toward teammate
+                                ballState.vy = power * 1.5; // High arc
+                                ballState.vz = (Math.random() - 0.5) * 2;
                                 ballState.rotationSpeed = 3;
                             } else {
-                                // Volley
-                                ballState.vx = power * 0.7;
-                                ballState.vy = power * 1.3;
-                                ballState.vz = (Math.random() - 0.5) * 1;
-                                ballState.rotationSpeed = 5;
-                            }
-                        } else if (ballHeight > 100 && distFromNet < 200 && canSpike) {
-                            // High ball near net - spike opportunity (70% chance)
-                            if (hitChoice < 0.7) {
-                                // Spike
-                                ballState.vx = power * 1.1;
-                                ballState.vy = power * 0.5;
-                                ballState.vz = (Math.random() - 0.5) * 2;
-                                ballState.rotationSpeed = 12;
-                            } else {
-                                // Volley (controlled)
-                                ballState.vx = power * 0.8;
-                                ballState.vy = power * 1.2;
-                                ballState.vz = (Math.random() - 0.5) * 1;
-                                ballState.rotationSpeed = 5;
+                                // Second touch - set up for hitter
+                                ballState.vx = -power * 0.3; // Slight backward for setup
+                                ballState.vy = power * 1.2; // Medium-high arc
+                                ballState.vz = (Math.random() - 0.5) * 1.5;
+                                ballState.rotationSpeed = 4;
                             }
                         } else {
-                            // Medium height - mix of bump (30%), volley (50%), spike (20%)
-                            if (hitChoice < 0.3) {
-                                // Bump
-                                ballState.vx = power * 0.6;
-                                ballState.vy = power * 1.6;
-                                ballState.vz = (Math.random() - 0.5) * 1;
-                                ballState.rotationSpeed = 3;
-                            } else if (hitChoice < 0.8) {
-                                // Volley (most common for medium balls)
-                                ballState.vx = power * 0.8;
-                                ballState.vy = power * 1.3;
-                                ballState.vz = (Math.random() - 0.5) * 1;
-                                ballState.rotationSpeed = 5;
-                            } else if (canSpike) {
-                                // Spike
-                                ballState.vx = power * 1.0;
-                                ballState.vy = power * 0.6;
-                                ballState.vz = (Math.random() - 0.5) * 2;
-                                ballState.rotationSpeed = 12;
+                            // Touch 3: Send it over the net!
+                            if (ballHeight < 40) {
+                                // Low ball - use bump (60% chance) or volley (40% chance)
+                                if (hitChoice < 0.6) {
+                                    // Bump - high defensive arc over net
+                                    ballState.vx = power * 0.6;
+                                    ballState.vy = power * 1.7;
+                                    ballState.vz = (Math.random() - 0.5) * 1;
+                                    ballState.rotationSpeed = 3;
+                                } else {
+                                    // Volley over net
+                                    ballState.vx = power * 0.7;
+                                    ballState.vy = power * 1.3;
+                                    ballState.vz = (Math.random() - 0.5) * 1;
+                                    ballState.rotationSpeed = 5;
+                                }
+                            } else if (ballHeight > 100 && distFromNet < 200 && canSpike) {
+                                // High ball near net - spike opportunity (70% chance)
+                                if (hitChoice < 0.7) {
+                                    // Spike over net
+                                    ballState.vx = power * 1.1;
+                                    ballState.vy = power * 0.5;
+                                    ballState.vz = (Math.random() - 0.5) * 2;
+                                    ballState.rotationSpeed = 12;
+                                } else {
+                                    // Volley (controlled) over net
+                                    ballState.vx = power * 0.8;
+                                    ballState.vy = power * 1.2;
+                                    ballState.vz = (Math.random() - 0.5) * 1;
+                                    ballState.rotationSpeed = 5;
+                                }
                             } else {
-                                // Too low to spike - volley instead
-                                ballState.vx = power * 0.8;
-                                ballState.vy = power * 1.3;
-                                ballState.vz = (Math.random() - 0.5) * 1;
-                                ballState.rotationSpeed = 5;
+                                // Medium height - mix of bump (30%), volley (50%), spike (20%)
+                                if (hitChoice < 0.3) {
+                                    // Bump over net
+                                    ballState.vx = power * 0.6;
+                                    ballState.vy = power * 1.6;
+                                    ballState.vz = (Math.random() - 0.5) * 1;
+                                    ballState.rotationSpeed = 3;
+                                } else if (hitChoice < 0.8) {
+                                    // Volley over net (most common for medium balls)
+                                    ballState.vx = power * 0.8;
+                                    ballState.vy = power * 1.3;
+                                    ballState.vz = (Math.random() - 0.5) * 1;
+                                    ballState.rotationSpeed = 5;
+                                } else if (canSpike) {
+                                    // Spike over net
+                                    ballState.vx = power * 1.0;
+                                    ballState.vy = power * 0.6;
+                                    ballState.vz = (Math.random() - 0.5) * 2;
+                                    ballState.rotationSpeed = 12;
+                                } else {
+                                    // Too low to spike - volley instead over net
+                                    ballState.vx = power * 0.8;
+                                    ballState.vy = power * 1.3;
+                                    ballState.vz = (Math.random() - 0.5) * 1;
+                                    ballState.rotationSpeed = 5;
+                                }
                             }
                         }
                         // No message for AI teammate hits
@@ -2892,14 +2917,36 @@
                 // Calculate distance to net and ball height
                 const distToNet = Math.abs(ballState.x - netX);
                 const ballHeight = ballState.y;
+                const currentTouch = gameState.touchCount;
 
                 // Decide hit type based on ball height and situation
                 const hitChoice = Math.random();
 
                 let horizontalPower, verticalPower;
 
-                // AI chooses hit type based on ball height
-                if (ballHeight < 40) {
+                // On touches 1-2, try to pass to teammates (set up for attack)
+                // On touch 3, send it over the net
+                const shouldSendOver = currentTouch >= 3;
+
+                // Decision: Pass to teammate or send over net
+                if (!shouldSendOver) {
+                    // Touches 1-2: Pass to teammate (set up the play)
+                    // Hit ball backward/upward to set up teammate for attack
+                    if (currentTouch === 1) {
+                        // First touch - bump/dig back to setter
+                        horizontalPower = power * 0.4; // Forward toward teammate (will be negated to go right)
+                        verticalPower = power * 1.5; // High arc
+                        ballState.rotationSpeed = 3;
+                    } else {
+                        // Second touch - set up for hitter
+                        horizontalPower = power * 0.3; // Slight forward for setup
+                        verticalPower = power * 1.2; // Medium-high arc
+                        ballState.rotationSpeed = 4;
+                    }
+                } else {
+                    // Touch 3: Send it over the net!
+                    // AI chooses hit type based on ball height
+                    if (ballHeight < 40) {
                     // Low ball - use bump (70% chance) or volley (30% chance)
                     if (hitChoice < 0.7) {
                         // Bump - high defensive arc
@@ -2961,9 +3008,10 @@
                         verticalPower = power * 1.4;
                         ballState.rotationSpeed = 8;
                     }
+                    }
                 }
 
-                ballState.vx = -horizontalPower * aiSettings.accuracy; // Left toward player
+                ballState.vx = -horizontalPower * aiSettings.accuracy; // Left toward player (negative = left)
                 ballState.vy = verticalPower; // Arc to clear net
                 ballState.vz = (Math.random() - 0.5) * 1.5;
                 // No message for CPU hits
