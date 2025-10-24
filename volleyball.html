@@ -1779,14 +1779,14 @@
 
                 // Player 2 zone: back-left area (covers deep balls and left side)
                 const inMyZone = predictedZ > 150; // Back court responsibility
-                const distFromDefaultPos = Math.sqrt(
-                    Math.pow(player2State.x - (netX - 180), 2) +
-                    Math.pow(player2State.z - 200, 2)
-                );
 
-                // Go for ball if it's in my zone OR I'm closest
+                // Check if ball is being set by teammate (going backward = negative vx)
+                const isTeammatePass = ballState.vx < 0 && gameState.touchCount < 3;
+
+                // Go for ball if it's in my zone OR I'm closest OR it's a teammate pass coming toward me
                 if ((inMyZone && distP2ToBall < aiSettings.reactionDistance) ||
-                    (distP2ToBall < 100 && ballState.vy > -8)) {
+                    (distP2ToBall < 100 && ballState.vy > -8) ||
+                    (isTeammatePass && distP2ToBall < 200)) {
                     // Ball is reachable - aggressively move to predicted position
                     player2State.targetX = Math.max(leftBoundary, Math.min(netX - 30, predictedX));
                     player2State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
@@ -1864,9 +1864,13 @@
                 // Player 3 zone: front-middle area (covers net and middle court)
                 const inMyZone = predictedZ < 180 && predictedX > netX - 200; // Front court near net
 
-                // Go for ball if it's in my zone OR I'm very close
+                // Check if ball is being set by teammate (going backward = negative vx)
+                const isTeammatePass = ballState.vx < 0 && gameState.touchCount < 3;
+
+                // Go for ball if it's in my zone OR I'm very close OR it's a teammate pass
                 if ((inMyZone && distP3ToBall < aiSettings.reactionDistance) ||
-                    (distP3ToBall < 100 && ballState.vy > -8)) {
+                    (distP3ToBall < 100 && ballState.vy > -8) ||
+                    (isTeammatePass && distP3ToBall < 200)) {
                     // Aggressively go for predicted position
                     player3State.targetX = Math.max(leftBoundary, Math.min(netX - 30, predictedX));
                     player3State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
@@ -1947,9 +1951,13 @@
                 // Player 4 zone: back-right area (covers deep right side)
                 const inMyZone = predictedZ > 150 && predictedZ < 250; // Back-mid court responsibility
 
-                // Go for ball if it's in my zone OR I'm very close
+                // Check if ball is being set by teammate (going backward = negative vx)
+                const isTeammatePass = ballState.vx < 0 && gameState.touchCount < 3;
+
+                // Go for ball if it's in my zone OR I'm very close OR it's a teammate pass
                 if ((inMyZone && distP4ToBall < aiSettings.reactionDistance) ||
-                    (distP4ToBall < 100 && ballState.vy > -8)) {
+                    (distP4ToBall < 100 && ballState.vy > -8) ||
+                    (isTeammatePass && distP4ToBall < 200)) {
                     // Aggressively go for predicted position
                     player4State.targetX = Math.max(leftBoundary, Math.min(netX - 30, predictedX));
                     player4State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
@@ -2119,9 +2127,13 @@
                 // CPU2 zone: back-left area (opponent's back-left)
                 const inMyZone = predictedZ > 150; // Back court responsibility
 
-                // Go for ball if it's in my zone OR I'm very close
+                // Check if ball is being set by teammate (going forward for CPU = positive vx)
+                const isTeammatePass = ballState.vx > 0 && gameState.touchCount < 3;
+
+                // Go for ball if it's in my zone OR I'm very close OR it's a teammate pass
                 if ((inMyZone && distCPU2ToBall < aiSettings.reactionDistance) ||
-                    (distCPU2ToBall < 100 && ballState.vy > -8)) {
+                    (distCPU2ToBall < 100 && ballState.vy > -8) ||
+                    (isTeammatePass && distCPU2ToBall < 200)) {
                     // Aggressively go for predicted position
                     cpu2State.targetX = Math.max(netX + 30, Math.min(rightBoundary, predictedX));
                     cpu2State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
@@ -2215,9 +2227,13 @@
                 // CPU3 zone: front-middle area (opponent's front-middle)
                 const inMyZone = predictedZ < 180 && predictedX < netX + 200; // Front court near net
 
-                // Go for ball if it's in my zone OR I'm very close
+                // Check if ball is being set by teammate (going forward for CPU = positive vx)
+                const isTeammatePass = ballState.vx > 0 && gameState.touchCount < 3;
+
+                // Go for ball if it's in my zone OR I'm very close OR it's a teammate pass
                 if ((inMyZone && distCPU3ToBall < aiSettings.reactionDistance) ||
-                    (distCPU3ToBall < 100 && ballState.vy > -8)) {
+                    (distCPU3ToBall < 100 && ballState.vy > -8) ||
+                    (isTeammatePass && distCPU3ToBall < 200)) {
                     // Aggressively go for predicted position
                     cpu3State.targetX = Math.max(netX + 30, Math.min(rightBoundary, predictedX));
                     cpu3State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
@@ -2311,9 +2327,13 @@
                 // CPU4 zone: back-right area (opponent's back-mid/right)
                 const inMyZone = predictedZ > 150 && predictedZ < 250; // Back-mid court responsibility
 
-                // Go for ball if it's in my zone OR I'm very close
+                // Check if ball is being set by teammate (going forward for CPU = positive vx)
+                const isTeammatePass = ballState.vx > 0 && gameState.touchCount < 3;
+
+                // Go for ball if it's in my zone OR I'm very close OR it's a teammate pass
                 if ((inMyZone && distCPU4ToBall < aiSettings.reactionDistance) ||
-                    (distCPU4ToBall < 100 && ballState.vy > -8)) {
+                    (distCPU4ToBall < 100 && ballState.vy > -8) ||
+                    (isTeammatePass && distCPU4ToBall < 200)) {
                     // Aggressively go for predicted position
                     cpu4State.targetX = Math.max(netX + 30, Math.min(rightBoundary, predictedX));
                     cpu4State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
