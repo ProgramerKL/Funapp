@@ -2685,17 +2685,20 @@
                          cpu3BodyDist < hitDistance || cpu4BodyDist < hitDistance) &&
                         Math.random() < failChance) {
 
-                        // Ball hits opponent and deflects out of bounds!
-                        ballState.vx = ballState.vx * 0.3; // Slow down dramatically
-                        ballState.vy = Math.abs(ballState.vy) * 0.4; // Bounce up weakly
-                        ballState.vz = (Math.random() - 0.5) * 8; // Random sideways deflection
+                        // Ball hits opponent and deflects WILDLY out of bounds!
+                        // Deflect WAY backward past the opponent baseline
+                        ballState.vx = Math.abs(ballState.vx) * 1.5; // Send it FLYING toward opponent baseline (positive = right)
+                        ballState.vy = -Math.abs(ballState.vy) * 0.2; // Continue downward fast
+                        ballState.vz = (Math.random() - 0.5) * 30; // MASSIVE sideways deflection
 
                         // Mark that ball hit opponent body
                         ballState.hitOpponentBody = true;
 
-                        showMessage('BODY HIT! 💥', 1000);
+                        showMessage('BODY HIT! BALL OUT! 💥', 1500);
 
-                        // Prevent CPU from hitting it back immediately
+                        // Change lastHitBy to 'cpu' so player scores when ball goes out
+                        // (Body hit means opponent failed to return, so they "touched" it last)
+                        gameState.lastHitBy = 'cpu';
                         gameState.lastHitter = 'bodyHit';
                     }
                 }
