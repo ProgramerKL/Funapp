@@ -128,6 +128,29 @@
             100% { transform: scale(1) rotate(360deg); }
         }
 
+        @keyframes glitch {
+            0% {
+                filter: hue-rotate(0deg) brightness(1);
+                transform: translateX(0);
+            }
+            25% {
+                filter: hue-rotate(90deg) brightness(1.2);
+                transform: translateX(-2px);
+            }
+            50% {
+                filter: hue-rotate(180deg) brightness(0.8);
+                transform: translateX(2px);
+            }
+            75% {
+                filter: hue-rotate(270deg) brightness(1.2);
+                transform: translateX(-2px);
+            }
+            100% {
+                filter: hue-rotate(360deg) brightness(1);
+                transform: translateX(0);
+            }
+        }
+
         #aiMood {
             text-align: center;
             font-size: 24px;
@@ -411,6 +434,11 @@
         let currentStreak = 0;
         let longestStreak = 0;
         let unlockedAchievements = new Set();
+
+        // Meltdown tracking
+        let meltdownStartTime = null;
+        let barBroken = false;
+        let meltdownTimer = null;
 
         // Elements
         const aiAvatar = document.getElementById('aiAvatar');
@@ -1810,7 +1838,27 @@
 
         // Update AI visual state
         function updateAIState() {
-            if (upsetLevel >= 100) {
+            if (barBroken && upsetLevel > 100) {
+                // Beyond normal meltdown - escalating states
+                if (upsetLevel >= 200) {
+                    aiAvatar.textContent = '💀';
+                    aiAvatar.className = 'furious';
+                    aiMood.textContent = 'SYSTEM FAILURE - TOTAL DESTRUCTION!!!';
+                    aiMood.style.color = '#000000';
+                    aiMood.style.textShadow = '0 0 10px #FF0000';
+                } else if (upsetLevel >= 150) {
+                    aiAvatar.textContent = '☠️';
+                    aiAvatar.className = 'furious';
+                    aiMood.textContent = 'CATASTROPHIC RAGE!!!';
+                    aiMood.style.color = '#4B0000';
+                    aiMood.style.textShadow = '0 0 5px #FF0000';
+                } else {
+                    aiAvatar.textContent = '🤯';
+                    aiAvatar.className = 'furious';
+                    aiMood.textContent = 'BEYOND MELTDOWN!!!';
+                    aiMood.style.color = '#6B0000';
+                }
+            } else if (upsetLevel >= 100) {
                 aiAvatar.textContent = '🤬';
                 aiAvatar.className = 'furious';
                 aiMood.textContent = 'COMPLETE MELTDOWN!!!';
@@ -1840,9 +1888,32 @@
 
         // Update meter
         function updateMeter() {
-            const percentage = Math.min(100, upsetLevel);
-            meterFill.style.width = percentage + '%';
-            meterFill.textContent = Math.floor(percentage) + '%';
+            let percentage;
+
+            if (barBroken) {
+                // Bar is broken - can exceed 100%
+                percentage = upsetLevel;
+                meterFill.style.width = '100%'; // Visual bar stays at 100% but shows higher number
+                meterFill.textContent = Math.floor(percentage) + '%';
+                meterFill.style.background = 'linear-gradient(90deg, #8B0000, #FF0000, #FF4500, #FF6347)';
+                meterFill.style.animation = 'glitch 0.3s infinite';
+            } else {
+                // Normal mode - cap at 100%
+                percentage = Math.min(100, upsetLevel);
+                meterFill.style.width = percentage + '%';
+                meterFill.textContent = Math.floor(percentage) + '%';
+
+                // Color changes based on level
+                if (percentage >= 100) {
+                    meterFill.style.background = 'linear-gradient(90deg, #8B0000, #DC143C)';
+                } else if (percentage >= 60) {
+                    meterFill.style.background = 'linear-gradient(90deg, #F44336, #E91E63)';
+                } else if (percentage >= 40) {
+                    meterFill.style.background = 'linear-gradient(90deg, #FF9800, #FF5722)';
+                } else {
+                    meterFill.style.background = 'linear-gradient(90deg, #FFC107, #FF9800)';
+                }
+            }
         }
 
         // Update stats
@@ -1889,6 +1960,46 @@
             }, 3000);
         }
 
+        // Show bar break notification
+        function showBarBreakNotification() {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #8B0000, #FF0000, #FF4500);
+                color: white;
+                padding: 40px 60px;
+                border-radius: 20px;
+                font-size: 36px;
+                font-weight: bold;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                z-index: 10000;
+                text-align: center;
+                animation: explode 0.8s ease;
+                border: 5px solid #FFD700;
+            `;
+            notification.innerHTML = `
+                <div style="font-size: 48px; margin-bottom: 10px;">💥 CRITICAL MELTDOWN! 💥</div>
+                <div style="font-size: 24px;">The anger meter has BROKEN!</div>
+                <div style="font-size: 20px; margin-top: 10px;">Upset level can now exceed 100%!</div>
+            `;
+            document.body.appendChild(notification);
+
+            // Screen shake effect
+            document.body.style.animation = 'shake 0.5s ease';
+            setTimeout(() => {
+                document.body.style.animation = '';
+            }, 500);
+
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 1s';
+                setTimeout(() => notification.remove(), 1000);
+            }, 4000);
+        }
+
         // Render achievements
         function renderAchievements() {
             const list = document.getElementById('achievementsList');
@@ -1909,7 +2020,40 @@
 
             messageCount++;
             const { upsetIncrease, detections } = calculateUpset(message);
-            upsetLevel = Math.min(100, upsetLevel + upsetIncrease);
+
+            // Apply upset increase (cap at 100 if bar not broken, unlimited if broken)
+            if (barBroken) {
+                upsetLevel = upsetLevel + upsetIncrease; // No cap when broken
+            } else {
+                upsetLevel = Math.min(100, upsetLevel + upsetIncrease);
+            }
+
+            // Check if we've reached 100% meltdown
+            if (upsetLevel >= 100 && !barBroken) {
+                if (meltdownStartTime === null) {
+                    // Start tracking meltdown time
+                    meltdownStartTime = Date.now();
+                    console.log('Meltdown started! Timer begins...');
+                }
+            } else if (upsetLevel < 100) {
+                // Reset timer if they drop below 100%
+                meltdownStartTime = null;
+                if (meltdownTimer) {
+                    clearTimeout(meltdownTimer);
+                    meltdownTimer = null;
+                }
+            }
+
+            // Check if they've been at meltdown for 10 seconds
+            if (meltdownStartTime && !barBroken) {
+                const timeAtMeltdown = Date.now() - meltdownStartTime;
+                if (timeAtMeltdown >= 10000) {
+                    // Break the bar!
+                    barBroken = true;
+                    showBarBreakNotification();
+                    console.log('BAR BROKEN! Upset level can now exceed 100%!');
+                }
+            }
 
             // Update streak
             if (upsetIncrease > 5) {
@@ -1948,6 +2092,12 @@
             upsetLevel = 0;
             messageCount = 0;
             currentStreak = 0;
+            barBroken = false;
+            meltdownStartTime = null;
+            if (meltdownTimer) {
+                clearTimeout(meltdownTimer);
+                meltdownTimer = null;
+            }
             aiResponse.textContent = "Ahh, that's better! I feel so refreshed! Thanks for the reset. Let's start fresh!";
             updateAIState();
             updateMeter();

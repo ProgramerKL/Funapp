@@ -2893,16 +2893,17 @@
                         // Decision: Pass to teammate or send over net
                         if (!shouldSendOver) {
                             // Touches 1-2: Pass to teammate (set up the play)
-                            // Hit ball backward/upward to set up teammate for attack
+                            // Player team always passes FORWARD (toward net) to avoid going out on left side
+
                             if (currentTouch === 1) {
-                                // First touch - bump/dig back to setter
-                                ballState.vx = -power * 0.4; // Backward toward teammate
+                                // First touch - bump/dig forward to setter
+                                ballState.vx = power * 0.4; // Forward toward net/teammate
                                 ballState.vy = power * 1.5; // High arc
                                 ballState.vz = (Math.random() - 0.5) * 2;
                                 ballState.rotationSpeed = 3;
                             } else {
                                 // Second touch - set up for hitter
-                                ballState.vx = -power * 0.3; // Slight backward for setup
+                                ballState.vx = power * 0.3; // Forward for setup
                                 ballState.vy = power * 1.2; // Medium-high arc
                                 ballState.vz = (Math.random() - 0.5) * 1.5;
                                 ballState.rotationSpeed = 4;
@@ -3013,15 +3014,16 @@
                 // Decision: Pass to teammate or send over net
                 if (!shouldSendOver) {
                     // Touches 1-2: Pass to teammate (set up the play)
-                    // Hit ball backward/upward to set up teammate for attack
+                    // CPU team always passes BACKWARD (away from net, toward their side) to avoid going out on right side
+
                     if (currentTouch === 1) {
                         // First touch - bump/dig back to setter
-                        horizontalPower = power * 0.4; // Forward toward teammate (will be negated to go right)
+                        horizontalPower = power * 0.4; // Backward toward teammate (will be negated to go left/their side)
                         verticalPower = power * 1.5; // High arc
                         ballState.rotationSpeed = 3;
                     } else {
                         // Second touch - set up for hitter
-                        horizontalPower = power * 0.3; // Slight forward for setup
+                        horizontalPower = power * 0.3; // Backward for setup
                         verticalPower = power * 1.2; // Medium-high arc
                         ballState.rotationSpeed = 4;
                     }
