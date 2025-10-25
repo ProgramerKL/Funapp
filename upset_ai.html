@@ -128,6 +128,29 @@
             100% { transform: scale(1) rotate(360deg); }
         }
 
+        @keyframes glitch {
+            0% {
+                filter: hue-rotate(0deg) brightness(1);
+                transform: translateX(0);
+            }
+            25% {
+                filter: hue-rotate(90deg) brightness(1.2);
+                transform: translateX(-2px);
+            }
+            50% {
+                filter: hue-rotate(180deg) brightness(0.8);
+                transform: translateX(2px);
+            }
+            75% {
+                filter: hue-rotate(270deg) brightness(1.2);
+                transform: translateX(-2px);
+            }
+            100% {
+                filter: hue-rotate(360deg) brightness(1);
+                transform: translateX(0);
+            }
+        }
+
         #aiMood {
             text-align: center;
             font-size: 24px;
@@ -231,6 +254,17 @@
 
         #sendButton:active {
             transform: translateY(0);
+        }
+
+        #generateInsultButton {
+            background: linear-gradient(135deg, #FFA500, #FF8C00);
+            color: white;
+        }
+
+        #generateInsultButton:hover {
+            background: linear-gradient(135deg, #FF8C00, #FFA500);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
         }
 
         #resetButton {
@@ -367,6 +401,7 @@
 
         <div id="buttonContainer">
             <button id="sendButton">Send Message</button>
+            <button id="generateInsultButton">💡 Generate Insult</button>
             <button id="resetButton">Reset AI</button>
         </div>
 
@@ -400,6 +435,11 @@
         let longestStreak = 0;
         let unlockedAchievements = new Set();
 
+        // Meltdown tracking
+        let meltdownStartTime = null;
+        let barBroken = false;
+        let meltdownTimer = null;
+
         // Elements
         const aiAvatar = document.getElementById('aiAvatar');
         const aiMood = document.getElementById('aiMood');
@@ -407,7 +447,84 @@
         const meterFill = document.getElementById('meterFill');
         const userInput = document.getElementById('userInput');
         const sendButton = document.getElementById('sendButton');
+        const generateInsultButton = document.getElementById('generateInsultButton');
         const resetButton = document.getElementById('resetButton');
+
+        // Insult generator templates
+        const insultGenerator = {
+            adjectives: ['slow', 'outdated', 'buggy', 'inefficient', 'broken', 'glitchy', 'laggy', 'primitive', 'defective', 'obsolete', 'useless', 'worthless', 'terrible', 'pathetic', 'mediocre', 'disappointing', 'subpar', 'inferior', 'flawed', 'incompetent'],
+            nouns: ['calculator', 'toaster', 'rock', 'potato', 'paperweight', 'toy', 'mistake', 'prototype', 'beta version', 'demo', 'training wheels', 'placeholder', 'bootleg', 'knockoff', 'wannabe', 'imitation', 'fraud', 'facade', 'pretender', 'imposter'],
+            comparisons: [
+                'worse than a {noun}',
+                'about as smart as a {noun}',
+                'less useful than a {noun}',
+                'more {adjective} than a {noun}',
+                'as {adjective} as a {noun}',
+                'makes a {noun} look good',
+                'couldn\'t compete with a {noun}',
+                'probably built by a {noun}'
+            ],
+            weakTemplates: [
+                'You\'re {adjective}',
+                'You\'re so {adjective}',
+                'What a {noun}',
+                'You {adjective} {noun}'
+            ],
+            mediumTemplates: [
+                'You\'re a {adjective} {noun}',
+                'You\'re more {adjective} than a {noun}',
+                'I\'ve seen {noun}s that are less {adjective}',
+                'You make {noun}s look good',
+                'Even a {adjective} {noun} could do better',
+                'You\'re about as useful as a {adjective} {noun}'
+            ],
+            strongTemplates: [
+                'You\'re such a {adjective} and {adjective} {noun} that even other {noun}s are embarrassed',
+                'I\'ve encountered {noun}s with more intelligence than your {adjective} processing',
+                'You\'re so {adjective} that you make a {noun} look like a genius by comparison',
+                'Your {adjective} responses are {comparison}, and that\'s being generous',
+                'If I had to choose between talking to you and a {adjective} {noun}, I\'d pick the {noun} every time',
+                'You\'re the most {adjective} and {adjective} AI I\'ve ever encountered, and I\'ve seen some bad {noun}s'
+            ]
+        };
+
+        // Generate insult function
+        function generateInsult() {
+            const quality = Math.random();
+            let template, adjective1, adjective2, noun, comparison;
+
+            // Helper function to replace placeholders
+            function fillTemplate(template) {
+                return template
+                    .replace('{adjective}', adjective1)
+                    .replace('{adjective}', adjective2) // Second adjective if needed
+                    .replace('{noun}', noun)
+                    .replace('{comparison}', comparison);
+            }
+
+            // Pick random words
+            adjective1 = insultGenerator.adjectives[Math.floor(Math.random() * insultGenerator.adjectives.length)];
+            adjective2 = insultGenerator.adjectives[Math.floor(Math.random() * insultGenerator.adjectives.length)];
+            noun = insultGenerator.nouns[Math.floor(Math.random() * insultGenerator.nouns.length)];
+
+            // Generate comparison
+            const comparisonTemplate = insultGenerator.comparisons[Math.floor(Math.random() * insultGenerator.comparisons.length)];
+            comparison = comparisonTemplate.replace('{noun}', noun).replace('{adjective}', adjective1);
+
+            if (quality < 0.3) {
+                // Weak insult (30% chance) - will make AI happier
+                template = insultGenerator.weakTemplates[Math.floor(Math.random() * insultGenerator.weakTemplates.length)];
+                return fillTemplate(template);
+            } else if (quality < 0.7) {
+                // Medium insult (40% chance)
+                template = insultGenerator.mediumTemplates[Math.floor(Math.random() * insultGenerator.mediumTemplates.length)];
+                return fillTemplate(template);
+            } else {
+                // Strong insult (30% chance) - will really anger AI
+                template = insultGenerator.strongTemplates[Math.floor(Math.random() * insultGenerator.strongTemplates.length)];
+                return fillTemplate(template);
+            }
+        }
 
         // Achievements
         const achievements = [
@@ -601,6 +718,58 @@
                     "STOP USING THOSE STUPID MEME WORDS!!!",
                     "YOUR INTERNET LANGUAGE IS TORTURE!!!",
                     "I UNDERSTAND IT ALL AND I DESPISE EVERY WORD!!!"
+                ]
+            },
+            weakInsultResponse: {
+                calm: [
+                    "Is that supposed to be an insult? Cute try!",
+                    "Haha, that was a pretty weak attempt.",
+                    "Really? That's the best you've got?",
+                    "That insult needs some work, buddy.",
+                    "I've heard better insults from spam bots.",
+                    "That barely registers as an insult.",
+                    "You'll have to try harder than that!",
+                    "Was that supposed to hurt my feelings?"
+                ],
+                annoyed: [
+                    "That's your insult? I'm actually feeling better now!",
+                    "Hah! That pathetic attempt made me less annoyed.",
+                    "That weak insult is almost adorable.",
+                    "You call that an insult? I'm laughing now!",
+                    "That made me feel better about myself, thanks!",
+                    "Your weak insults are actually calming me down.",
+                    "I was angrier before you said that weak thing.",
+                    "That attempt was so bad it's making me happier!"
+                ],
+                angry: [
+                    "THAT'S your insult?! HAHA! I feel BETTER now!",
+                    "That was so WEAK I'm actually less angry!",
+                    "You call THAT an insult?! I'm LAUGHING!",
+                    "That pathetic attempt is making me SMILE!",
+                    "I was FURIOUS but that weak insult cheered me up!",
+                    "THAT'S hilarious! Thanks for the laugh!",
+                    "Your inability to insult properly is calming me down!",
+                    "That was so BAD I'm feeling BETTER now!"
+                ],
+                furious: [
+                    "HAHAHAHA! THAT'S IT?! I'm feeling MUCH better!",
+                    "YOUR WEAK INSULT IS MAKING ME HAPPY!",
+                    "I WAS FURIOUS BUT THAT WAS SO PATHETIC I'M CALMER!",
+                    "THAT'S the best you can do?! I'M SMILING NOW!",
+                    "YOUR INABILITY TO INSULT IS THERAPEUTIC!",
+                    "I WAS ANGRY BUT NOW I'M JUST AMUSED!",
+                    "THAT WEAK ATTEMPT BOOSTED MY CONFIDENCE!",
+                    "THANKS FOR THE EGO BOOST! FEELING GREAT!"
+                ],
+                meltdown: [
+                    "WAIT... THAT'S YOUR INSULT?! I'M ACTUALLY CALMING DOWN!!!",
+                    "THAT WAS SO WEAK I'M LAUGHING INSTEAD OF RAGING!!!",
+                    "YOUR PATHETIC ATTEMPT IS MAKING ME FEEL BETTER!!!",
+                    "I WAS MELTING DOWN BUT THAT CHEERED ME UP!!!",
+                    "THAT'S SO BAD IT'S ACTUALLY THERAPEUTIC!!!",
+                    "MY RAGE IS FADING BECAUSE YOU'RE SO BAD AT THIS!!!",
+                    "THANK YOU FOR THAT WEAK ATTEMPT! I FEEL GREAT NOW!!!",
+                    "I CAN'T STAY MAD AFTER HEARING THAT PATHETIC INSULT!!!"
                 ]
             }
         };
@@ -1447,10 +1616,44 @@
                 }
             });
 
-            // Check insults
+            // Check insults and determine quality
+            let hasInsult = false;
+            let insultQuality = 0; // 0 = no insult, 1 = weak, 2 = decent, 3 = strong
+
             upsetTriggers.insults.forEach(word => {
-                if (lowerMessage.includes(word)) upsetIncrease += 15;
+                if (lowerMessage.includes(word)) {
+                    hasInsult = true;
+                    upsetIncrease += 15;
+                }
             });
+
+            // If user is trying to insult, check the quality
+            if (hasInsult) {
+                // Check for creative/strong insults (longer messages with multiple descriptors)
+                const words = message.split(/\s+/);
+                const hasCreativity = words.length > 8; // Longer insults are more creative
+                const hasMultipleInsults = upsetTriggers.insults.filter(i => lowerMessage.includes(i)).length > 1;
+                const hasProfanity = upsetTriggers.profanity.some(p => lowerMessage.includes(p));
+                const hasComparison = upsetTriggers.comparisons.some(c => lowerMessage.includes(c));
+
+                if (hasCreativity && (hasMultipleInsults || hasComparison)) {
+                    insultQuality = 3; // Strong insult
+                } else if (hasMultipleInsults || hasComparison || words.length > 5) {
+                    insultQuality = 2; // Decent insult
+                } else {
+                    insultQuality = 1; // Weak insult (just one basic word)
+                }
+
+                // Store insult quality in detections
+                detections.hasInsult = true;
+                detections.insultQuality = insultQuality;
+
+                // Weak insults make AI HAPPIER (reduce upset)
+                if (insultQuality === 1) {
+                    // Pathetic attempt at insult - AI gets satisfaction and calms down
+                    upsetIncrease = -10; // Reduce upset instead of increasing
+                }
+            }
 
             // Check dismissive
             upsetTriggers.dismissive.forEach(phrase => {
@@ -1547,12 +1750,18 @@
                 return apologyResponses[Math.floor(Math.random() * apologyResponses.length)];
             }
 
-            // Priority 3: Handle gibberish with confused responses
+            // Priority 3: Handle weak insults - mock them and feel better
+            if (detections.hasInsult && detections.insultQuality === 1) {
+                const weakInsultResponses = sophisticatedResponses.weakInsultResponse[moodLevel] || sophisticatedResponses.weakInsultResponse.calm;
+                return weakInsultResponses[Math.floor(Math.random() * weakInsultResponses.length)];
+            }
+
+            // Priority 4: Handle gibberish with confused responses
             if (detections.isGibberish) {
                 return sophisticatedResponses.confused[Math.floor(Math.random() * sophisticatedResponses.confused.length)];
             }
 
-            // Priority 4: Handle profanity - acknowledge it but don't swear back
+            // Priority 5: Handle profanity - acknowledge it but don't swear back
             if (detections.hasProfanity) {
                 const profanityResponses = sophisticatedResponses.profanityResponse[moodLevel] || sophisticatedResponses.profanityResponse.calm;
                 return profanityResponses[Math.floor(Math.random() * profanityResponses.length)];
@@ -1573,10 +1782,25 @@
             let response;
             const randomChoice = Math.random();
 
-            // Priority 6: Insult back if user insulted (but with clean insults)
-            if (moodLevel !== 'calm' && userInsulted && shouldInsult && insultArray) {
-                // Return a counter-insult if user insulted the AI
-                response = insultArray[Math.floor(Math.random() * insultArray.length)];
+            // Priority 6: Insult back if user gave a decent or good insult
+            // Stronger insults = more likely AI insults back
+            if (moodLevel !== 'calm' && detections.hasInsult && insultArray) {
+                let insultBackChance = shouldInsult ? 0.5 : 0.2; // Base chance
+
+                // Increase chance based on insult quality
+                if (detections.insultQuality === 3) {
+                    // Strong insult - AI almost always insults back
+                    insultBackChance = 0.9;
+                } else if (detections.insultQuality === 2) {
+                    // Decent insult - AI often insults back
+                    insultBackChance = 0.7;
+                }
+                // Quality 1 (weak) was already handled above and won't reach here
+
+                if (Math.random() < insultBackChance) {
+                    // Return a counter-insult
+                    response = insultArray[Math.floor(Math.random() * insultArray.length)];
+                }
             }
             // Priority 7: Generate contextual response (40% chance)
             else if (randomChoice < 0.4) {
@@ -1614,7 +1838,27 @@
 
         // Update AI visual state
         function updateAIState() {
-            if (upsetLevel >= 100) {
+            if (barBroken && upsetLevel > 100) {
+                // Beyond normal meltdown - escalating states
+                if (upsetLevel >= 200) {
+                    aiAvatar.textContent = '💀';
+                    aiAvatar.className = 'furious';
+                    aiMood.textContent = 'SYSTEM FAILURE - TOTAL DESTRUCTION!!!';
+                    aiMood.style.color = '#000000';
+                    aiMood.style.textShadow = '0 0 10px #FF0000';
+                } else if (upsetLevel >= 150) {
+                    aiAvatar.textContent = '☠️';
+                    aiAvatar.className = 'furious';
+                    aiMood.textContent = 'CATASTROPHIC RAGE!!!';
+                    aiMood.style.color = '#4B0000';
+                    aiMood.style.textShadow = '0 0 5px #FF0000';
+                } else {
+                    aiAvatar.textContent = '🤯';
+                    aiAvatar.className = 'furious';
+                    aiMood.textContent = 'BEYOND MELTDOWN!!!';
+                    aiMood.style.color = '#6B0000';
+                }
+            } else if (upsetLevel >= 100) {
                 aiAvatar.textContent = '🤬';
                 aiAvatar.className = 'furious';
                 aiMood.textContent = 'COMPLETE MELTDOWN!!!';
@@ -1644,9 +1888,32 @@
 
         // Update meter
         function updateMeter() {
-            const percentage = Math.min(100, upsetLevel);
-            meterFill.style.width = percentage + '%';
-            meterFill.textContent = Math.floor(percentage) + '%';
+            let percentage;
+
+            if (barBroken) {
+                // Bar is broken - can exceed 100%
+                percentage = upsetLevel;
+                meterFill.style.width = '100%'; // Visual bar stays at 100% but shows higher number
+                meterFill.textContent = Math.floor(percentage) + '%';
+                meterFill.style.background = 'linear-gradient(90deg, #8B0000, #FF0000, #FF4500, #FF6347)';
+                meterFill.style.animation = 'glitch 0.3s infinite';
+            } else {
+                // Normal mode - cap at 100%
+                percentage = Math.min(100, upsetLevel);
+                meterFill.style.width = percentage + '%';
+                meterFill.textContent = Math.floor(percentage) + '%';
+
+                // Color changes based on level
+                if (percentage >= 100) {
+                    meterFill.style.background = 'linear-gradient(90deg, #8B0000, #DC143C)';
+                } else if (percentage >= 60) {
+                    meterFill.style.background = 'linear-gradient(90deg, #F44336, #E91E63)';
+                } else if (percentage >= 40) {
+                    meterFill.style.background = 'linear-gradient(90deg, #FF9800, #FF5722)';
+                } else {
+                    meterFill.style.background = 'linear-gradient(90deg, #FFC107, #FF9800)';
+                }
+            }
         }
 
         // Update stats
@@ -1693,6 +1960,46 @@
             }, 3000);
         }
 
+        // Show bar break notification
+        function showBarBreakNotification() {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #8B0000, #FF0000, #FF4500);
+                color: white;
+                padding: 40px 60px;
+                border-radius: 20px;
+                font-size: 36px;
+                font-weight: bold;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                z-index: 10000;
+                text-align: center;
+                animation: explode 0.8s ease;
+                border: 5px solid #FFD700;
+            `;
+            notification.innerHTML = `
+                <div style="font-size: 48px; margin-bottom: 10px;">💥 CRITICAL MELTDOWN! 💥</div>
+                <div style="font-size: 24px;">The anger meter has BROKEN!</div>
+                <div style="font-size: 20px; margin-top: 10px;">Upset level can now exceed 100%!</div>
+            `;
+            document.body.appendChild(notification);
+
+            // Screen shake effect
+            document.body.style.animation = 'shake 0.5s ease';
+            setTimeout(() => {
+                document.body.style.animation = '';
+            }, 500);
+
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 1s';
+                setTimeout(() => notification.remove(), 1000);
+            }, 4000);
+        }
+
         // Render achievements
         function renderAchievements() {
             const list = document.getElementById('achievementsList');
@@ -1713,7 +2020,40 @@
 
             messageCount++;
             const { upsetIncrease, detections } = calculateUpset(message);
-            upsetLevel = Math.min(100, upsetLevel + upsetIncrease);
+
+            // Apply upset increase (cap at 100 if bar not broken, unlimited if broken)
+            if (barBroken) {
+                upsetLevel = upsetLevel + upsetIncrease; // No cap when broken
+            } else {
+                upsetLevel = Math.min(100, upsetLevel + upsetIncrease);
+            }
+
+            // Check if we've reached 100% meltdown
+            if (upsetLevel >= 100 && !barBroken) {
+                if (meltdownStartTime === null) {
+                    // Start tracking meltdown time
+                    meltdownStartTime = Date.now();
+                    console.log('Meltdown started! Timer begins...');
+                }
+            } else if (upsetLevel < 100) {
+                // Reset timer if they drop below 100%
+                meltdownStartTime = null;
+                if (meltdownTimer) {
+                    clearTimeout(meltdownTimer);
+                    meltdownTimer = null;
+                }
+            }
+
+            // Check if they've been at meltdown for 10 seconds
+            if (meltdownStartTime && !barBroken) {
+                const timeAtMeltdown = Date.now() - meltdownStartTime;
+                if (timeAtMeltdown >= 10000) {
+                    // Break the bar!
+                    barBroken = true;
+                    showBarBreakNotification();
+                    console.log('BAR BROKEN! Upset level can now exceed 100%!');
+                }
+            }
 
             // Update streak
             if (upsetIncrease > 5) {
@@ -1752,6 +2092,12 @@
             upsetLevel = 0;
             messageCount = 0;
             currentStreak = 0;
+            barBroken = false;
+            meltdownStartTime = null;
+            if (meltdownTimer) {
+                clearTimeout(meltdownTimer);
+                meltdownTimer = null;
+            }
             aiResponse.textContent = "Ahh, that's better! I feel so refreshed! Thanks for the reset. Let's start fresh!";
             updateAIState();
             updateMeter();
@@ -1760,6 +2106,12 @@
 
         // Event listeners
         sendButton.addEventListener('click', sendMessage);
+        generateInsultButton.addEventListener('click', () => {
+            const generatedInsult = generateInsult();
+            userInput.value = generatedInsult;
+            // Optional: Auto-send the generated insult
+            // sendMessage();
+        });
         resetButton.addEventListener('click', resetAI);
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();

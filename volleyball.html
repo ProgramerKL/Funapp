@@ -252,7 +252,7 @@
         #court {
             position: relative;
             width: 100%;
-            height: 500px;
+            height: 700px;
             background: linear-gradient(180deg, #87CEEB 0%, #87CEEB 70%, #DEB887 70%, #D2B48C 100%);
             border: 3px solid rgba(255, 255, 255, 0.5);
             overflow: hidden;
@@ -1238,7 +1238,8 @@
             rotation: 0, // ball rotation angle in degrees
             rotationSpeed: 0, // rotation speed
             mass: 1, // Ball mass for physics calculations
-            airDrag: 0.0005 // Air resistance coefficient (reduced from 0.002)
+            airDrag: 0.0005, // Air resistance coefficient (reduced from 0.002)
+            hitOpponentBody: false // Track if ball hit opponent's body
         };
 
         // Player state (side-view: X = horizontal, Y = height, Z = depth)
@@ -1247,7 +1248,7 @@
             y: 0, // height (jumping)
             z: 250, // depth position (300 = front, 200 = back)
             vx: 0,
-            speed: 12, // Enhanced speed for user player
+            speed: 15, // Enhanced speed for user player - faster but controlled
             jumping: false,
             jumpPower: 0,
             maxJumpPower: 25,
@@ -1483,6 +1484,7 @@
             ballState.scored = false;
             ballState.rotation = 0;
             ballState.rotationSpeed = 0;
+            ballState.hitOpponentBody = false;
             gameState.ballInPlay = false;
             gameState.lastHitBy = null;
             gameState.touchCount = 0;
@@ -1612,6 +1614,7 @@
             gameState.lastHitBy = 'player';
             ballState.firstBounce = false;
             ballState.scored = false;
+            ballState.hitOpponentBody = false;
             gameState.touchCount = 0;
             gameState.currentSide = 'player';
 
@@ -1773,17 +1776,25 @@
                 );
 
                 const distP2ToBall = Math.sqrt(
-                    Math.pow(ballState.x - player2State.x, 2) +
-                    Math.pow(ballState.z - player2State.z, 2)
+                    Math.pow(predictedX - player2State.x, 2) +
+                    Math.pow(predictedZ - player2State.z, 2)
                 );
 
-                // Go for ball if user player is far AND ball is coming down
-                if (distPlayerToBall > aiSettings.reactionDistance * 0.5 && ballState.vy > -5) {
+                // Player 2 zone: back-left area (covers deep balls and left side)
+                const inMyZone = predictedZ > 150; // Back court responsibility
+
+                // Check if ball is being set by teammate (going backward = negative vx)
+                const isTeammatePass = ballState.vx < 0 && gameState.touchCount < 3;
+
+                // Go for ball if it's in my zone OR I'm closest OR it's a teammate pass coming toward me
+                if ((inMyZone && distP2ToBall < aiSettings.reactionDistance) ||
+                    (distP2ToBall < 100 && ballState.vy > -8) ||
+                    (isTeammatePass && distP2ToBall < 200)) {
                     // Ball is reachable - aggressively move to predicted position
                     player2State.targetX = Math.max(leftBoundary, Math.min(netX - 30, predictedX));
                     player2State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
                 } else {
-                    // Maintain back court position for coverage
+                    // Return to default back-left position for coverage
                     player2State.targetX = netX - 180;
                     player2State.targetZ = 200;
                 }
@@ -1848,24 +1859,26 @@
                     Math.pow(ballState.x - playerState.x, 2) +
                     Math.pow(ballState.z - playerState.z, 2)
                 );
-                const distPlayer2ToBall = Math.sqrt(
-                    Math.pow(ballState.x - player2State.x, 2) +
-                    Math.pow(ballState.z - player2State.z, 2)
-                );
-
                 const distP3ToBall = Math.sqrt(
-                    Math.pow(ballState.x - player3State.x, 2) +
-                    Math.pow(ballState.z - player3State.z, 2)
+                    Math.pow(predictedX - player3State.x, 2) +
+                    Math.pow(predictedZ - player3State.z, 2)
                 );
 
-                // Go for ball if others are far and ball is descending
-                if (distPlayerToBall > aiSettings.reactionDistance * 0.4 &&
-                    distPlayer2ToBall > aiSettings.reactionDistance * 0.4 &&
-                    ballState.vy > -5) {
+                // Player 3 zone: front-middle area (covers net and middle court)
+                const inMyZone = predictedZ < 180 && predictedX > netX - 200; // Front court near net
+
+                // Check if ball is being set by teammate (going backward = negative vx)
+                const isTeammatePass = ballState.vx < 0 && gameState.touchCount < 3;
+
+                // Go for ball if it's in my zone OR I'm very close OR it's a teammate pass
+                if ((inMyZone && distP3ToBall < aiSettings.reactionDistance) ||
+                    (distP3ToBall < 100 && ballState.vy > -8) ||
+                    (isTeammatePass && distP3ToBall < 200)) {
                     // Aggressively go for predicted position
                     player3State.targetX = Math.max(leftBoundary, Math.min(netX - 30, predictedX));
                     player3State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
                 } else {
+                    // Return to default front-middle position
                     player3State.targetX = netX - 150;
                     player3State.targetZ = 225;
                 }
@@ -1933,24 +1946,26 @@
                     predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
                 }
 
-                const distPlayerToBall = Math.sqrt(
-                    Math.pow(ballState.x - playerState.x, 2) +
-                    Math.pow(ballState.z - playerState.z, 2)
-                );
-                const distPlayer2ToBall = Math.sqrt(
-                    Math.pow(ballState.x - player2State.x, 2) +
-                    Math.pow(ballState.z - player2State.z, 2)
-                );
-                const distPlayer3ToBall = Math.sqrt(
-                    Math.pow(ballState.x - player3State.x, 2) +
-                    Math.pow(ballState.z - player3State.z, 2)
+                const distP4ToBall = Math.sqrt(
+                    Math.pow(predictedX - player4State.x, 2) +
+                    Math.pow(predictedZ - player4State.z, 2)
                 );
 
-                if (distPlayerToBall > aiSettings.reactionDistance * 0.6 && distPlayer2ToBall > aiSettings.reactionDistance * 0.6 && distPlayer3ToBall > aiSettings.reactionDistance * 0.6) {
+                // Player 4 zone: back-right area (covers deep right side)
+                const inMyZone = predictedZ > 150 && predictedZ < 250; // Back-mid court responsibility
+
+                // Check if ball is being set by teammate (going backward = negative vx)
+                const isTeammatePass = ballState.vx < 0 && gameState.touchCount < 3;
+
+                // Go for ball if it's in my zone OR I'm very close OR it's a teammate pass
+                if ((inMyZone && distP4ToBall < aiSettings.reactionDistance) ||
+                    (distP4ToBall < 100 && ballState.vy > -8) ||
+                    (isTeammatePass && distP4ToBall < 200)) {
                     // Aggressively go for predicted position
                     player4State.targetX = Math.max(leftBoundary, Math.min(netX - 30, predictedX));
                     player4State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
                 } else {
+                    // Return to default back-mid position
                     player4State.targetX = netX - 200;
                     player4State.targetZ = 175;
                 }
@@ -2062,27 +2077,7 @@
                 }
             }
 
-            // CPU hit ball (only if they weren't the last hitter and ball is in air) - with accuracy check and net avoidance
-            if (gameState.ballInPlay && ballState.x > netX && ballState.y > 5 &&
-                gameState.lastHitter !== 'cpu' && gameState.lastHitter !== 'cpu2' && gameState.lastHitter !== 'cpu3' && gameState.lastHitter !== 'cpu4') {
-                const distToBall = Math.sqrt(
-                    Math.pow(ballState.x - cpuState.x, 2) +
-                    Math.pow(ballState.y - cpuState.y, 2) +
-                    Math.pow(ballState.z - cpuState.z, 2)
-                );
-
-                // Check if ball is not too close to net (avoid hitting into net)
-                const distFromNet = Math.abs(ballState.x - netX);
-                const safeToHit = distFromNet > 100 || ballState.y > 80;
-
-                if (distToBall < 70 && Math.random() < aiSettings.hitChance && safeToHit) {
-                    if (ballState.y > 50 && !cpuState.jumping) {
-                        cpuState.jumping = true;
-                        cpuState.jumpPower = cpuState.maxJumpPower;
-                    }
-                    hitBall('cpu');
-                }
-            }
+            // CPU collision check moved to centralized checkCPUCollisions() function
         }
 
         function updateCPU2AI() {
@@ -2107,17 +2102,26 @@
                     predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
                 }
 
-                const distCPU1ToBall = Math.sqrt(
-                    Math.pow(ballState.x - cpuState.x, 2) +
-                    Math.pow(ballState.z - cpuState.z, 2)
+                const distCPU2ToBall = Math.sqrt(
+                    Math.pow(predictedX - cpu2State.x, 2) +
+                    Math.pow(predictedZ - cpu2State.z, 2)
                 );
 
-                // Go for ball if CPU1 is far and ball is descending
-                if (distCPU1ToBall > aiSettings.reactionDistance * 0.5 && ballState.vy > -5) {
+                // CPU2 zone: back-left area (opponent's back-left)
+                const inMyZone = predictedZ > 150; // Back court responsibility
+
+                // Check if ball is being set by teammate (going forward for CPU = positive vx)
+                const isTeammatePass = ballState.vx > 0 && gameState.touchCount < 3;
+
+                // Go for ball if it's in my zone OR I'm very close OR it's a teammate pass
+                if ((inMyZone && distCPU2ToBall < aiSettings.reactionDistance) ||
+                    (distCPU2ToBall < 100 && ballState.vy > -8) ||
+                    (isTeammatePass && distCPU2ToBall < 200)) {
                     // Aggressively go for predicted position
                     cpu2State.targetX = Math.max(netX + 30, Math.min(rightBoundary, predictedX));
                     cpu2State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
                 } else {
+                    // Return to default back-left position
                     cpu2State.targetX = netX + 180;
                     cpu2State.targetZ = 200;
                 }
@@ -2154,26 +2158,7 @@
             cpu2State.x = Math.max(netX + 30, Math.min(rightBoundary, cpu2State.x));
             cpu2State.z = Math.max(backZ, Math.min(frontZ, cpu2State.z));
 
-            // CPU2 hit ball - with accuracy check and net avoidance (only if ball is in air)
-            if (gameState.ballInPlay && ballState.x > netX && ballState.y > 5) {
-                const distToBall = Math.sqrt(
-                    Math.pow(ballState.x - cpu2State.x, 2) +
-                    Math.pow(ballState.y - cpu2State.y, 2) +
-                    Math.pow(ballState.z - cpu2State.z, 2)
-                );
-
-                // Check if ball is not too close to net (avoid hitting into net)
-                const distFromNet = Math.abs(ballState.x - netX);
-                const safeToHit = distFromNet > 100 || ballState.y > 80;
-
-                if (distToBall < 70 && gameState.lastHitter !== 'cpu' && gameState.lastHitter !== 'cpu2' && gameState.lastHitter !== 'cpu3' && gameState.lastHitter !== 'cpu4' && Math.random() < aiSettings.hitChance && safeToHit) {
-                    if (ballState.y > 50 && !cpu2State.jumping) {
-                        cpu2State.jumping = true;
-                        cpu2State.jumpPower = cpu2State.maxJumpPower;
-                    }
-                    hitBall('cpu2');
-                }
-            }
+            // CPU2 collision check moved to centralized checkCPUCollisions() function
         }
 
         function updateCPU3AI() {
@@ -2198,23 +2183,26 @@
                     predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
                 }
 
-                const distCPU1ToBall = Math.sqrt(
-                    Math.pow(ballState.x - cpuState.x, 2) +
-                    Math.pow(ballState.z - cpuState.z, 2)
-                );
-                const distCPU2ToBall = Math.sqrt(
-                    Math.pow(ballState.x - cpu2State.x, 2) +
-                    Math.pow(ballState.z - cpu2State.z, 2)
+                const distCPU3ToBall = Math.sqrt(
+                    Math.pow(predictedX - cpu3State.x, 2) +
+                    Math.pow(predictedZ - cpu3State.z, 2)
                 );
 
-                // Go for ball if others are far and ball is descending
-                if (distCPU1ToBall > aiSettings.reactionDistance * 0.4 &&
-                    distCPU2ToBall > aiSettings.reactionDistance * 0.4 &&
-                    ballState.vy > -5) {
+                // CPU3 zone: front-middle area (opponent's front-middle)
+                const inMyZone = predictedZ < 180 && predictedX < netX + 200; // Front court near net
+
+                // Check if ball is being set by teammate (going forward for CPU = positive vx)
+                const isTeammatePass = ballState.vx > 0 && gameState.touchCount < 3;
+
+                // Go for ball if it's in my zone OR I'm very close OR it's a teammate pass
+                if ((inMyZone && distCPU3ToBall < aiSettings.reactionDistance) ||
+                    (distCPU3ToBall < 100 && ballState.vy > -8) ||
+                    (isTeammatePass && distCPU3ToBall < 200)) {
                     // Aggressively go for predicted position
                     cpu3State.targetX = Math.max(netX + 30, Math.min(rightBoundary, predictedX));
                     cpu3State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
                 } else {
+                    // Return to default front-middle position
                     cpu3State.targetX = netX + 150;
                     cpu3State.targetZ = 225;
                 }
@@ -2251,26 +2239,7 @@
             cpu3State.x = Math.max(netX + 30, Math.min(rightBoundary, cpu3State.x));
             cpu3State.z = Math.max(backZ, Math.min(frontZ, cpu3State.z));
 
-            // CPU3 hit ball - with accuracy check and net avoidance (only if ball is in air)
-            if (gameState.ballInPlay && ballState.x > netX && ballState.y > 5) {
-                const distToBall = Math.sqrt(
-                    Math.pow(ballState.x - cpu3State.x, 2) +
-                    Math.pow(ballState.y - cpu3State.y, 2) +
-                    Math.pow(ballState.z - cpu3State.z, 2)
-                );
-
-                // Check if ball is not too close to net (avoid hitting into net)
-                const distFromNet = Math.abs(ballState.x - netX);
-                const safeToHit = distFromNet > 100 || ballState.y > 80;
-
-                if (distToBall < 70 && gameState.lastHitter !== 'cpu' && gameState.lastHitter !== 'cpu2' && gameState.lastHitter !== 'cpu3' && gameState.lastHitter !== 'cpu4' && Math.random() < aiSettings.hitChance && safeToHit) {
-                    if (ballState.y > 50 && !cpu3State.jumping) {
-                        cpu3State.jumping = true;
-                        cpu3State.jumpPower = cpu3State.maxJumpPower;
-                    }
-                    hitBall('cpu3');
-                }
-            }
+            // CPU3 collision check moved to centralized checkCPUCollisions() function
         }
 
         function updateCPU4AI() {
@@ -2295,24 +2264,26 @@
                     predictedZ = ballState.z + ballState.vz * aiSettings.predictionFrames;
                 }
 
-                const distCPU1ToBall = Math.sqrt(
-                    Math.pow(ballState.x - cpuState.x, 2) +
-                    Math.pow(ballState.z - cpuState.z, 2)
-                );
-                const distCPU2ToBall = Math.sqrt(
-                    Math.pow(ballState.x - cpu2State.x, 2) +
-                    Math.pow(ballState.z - cpu2State.z, 2)
-                );
-                const distCPU3ToBall = Math.sqrt(
-                    Math.pow(ballState.x - cpu3State.x, 2) +
-                    Math.pow(ballState.z - cpu3State.z, 2)
+                const distCPU4ToBall = Math.sqrt(
+                    Math.pow(predictedX - cpu4State.x, 2) +
+                    Math.pow(predictedZ - cpu4State.z, 2)
                 );
 
-                if (distCPU1ToBall > aiSettings.reactionDistance * 0.6 && distCPU2ToBall > aiSettings.reactionDistance * 0.6 && distCPU3ToBall > aiSettings.reactionDistance * 0.6) {
+                // CPU4 zone: back-right area (opponent's back-mid/right)
+                const inMyZone = predictedZ > 150 && predictedZ < 250; // Back-mid court responsibility
+
+                // Check if ball is being set by teammate (going forward for CPU = positive vx)
+                const isTeammatePass = ballState.vx > 0 && gameState.touchCount < 3;
+
+                // Go for ball if it's in my zone OR I'm very close OR it's a teammate pass
+                if ((inMyZone && distCPU4ToBall < aiSettings.reactionDistance) ||
+                    (distCPU4ToBall < 100 && ballState.vy > -8) ||
+                    (isTeammatePass && distCPU4ToBall < 200)) {
                     // Aggressively go for predicted position
                     cpu4State.targetX = Math.max(netX + 30, Math.min(rightBoundary, predictedX));
                     cpu4State.targetZ = Math.max(backZ, Math.min(frontZ, predictedZ));
                 } else {
+                    // Return to default back-mid position
                     cpu4State.targetX = netX + 200;
                     cpu4State.targetZ = 175;
                 }
@@ -2349,26 +2320,7 @@
             cpu4State.x = Math.max(netX + 30, Math.min(rightBoundary, cpu4State.x));
             cpu4State.z = Math.max(backZ, Math.min(frontZ, cpu4State.z));
 
-            // CPU4 hit ball - with accuracy check and net avoidance (only if ball is in air)
-            if (gameState.ballInPlay && ballState.x > netX && ballState.y > 5) {
-                const distToBall = Math.sqrt(
-                    Math.pow(ballState.x - cpu4State.x, 2) +
-                    Math.pow(ballState.y - cpu4State.y, 2) +
-                    Math.pow(ballState.z - cpu4State.z, 2)
-                );
-
-                // Check if ball is not too close to net (avoid hitting into net)
-                const distFromNet = Math.abs(ballState.x - netX);
-                const safeToHit = distFromNet > 100 || ballState.y > 80;
-
-                if (distToBall < 70 && gameState.lastHitter !== 'cpu' && gameState.lastHitter !== 'cpu2' && gameState.lastHitter !== 'cpu3' && gameState.lastHitter !== 'cpu4' && Math.random() < aiSettings.hitChance && safeToHit) {
-                    if (ballState.y > 50 && !cpu4State.jumping) {
-                        cpu4State.jumping = true;
-                        cpu4State.jumpPower = cpu4State.maxJumpPower;
-                    }
-                    hitBall('cpu4');
-                }
-            }
+            // CPU4 collision check moved to centralized checkCPUCollisions() function
         }
 
         function aiTeammateServe() {
@@ -2619,15 +2571,53 @@
 
             const hitRange = 70;
 
-            // Player hitting ball (only if they weren't the last hitter and ball is in air)
-            if (ballState.x < netX && ballState.y > 5 && gameState.lastHitter !== 'player' && gameState.lastHitter !== 'player2' && gameState.lastHitter !== 'player3' && gameState.lastHitter !== 'player4') {
+            // For player team - find closest player to ball and only let them hit
+            if (ballState.x < netX && ballState.y > 5) {
+                // Calculate distances for all players
                 const playerDist = Math.sqrt(
                     Math.pow(ballState.x - playerState.x, 2) +
                     Math.pow(ballState.y - playerState.y, 2) +
                     Math.pow(ballState.z - playerState.z, 2)
                 );
+                const player2Dist = Math.sqrt(
+                    Math.pow(ballState.x - player2State.x, 2) +
+                    Math.pow(ballState.y - player2State.y, 2) +
+                    Math.pow(ballState.z - player2State.z, 2)
+                );
+                const player3Dist = Math.sqrt(
+                    Math.pow(ballState.x - player3State.x, 2) +
+                    Math.pow(ballState.y - player3State.y, 2) +
+                    Math.pow(ballState.z - player3State.z, 2)
+                );
+                const player4Dist = Math.sqrt(
+                    Math.pow(ballState.x - player4State.x, 2) +
+                    Math.pow(ballState.y - player4State.y, 2) +
+                    Math.pow(ballState.z - player4State.z, 2)
+                );
 
-                if (playerDist < hitRange) {
+                // Find closest player who wasn't the last hitter
+                let closestPlayer = null;
+                let closestDist = Infinity;
+
+                if (gameState.lastHitter !== 'player' && playerDist < closestDist && playerDist < hitRange) {
+                    closestPlayer = 'player';
+                    closestDist = playerDist;
+                }
+                if (gameState.lastHitter !== 'player2' && player2Dist < closestDist && player2Dist < hitRange) {
+                    closestPlayer = 'player2';
+                    closestDist = player2Dist;
+                }
+                if (gameState.lastHitter !== 'player3' && player3Dist < closestDist && player3Dist < hitRange) {
+                    closestPlayer = 'player3';
+                    closestDist = player3Dist;
+                }
+                if (gameState.lastHitter !== 'player4' && player4Dist < closestDist && player4Dist < hitRange) {
+                    closestPlayer = 'player4';
+                    closestDist = player4Dist;
+                }
+
+                // Only the closest player hits
+                if (closestPlayer === 'player') {
                     // Check if blocking
                     if (playerState.blocking && playerState.y > 40) {
                         blockBall('player');
@@ -2635,69 +2625,161 @@
                     } else {
                         hitBall('player');
                     }
-                }
-            }
-
-            // Player 2 (teammate AI) hitting ball - avoid hitting when too close to net or on ground
-            if (ballState.x < netX && ballState.y > 5 && gameState.lastHitter !== 'player' && gameState.lastHitter !== 'player2' && gameState.lastHitter !== 'player3' && gameState.lastHitter !== 'player4') {
-                const player2Dist = Math.sqrt(
-                    Math.pow(ballState.x - player2State.x, 2) +
-                    Math.pow(ballState.y - player2State.y, 2) +
-                    Math.pow(ballState.z - player2State.z, 2)
-                );
-
-                // Check if ball is not too close to net (avoid hitting into net)
-                const distFromNet = Math.abs(ballState.x - netX);
-                const safeToHit = distFromNet > 100 || ballState.y > 80; // Only hit if far from net or ball is high
-
-                if (player2Dist < 70 && safeToHit) {
+                } else if (closestPlayer === 'player2') {
                     if (ballState.y > 50 && !player2State.jumping) {
                         player2State.jumping = true;
                         player2State.jumpPower = player2State.maxJumpPower;
                     }
                     hitBall('player2');
-                }
-            }
-
-            // Player 3 (teammate AI) hitting ball - avoid hitting when too close to net or on ground
-            if (ballState.x < netX && ballState.y > 5 && gameState.lastHitter !== 'player' && gameState.lastHitter !== 'player2' && gameState.lastHitter !== 'player3' && gameState.lastHitter !== 'player4') {
-                const player3Dist = Math.sqrt(
-                    Math.pow(ballState.x - player3State.x, 2) +
-                    Math.pow(ballState.y - player3State.y, 2) +
-                    Math.pow(ballState.z - player3State.z, 2)
-                );
-
-                // Check if ball is not too close to net (avoid hitting into net)
-                const distFromNet = Math.abs(ballState.x - netX);
-                const safeToHit = distFromNet > 100 || ballState.y > 80;
-
-                if (player3Dist < 70 && safeToHit) {
+                } else if (closestPlayer === 'player3') {
                     if (ballState.y > 50 && !player3State.jumping) {
                         player3State.jumping = true;
                         player3State.jumpPower = player3State.maxJumpPower;
                     }
                     hitBall('player3');
-                }
-            }
-
-            // Player 4 (teammate AI) hitting ball - avoid hitting when too close to net or on ground
-            if (ballState.x < netX && ballState.y > 5 && gameState.lastHitter !== 'player' && gameState.lastHitter !== 'player2' && gameState.lastHitter !== 'player3' && gameState.lastHitter !== 'player4') {
-                const player4Dist = Math.sqrt(
-                    Math.pow(ballState.x - player4State.x, 2) +
-                    Math.pow(ballState.y - player4State.y, 2) +
-                    Math.pow(ballState.z - player4State.z, 2)
-                );
-
-                // Check if ball is not too close to net (avoid hitting into net)
-                const distFromNet = Math.abs(ballState.x - netX);
-                const safeToHit = distFromNet > 100 || ballState.y > 80;
-
-                if (player4Dist < 70 && safeToHit) {
+                } else if (closestPlayer === 'player4') {
                     if (ballState.y > 50 && !player4State.jumping) {
                         player4State.jumping = true;
                         player4State.jumpPower = player4State.maxJumpPower;
                     }
                     hitBall('player4');
+                }
+            }
+
+            // Check if player's powerful spike hits an opponent player (causes them to fail to receive)
+            if (gameState.ballInPlay && ballState.x > netX && ballState.y > 5 && gameState.lastHitter === 'player' && !ballState.scored) {
+                // Check if ball is moving fast (player spike)
+                const ballSpeed = Math.sqrt(ballState.vx * ballState.vx + ballState.vy * ballState.vy);
+                const isPowerfulSpike = ballSpeed > 25 && ballState.vy < -10; // Fast and downward
+
+                if (isPowerfulSpike) {
+                    // Check if ball hits any CPU player
+                    const hitDistance = 80; // Increased distance to detect "body hit"
+
+                    const cpuBodyDist = Math.sqrt(
+                        Math.pow(ballState.x - cpuState.x, 2) +
+                        Math.pow(ballState.y - cpuState.y, 2) +
+                        Math.pow(ballState.z - cpuState.z, 2)
+                    );
+                    const cpu2BodyDist = Math.sqrt(
+                        Math.pow(ballState.x - cpu2State.x, 2) +
+                        Math.pow(ballState.y - cpu2State.y, 2) +
+                        Math.pow(ballState.z - cpu2State.z, 2)
+                    );
+                    const cpu3BodyDist = Math.sqrt(
+                        Math.pow(ballState.x - cpu3State.x, 2) +
+                        Math.pow(ballState.y - cpu3State.y, 2) +
+                        Math.pow(ballState.z - cpu3State.z, 2)
+                    );
+                    const cpu4BodyDist = Math.sqrt(
+                        Math.pow(ballState.x - cpu4State.x, 2) +
+                        Math.pow(ballState.y - cpu4State.y, 2) +
+                        Math.pow(ballState.z - cpu4State.z, 2)
+                    );
+
+                    // Chance for opponent to fail receiving spike - VERY HIGH chance
+                    const aiSettings = getAISettings(gameState.opponentDifficulty, true);
+                    const failChance = 1 - (aiSettings.accuracy * 0.1); // Only 10% success at max accuracy = 90% fail!
+
+                    if ((cpuBodyDist < hitDistance || cpu2BodyDist < hitDistance ||
+                         cpu3BodyDist < hitDistance || cpu4BodyDist < hitDistance) &&
+                        Math.random() < failChance) {
+
+                        // BODY HIT! Opponent fails to receive - INSTANT POINT FOR PLAYER!
+                        console.log('💥 BODY HIT! Opponent overwhelmed by powerful spike!');
+
+                        ballState.scored = true;
+                        gameState.playerScore++;
+                        gameState.serving = 'player';
+
+                        showMessage('BODY HIT! YOU SCORE! 💥', 2000);
+                        makeCrowdCheer('left');
+                        updateScore();
+
+                        console.log('🔵 PLAYER SCORED via BODY HIT! New score:', gameState.playerScore, '-', gameState.opponentScore);
+
+                        // Reset ball after short delay
+                        setTimeout(() => resetBall(), 1500);
+
+                        // Don't process any more collisions this frame
+                        return;
+                    }
+                }
+            }
+
+            // For CPU team - find closest CPU to ball and only let them hit
+            if (gameState.ballInPlay && ballState.x > netX && ballState.y > 5) {
+                const aiSettings = getAISettings(gameState.opponentDifficulty, true);
+
+                // Calculate distances for all CPU players
+                const cpuDist = Math.sqrt(
+                    Math.pow(ballState.x - cpuState.x, 2) +
+                    Math.pow(ballState.y - cpuState.y, 2) +
+                    Math.pow(ballState.z - cpuState.z, 2)
+                );
+                const cpu2Dist = Math.sqrt(
+                    Math.pow(ballState.x - cpu2State.x, 2) +
+                    Math.pow(ballState.y - cpu2State.y, 2) +
+                    Math.pow(ballState.z - cpu2State.z, 2)
+                );
+                const cpu3Dist = Math.sqrt(
+                    Math.pow(ballState.x - cpu3State.x, 2) +
+                    Math.pow(ballState.y - cpu3State.y, 2) +
+                    Math.pow(ballState.z - cpu3State.z, 2)
+                );
+                const cpu4Dist = Math.sqrt(
+                    Math.pow(ballState.x - cpu4State.x, 2) +
+                    Math.pow(ballState.y - cpu4State.y, 2) +
+                    Math.pow(ballState.z - cpu4State.z, 2)
+                );
+
+                // Find closest CPU who wasn't the last hitter
+                let closestCPU = null;
+                let closestDist = Infinity;
+                const hitRange = 70;
+
+                if (gameState.lastHitter !== 'cpu' && cpuDist < closestDist && cpuDist < hitRange && Math.random() < aiSettings.hitChance) {
+                    closestCPU = 'cpu';
+                    closestDist = cpuDist;
+                }
+                if (gameState.lastHitter !== 'cpu2' && cpu2Dist < closestDist && cpu2Dist < hitRange && Math.random() < aiSettings.hitChance) {
+                    closestCPU = 'cpu2';
+                    closestDist = cpu2Dist;
+                }
+                if (gameState.lastHitter !== 'cpu3' && cpu3Dist < closestDist && cpu3Dist < hitRange && Math.random() < aiSettings.hitChance) {
+                    closestCPU = 'cpu3';
+                    closestDist = cpu3Dist;
+                }
+                if (gameState.lastHitter !== 'cpu4' && cpu4Dist < closestDist && cpu4Dist < hitRange && Math.random() < aiSettings.hitChance) {
+                    closestCPU = 'cpu4';
+                    closestDist = cpu4Dist;
+                }
+
+                // Only the closest CPU hits
+                if (closestCPU === 'cpu') {
+                    if (ballState.y > 50 && !cpuState.jumping) {
+                        cpuState.jumping = true;
+                        cpuState.jumpPower = cpuState.maxJumpPower;
+                    }
+                    hitBall('cpu');
+                } else if (closestCPU === 'cpu2') {
+                    if (ballState.y > 50 && !cpu2State.jumping) {
+                        cpu2State.jumping = true;
+                        cpu2State.jumpPower = cpu2State.maxJumpPower;
+                    }
+                    hitBall('cpu2');
+                } else if (closestCPU === 'cpu3') {
+                    if (ballState.y > 50 && !cpu3State.jumping) {
+                        cpu3State.jumping = true;
+                        cpu3State.jumpPower = cpu3State.maxJumpPower;
+                    }
+                    hitBall('cpu3');
+                } else if (closestCPU === 'cpu4') {
+                    if (ballState.y > 50 && !cpu4State.jumping) {
+                        cpu4State.jumping = true;
+                        cpu4State.jumpPower = cpu4State.maxJumpPower;
+                    }
+                    hitBall('cpu4');
                 }
             }
         }
@@ -2760,13 +2842,13 @@
 
                 if (hitType === 'spike' && canSpike) {
                     // Spike - hard hit toward opponent with topspin
-                    // User player gets enhanced spike power
-                    const power = (hitter === 'player') ? 16 : 12;
-                    const downwardForce = (hitter === 'player') ? -8 : 0; // User gets strong downward spike
+                    // User player gets ULTRA enhanced spike power
+                    const power = (hitter === 'player') ? 28 : 12; // ULTRA fast horizontal speed
+                    const downwardForce = (hitter === 'player') ? -22 : 0; // EXTREME downward spike force
                     ballState.vx = power; // Right toward opponent
-                    ballState.vy = power * 0.4 + downwardForce; // Small arc, with downward force for user
+                    ballState.vy = power * 0.15 + downwardForce; // Very low arc with extreme downward force
                     ballState.vz = (Math.random() - 0.5) * 2;
-                    ballState.rotationSpeed = 15; // Fast forward spin
+                    ballState.rotationSpeed = 30; // Maximum forward spin for dramatic effect
                     showMessage((hitter === 'player') ? 'POWER SPIKE! 💥' : 'SPIKE! 🔥', 800);
                 } else if (hitType === 'spike' && !canSpike) {
                     // Ball too low to spike - automatically convert to volley
@@ -2796,69 +2878,95 @@
                     // Auto hit for AI teammates - use varied hit types
                     const power = 12;
                     if (hitter === 'player2' || hitter === 'player3' || hitter === 'player4') {
-                        // AI teammates use smart hitting based on ball height and distance
+                        // AI teammates use smart hitting based on ball height, distance, and touch count
                         const distFromNet = Math.abs(ballState.x - netX);
                         const ballHeight = ballState.y;
+                        const currentTouch = gameState.touchCount;
 
                         // Decide hit type based on ball height and situation
                         const hitChoice = Math.random();
 
-                        if (ballHeight < 40) {
-                            // Low ball - use bump (60% chance) or volley (40% chance)
-                            if (hitChoice < 0.6) {
-                                // Bump - high defensive arc
-                                ballState.vx = power * 0.6;
-                                ballState.vy = power * 1.7;
-                                ballState.vz = (Math.random() - 0.5) * 1;
+                        // On touches 1-2, try to pass to teammates (set up for attack)
+                        // On touch 3, send it over the net
+                        const shouldSendOver = currentTouch >= 3;
+
+                        // Decision: Pass to teammate or send over net
+                        if (!shouldSendOver) {
+                            // Touches 1-2: Pass to teammate (set up the play)
+                            // Player team always passes FORWARD (toward net) to avoid going out on left side
+
+                            if (currentTouch === 1) {
+                                // First touch - bump/dig forward to setter
+                                ballState.vx = power * 0.4; // Forward toward net/teammate
+                                ballState.vy = power * 1.5; // High arc
+                                ballState.vz = (Math.random() - 0.5) * 2;
                                 ballState.rotationSpeed = 3;
                             } else {
-                                // Volley
-                                ballState.vx = power * 0.7;
-                                ballState.vy = power * 1.3;
-                                ballState.vz = (Math.random() - 0.5) * 1;
-                                ballState.rotationSpeed = 5;
-                            }
-                        } else if (ballHeight > 100 && distFromNet < 200 && canSpike) {
-                            // High ball near net - spike opportunity (70% chance)
-                            if (hitChoice < 0.7) {
-                                // Spike
-                                ballState.vx = power * 1.1;
-                                ballState.vy = power * 0.5;
-                                ballState.vz = (Math.random() - 0.5) * 2;
-                                ballState.rotationSpeed = 12;
-                            } else {
-                                // Volley (controlled)
-                                ballState.vx = power * 0.8;
-                                ballState.vy = power * 1.2;
-                                ballState.vz = (Math.random() - 0.5) * 1;
-                                ballState.rotationSpeed = 5;
+                                // Second touch - set up for hitter
+                                ballState.vx = power * 0.3; // Forward for setup
+                                ballState.vy = power * 1.2; // Medium-high arc
+                                ballState.vz = (Math.random() - 0.5) * 1.5;
+                                ballState.rotationSpeed = 4;
                             }
                         } else {
-                            // Medium height - mix of bump (30%), volley (50%), spike (20%)
-                            if (hitChoice < 0.3) {
-                                // Bump
-                                ballState.vx = power * 0.6;
-                                ballState.vy = power * 1.6;
-                                ballState.vz = (Math.random() - 0.5) * 1;
-                                ballState.rotationSpeed = 3;
-                            } else if (hitChoice < 0.8) {
-                                // Volley (most common for medium balls)
-                                ballState.vx = power * 0.8;
-                                ballState.vy = power * 1.3;
-                                ballState.vz = (Math.random() - 0.5) * 1;
-                                ballState.rotationSpeed = 5;
-                            } else if (canSpike) {
-                                // Spike
-                                ballState.vx = power * 1.0;
-                                ballState.vy = power * 0.6;
-                                ballState.vz = (Math.random() - 0.5) * 2;
-                                ballState.rotationSpeed = 12;
+                            // Touch 3: Send it over the net!
+                            if (ballHeight < 40) {
+                                // Low ball - use bump (60% chance) or volley (40% chance)
+                                if (hitChoice < 0.6) {
+                                    // Bump - high defensive arc over net
+                                    ballState.vx = power * 0.6;
+                                    ballState.vy = power * 1.7;
+                                    ballState.vz = (Math.random() - 0.5) * 1;
+                                    ballState.rotationSpeed = 3;
+                                } else {
+                                    // Volley over net
+                                    ballState.vx = power * 0.7;
+                                    ballState.vy = power * 1.3;
+                                    ballState.vz = (Math.random() - 0.5) * 1;
+                                    ballState.rotationSpeed = 5;
+                                }
+                            } else if (ballHeight > 100 && distFromNet < 200 && canSpike) {
+                                // High ball near net - spike opportunity (70% chance)
+                                if (hitChoice < 0.7) {
+                                    // Spike over net
+                                    ballState.vx = power * 1.1;
+                                    ballState.vy = power * 0.5;
+                                    ballState.vz = (Math.random() - 0.5) * 2;
+                                    ballState.rotationSpeed = 12;
+                                } else {
+                                    // Volley (controlled) over net
+                                    ballState.vx = power * 0.8;
+                                    ballState.vy = power * 1.2;
+                                    ballState.vz = (Math.random() - 0.5) * 1;
+                                    ballState.rotationSpeed = 5;
+                                }
                             } else {
-                                // Too low to spike - volley instead
-                                ballState.vx = power * 0.8;
-                                ballState.vy = power * 1.3;
-                                ballState.vz = (Math.random() - 0.5) * 1;
-                                ballState.rotationSpeed = 5;
+                                // Medium height - mix of bump (30%), volley (50%), spike (20%)
+                                if (hitChoice < 0.3) {
+                                    // Bump over net
+                                    ballState.vx = power * 0.6;
+                                    ballState.vy = power * 1.6;
+                                    ballState.vz = (Math.random() - 0.5) * 1;
+                                    ballState.rotationSpeed = 3;
+                                } else if (hitChoice < 0.8) {
+                                    // Volley over net (most common for medium balls)
+                                    ballState.vx = power * 0.8;
+                                    ballState.vy = power * 1.3;
+                                    ballState.vz = (Math.random() - 0.5) * 1;
+                                    ballState.rotationSpeed = 5;
+                                } else if (canSpike) {
+                                    // Spike over net
+                                    ballState.vx = power * 1.0;
+                                    ballState.vy = power * 0.6;
+                                    ballState.vz = (Math.random() - 0.5) * 2;
+                                    ballState.rotationSpeed = 12;
+                                } else {
+                                    // Too low to spike - volley instead over net
+                                    ballState.vx = power * 0.8;
+                                    ballState.vy = power * 1.3;
+                                    ballState.vz = (Math.random() - 0.5) * 1;
+                                    ballState.rotationSpeed = 5;
+                                }
                             }
                         }
                         // No message for AI teammate hits
@@ -2892,14 +3000,37 @@
                 // Calculate distance to net and ball height
                 const distToNet = Math.abs(ballState.x - netX);
                 const ballHeight = ballState.y;
+                const currentTouch = gameState.touchCount;
 
                 // Decide hit type based on ball height and situation
                 const hitChoice = Math.random();
 
                 let horizontalPower, verticalPower;
 
-                // AI chooses hit type based on ball height
-                if (ballHeight < 40) {
+                // On touches 1-2, try to pass to teammates (set up for attack)
+                // On touch 3, send it over the net
+                const shouldSendOver = currentTouch >= 3;
+
+                // Decision: Pass to teammate or send over net
+                if (!shouldSendOver) {
+                    // Touches 1-2: Pass to teammate (set up the play)
+                    // CPU team always passes BACKWARD (away from net, toward their side) to avoid going out on right side
+
+                    if (currentTouch === 1) {
+                        // First touch - bump/dig back to setter
+                        horizontalPower = power * 0.4; // Backward toward teammate (will be negated to go left/their side)
+                        verticalPower = power * 1.5; // High arc
+                        ballState.rotationSpeed = 3;
+                    } else {
+                        // Second touch - set up for hitter
+                        horizontalPower = power * 0.3; // Backward for setup
+                        verticalPower = power * 1.2; // Medium-high arc
+                        ballState.rotationSpeed = 4;
+                    }
+                } else {
+                    // Touch 3: Send it over the net!
+                    // AI chooses hit type based on ball height
+                    if (ballHeight < 40) {
                     // Low ball - use bump (70% chance) or volley (30% chance)
                     if (hitChoice < 0.7) {
                         // Bump - high defensive arc
@@ -2961,9 +3092,10 @@
                         verticalPower = power * 1.4;
                         ballState.rotationSpeed = 8;
                     }
+                    }
                 }
 
-                ballState.vx = -horizontalPower * aiSettings.accuracy; // Left toward player
+                ballState.vx = -horizontalPower * aiSettings.accuracy; // Left toward player (negative = left)
                 ballState.vy = verticalPower; // Arc to clear net
                 ballState.vz = (Math.random() - 0.5) * 1.5;
                 // No message for CPU hits
