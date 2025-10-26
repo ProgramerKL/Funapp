@@ -333,36 +333,56 @@
             color: #666;
         }
 
-        /* Back to Gallery Button */
+        /* Back to Gallery Button - AI Theme */
         .back-button {
             position: fixed;
             top: 20px;
             left: 20px;
-            background: linear-gradient(145deg, #E74C3C, #C0392B);
-            border: 3px solid #fff;
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            border: 3px solid #E0E7FF;
             color: #fff;
-            padding: 12px 20px;
-            border-radius: 15px;
+            padding: 14px 24px;
+            border-radius: 50px;
             cursor: pointer;
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 1rem;
             transition: all 0.3s ease;
             z-index: 10000;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.3), 0 0 20px rgba(118, 75, 162, 0.2);
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-button::before {
+            content: '🤖';
+            font-size: 1.2em;
+            animation: ai-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes ai-pulse {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.1); filter: brightness(1.2); }
         }
 
         .back-button:hover {
-            background: linear-gradient(145deg, #C0392B, #E74C3C);
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(145deg, #764ba2, #667eea);
+            transform: translateY(-2px) scale(1.08);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.7), inset 0 2px 0 rgba(255, 255, 255, 0.4), 0 0 30px rgba(118, 75, 162, 0.4);
+        }
+
+        .back-button:active {
+            transform: translateY(0) scale(1.02);
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.4);
         }
     </style>
 </head>
 <body>
     <!-- Back to Gallery Button -->
-    <a href="index.html" class="back-button">🏠 Back to Gallery</a>
+    <a href="index.html" class="back-button">Back to Gallery</a>
 
     <!-- Background particles -->
     <script>

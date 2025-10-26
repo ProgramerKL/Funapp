@@ -491,36 +491,56 @@
             box-shadow: 0 4px 15px rgba(255, 68, 68, 0.5);
         }
 
-        /* Back to Gallery Button */
+        /* Back to Gallery Button - Aviation Theme */
         .back-button {
             position: fixed;
             top: 20px;
             left: 20px;
-            background: linear-gradient(145deg, #3498DB, #2980B9);
-            border: 3px solid #fff;
+            background: linear-gradient(145deg, #00A8E8, #007EA7);
+            border: 3px solid #B0E0E6;
             color: #fff;
-            padding: 12px 20px;
-            border-radius: 15px;
+            padding: 14px 24px;
+            border-radius: 50px;
             cursor: pointer;
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 1rem;
             transition: all 0.3s ease;
             z-index: 10000;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 168, 232, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.3), 0 0 20px rgba(0, 126, 167, 0.2);
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Arial', sans-serif;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-button::before {
+            content: '✈️';
+            font-size: 1.2em;
+            animation: plane-fly 2s ease-in-out infinite;
+        }
+
+        @keyframes plane-fly {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            50% { transform: translateX(4px) rotate(-5deg); }
         }
 
         .back-button:hover {
-            background: linear-gradient(145deg, #2980B9, #3498DB);
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(145deg, #007EA7, #00A8E8);
+            transform: translateY(-2px) scale(1.08);
+            box-shadow: 0 6px 25px rgba(0, 168, 232, 0.7), inset 0 2px 0 rgba(255, 255, 255, 0.4), 0 0 30px rgba(0, 126, 167, 0.4);
+        }
+
+        .back-button:active {
+            transform: translateY(0) scale(1.02);
+            box-shadow: 0 2px 10px rgba(0, 168, 232, 0.4);
         }
     </style>
 </head>
 <body>
     <!-- Back to Gallery Button -->
-    <a href="index.html" class="back-button">🏠 Back to Gallery</a>
+    <a href="index.html" class="back-button">Back to Gallery</a>
 
     <canvas id="gameCanvas"></canvas>
 

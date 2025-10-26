@@ -783,36 +783,56 @@
             box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
         }
 
-        /* Back to Gallery Button */
+        /* Back to Gallery Button - Beach Volleyball Theme */
         .back-button {
             position: fixed;
             top: 20px;
             left: 20px;
-            background: linear-gradient(145deg, #4169E1, #1E90FF);
-            border: 3px solid #fff;
+            background: linear-gradient(145deg, #FF6B35, #F7931E);
+            border: 3px solid #FFF8DC;
             color: #fff;
-            padding: 12px 20px;
-            border-radius: 15px;
+            padding: 14px 24px;
+            border-radius: 50px;
             cursor: pointer;
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 1rem;
             transition: all 0.3s ease;
             z-index: 10000;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.3);
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Arial', sans-serif;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-button::before {
+            content: '🏐';
+            font-size: 1.2em;
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
         }
 
         .back-button:hover {
-            background: linear-gradient(145deg, #1E90FF, #4169E1);
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(145deg, #F7931E, #FF6B35);
+            transform: translateY(-2px) scale(1.08);
+            box-shadow: 0 6px 25px rgba(255, 107, 53, 0.6), inset 0 2px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .back-button:active {
+            transform: translateY(0) scale(1.02);
+            box-shadow: 0 2px 10px rgba(255, 107, 53, 0.4);
         }
     </style>
 </head>
 <body>
     <!-- Back to Gallery Button -->
-    <a href="index.html" class="back-button">🏠 Back to Gallery</a>
+    <a href="index.html" class="back-button">Back to Gallery</a>
 
     <!-- Sun -->
     <div class="sun"></div>
@@ -1231,14 +1251,17 @@
             vx: 0, // velocity x (horizontal)
             vy: 0, // velocity y (vertical - up/down)
             vz: 0, // velocity z (depth - forward/backward in court)
-            gravity: 0.5, // Gravity (reduced from 0.6 for better serves)
-            bounceDecay: 0.5, // More realistic bounce energy loss
+            gravity: 0.6, // More realistic gravity (9.8m/s² scaled)
+            bounceDecay: 0.4, // Realistic bounce energy loss (volleyball loses 60% energy)
             firstBounce: false,
             scored: false,
             rotation: 0, // ball rotation angle in degrees
             rotationSpeed: 0, // rotation speed
-            mass: 1, // Ball mass for physics calculations
-            airDrag: 0.0005, // Air resistance coefficient (reduced from 0.002)
+            spinX: 0, // Topspin/backspin
+            spinZ: 0, // Sidespin
+            mass: 0.27, // Actual volleyball mass in kg
+            airDrag: 0.001, // More realistic air resistance for volleyball
+            magnusEffect: 0.15, // Magnus effect for spin influence
             hitOpponentBody: false // Track if ball hit opponent's body
         };
 
@@ -1247,15 +1270,16 @@
             x: 200, // horizontal position (left-right on screen)
             y: 0, // height (jumping)
             z: 250, // depth position (300 = front, 200 = back)
-            vx: 0,
-            speed: 15, // Enhanced speed for user player - faster but controlled
+            vx: 0, // Current velocity X
+            vz: 0, // Current velocity Z
+            speed: 12, // Max movement speed (more realistic)
+            acceleration: 0.8, // How fast player accelerates
+            friction: 0.85, // Deceleration when not moving (sand friction)
             jumping: false,
             jumpPower: 0,
-            maxJumpPower: 25,
+            maxJumpPower: 22, // Realistic jump height
             hitType: null,
             blocking: false, // Is player attempting to block?
-            stamina: 100, // Player stamina for jumps
-            lastJumpTime: 0, // Cooldown for jumps
             jumpServing: false, // Is player performing jump serve?
             jumpServePhase: 0, // 0=not serving, 1=jumping, 2=hitting
             isServingNow: false // Is currently serving (locked behind baseline)?
@@ -1480,6 +1504,8 @@
             ballState.vx = 0;
             ballState.vy = 0;
             ballState.vz = 0;
+            ballState.spinX = 0; // Reset topspin/backspin
+            ballState.spinZ = 0; // Reset sidespin
             ballState.firstBounce = false;
             ballState.scored = false;
             ballState.rotation = 0;
@@ -1536,7 +1562,7 @@
                     powerLevel = 0;
                     powerMeter.classList.add('active');
                 } else if (gameState.ballInPlay && !playerState.jumping) {
-                    // Jump (for spike)
+                    // Jump (for spike) - instant, no cooldown or stamina cost
                     playerState.jumping = true;
                     playerState.jumpPower = playerState.maxJumpPower;
                     playerState.hitType = 'spike';
@@ -1554,15 +1580,10 @@
             }
 
             // B key for block
-            if (e.key.toLowerCase() === 'b' && gameState.ballInPlay) {
-                const now = Date.now();
-                // Jump cooldown of 500ms for more realistic timing
-                if (!playerState.jumping && now - playerState.lastJumpTime > 500) {
-                    playerState.blocking = true;
-                    playerState.jumping = true;
-                    playerState.jumpPower = playerState.maxJumpPower * 0.8; // Slightly lower jump for blocks
-                    playerState.lastJumpTime = now;
-                }
+            if (e.key.toLowerCase() === 'b' && gameState.ballInPlay && !playerState.jumping) {
+                playerState.blocking = true;
+                playerState.jumping = true;
+                playerState.jumpPower = playerState.maxJumpPower * 0.8; // Slightly lower jump for blocks
             }
 
             // P key for jump serve
@@ -1573,14 +1594,12 @@
                     return;
                 }
 
-                const now = Date.now();
                 if (!playerState.jumping && !playerState.jumpServing) {
                     // Start jump serve sequence
                     playerState.jumpServing = true;
                     playerState.jumpServePhase = 1;
                     playerState.jumping = true;
                     playerState.jumpPower = playerState.maxJumpPower * 0.95; // Normal jump height
-                    playerState.lastJumpTime = now;
 
                     // Toss ball up to match jump height
                     ballState.y = 80;
@@ -1687,7 +1706,7 @@
         }
 
         function updatePlayer() {
-            // Move left/right (horizontal across screen)
+            // Move left/right (horizontal across screen) with realistic acceleration
             // If serving, restrict forward movement (can't go past baseline)
             let minX = leftBoundary - 50;
             let maxX = netX - 30;
@@ -1697,26 +1716,38 @@
                 maxX = playerServeLineX + 5; // Can only move slightly past baseline
             }
 
+            // Realistic acceleration-based movement
             if (keys['a'] && playerState.x > minX) {
-                playerState.vx = -playerState.speed;
+                playerState.vx -= playerState.acceleration;
+                playerState.vx = Math.max(playerState.vx, -playerState.speed);
             } else if (keys['d'] && playerState.x < maxX) {
-                playerState.vx = playerState.speed;
+                playerState.vx += playerState.acceleration;
+                playerState.vx = Math.min(playerState.vx, playerState.speed);
             } else {
-                playerState.vx *= 0.8;
+                // Apply friction when no input (sand slows you down)
+                playerState.vx *= playerState.friction;
+                if (Math.abs(playerState.vx) < 0.1) playerState.vx = 0;
             }
             playerState.x += playerState.vx;
 
-            // Move forward/back (depth in court)
+            // Move forward/back (depth in court) with acceleration
             if (keys['w'] && playerState.z < frontZ) {
-                playerState.z += 4;
+                playerState.vz += playerState.acceleration * 0.8;
+                playerState.vz = Math.min(playerState.vz, playerState.speed * 0.7);
             } else if (keys['s'] && playerState.z > backZ) {
-                playerState.z -= 4;
+                playerState.vz -= playerState.acceleration * 0.8;
+                playerState.vz = Math.max(playerState.vz, -playerState.speed * 0.7);
+            } else {
+                // Apply friction
+                playerState.vz *= playerState.friction;
+                if (Math.abs(playerState.vz) < 0.1) playerState.vz = 0;
             }
+            playerState.z += playerState.vz;
 
-            // Jumping
+            // Jumping with realistic physics
             if (playerState.jumping) {
                 playerState.y += playerState.jumpPower;
-                playerState.jumpPower -= 1.2;
+                playerState.jumpPower -= 1.1; // Realistic gravity deceleration
 
                 // Jump serve hitting logic - hit ball automatically at peak
                 if (playerState.jumpServing && playerState.jumpServePhase === 1) {
@@ -2481,8 +2512,23 @@
                 ballState.vz -= dragZ;
             }
 
-            // Update ball rotation based on velocity
-            ballState.rotationSpeed = ballState.vx * 3;
+            // Apply Magnus effect (spin causes ball to curve)
+            // Topspin makes ball drop faster, backspin makes it float
+            // Sidespin makes ball curve left/right
+            if (speed > 0) {
+                const magnusForceY = ballState.spinX * ballState.magnusEffect; // Topspin effect
+                const magnusForceZ = ballState.spinZ * ballState.magnusEffect; // Sidespin effect
+
+                ballState.vy -= magnusForceY; // Topspin pulls ball down
+                ballState.vz += magnusForceZ; // Sidespin curves ball
+            }
+
+            // Spin decay over time (air friction on spin)
+            ballState.spinX *= 0.98;
+            ballState.spinZ *= 0.98;
+
+            // Update ball rotation based on velocity and spin
+            ballState.rotationSpeed = ballState.vx * 3 + ballState.spinX * 2;
             ballState.rotation += ballState.rotationSpeed;
 
             // Track if ball crosses net to reset lastHitter
@@ -2526,36 +2572,50 @@
                 }
             }
 
-            // Net collision - team that hit ball into net loses point and serve
-            if (gameState.ballInPlay && Math.abs(ballState.x - netX) < 20 && ballState.y < netHeight) {
-                // Ball hit the net - team that hit it last loses
-                if (!ballState.scored) {
-                    ballState.scored = true;
+            // Net collision - realistic net tape mechanics with bounce back
+            if (gameState.ballInPlay && Math.abs(ballState.x - netX) < 20) {
+                // Check if ball is at net height (can roll on top of net tape)
+                const netTapeHeight = netHeight;
+                const netTapeRange = 5; // Thin band at top of net
 
-                    // Team that hit ball into net loses the point
-                    if (gameState.lastHitBy === 'player') {
-                        // Player team hit into net - opponent scores and gets serve
-                        gameState.opponentScore++;
-                        console.log('🔴 NET COLLISION! Player hit into net. New score:', gameState.playerScore, '-', gameState.opponentScore);
-                        gameState.serving = 'opponent';
-                        showMessage('NET! OPPONENT SCORES! 🏐');
-                        makeCrowdCheer('right');
+                if (ballState.y >= netTapeHeight - netTapeRange && ballState.y <= netTapeHeight + netTapeRange && Math.abs(ballState.vy) < 3) {
+                    // Ball rolling on net tape - realistic physics
+                    ballState.y = netTapeHeight;
+                    ballState.vy = 0;
+                    ballState.vx *= 0.95; // Friction on net
+                    ballState.vz *= 0.95;
+
+                    // Ball can fall off either side randomly based on spin and velocity
+                    if (Math.abs(ballState.vx) < 0.5) {
+                        // Ball stops on net, falls to one side
+                        const fallSide = ballState.spinZ > 0 ? 1 : (ballState.spinZ < 0 ? -1 : (Math.random() > 0.5 ? 1 : -1));
+                        ballState.vx = fallSide * 1;
+                        ballState.vy = -2;
+                    }
+                } else if (ballState.y < netHeight) {
+                    // Ball hit the net below tape - BOUNCE BACK to the side it came from
+                    // Determine which side the ball came from based on velocity direction
+                    const ballComingFromLeft = ballState.vx > 0; // Moving right = came from left
+
+                    // Bounce ball back to the side it came from
+                    ballState.vx = -ballState.vx * 0.6; // Reverse and reduce horizontal velocity
+                    ballState.vy = Math.abs(ballState.vy) * 0.5; // Bounce up slightly
+
+                    // Move ball away from net to prevent getting stuck
+                    if (ballComingFromLeft) {
+                        ballState.x = netX - 25; // Push back to left side
                     } else {
-                        // Opponent team hit into net - player scores and gets serve
-                        gameState.playerScore++;
-                        console.log('🔵 NET COLLISION! Opponent hit into net. New score:', gameState.playerScore, '-', gameState.opponentScore);
-                        gameState.serving = 'player';
-                        showMessage('NET! YOU SCORE! 🏐');
-                        makeCrowdCheer('left');
+                        ballState.x = netX + 25; // Push back to right side
                     }
 
-                    updateScore();
+                    // Reduce spin on net contact
+                    ballState.spinX *= 0.5;
+                    ballState.spinZ *= 0.5;
 
-                    // Infinite play mode - no game over
+                    console.log('🏐 NET BOUNCE! Ball bounced back to', ballComingFromLeft ? 'left side' : 'right side');
 
-                    // Reset ball immediately (no delay)
-                    resetBall();
-                    return;
+                    // Still count as violation after too many touches
+                    // Ball will eventually drop and score will be awarded normally
                 }
             }
 
@@ -2648,9 +2708,9 @@
 
             // Check if player's powerful spike hits an opponent player (causes them to fail to receive)
             if (gameState.ballInPlay && ballState.x > netX && ballState.y > 5 && gameState.lastHitter === 'player' && !ballState.scored) {
-                // Check if ball is moving fast (player spike)
+                // Check if ball is moving fast (player spike) - adjusted for more realistic speeds
                 const ballSpeed = Math.sqrt(ballState.vx * ballState.vx + ballState.vy * ballState.vy);
-                const isPowerfulSpike = ballSpeed > 25 && ballState.vy < -10; // Fast and downward
+                const isPowerfulSpike = ballSpeed > 20 && ballState.vy < -8; // Fast and downward (realistic thresholds)
 
                 if (isPowerfulSpike) {
                     // Check if ball hits any CPU player
@@ -2842,13 +2902,17 @@
 
                 if (hitType === 'spike' && canSpike) {
                     // Spike - hard hit toward opponent with topspin
-                    // User player gets ULTRA enhanced spike power
-                    const power = (hitter === 'player') ? 28 : 12; // ULTRA fast horizontal speed
-                    const downwardForce = (hitter === 'player') ? -22 : 0; // EXTREME downward spike force
+                    // User player gets enhanced spike power
+                    const power = (hitter === 'player') ? 22 : 12; // Powerful but realistic
+                    const downwardForce = (hitter === 'player') ? -15 : 0; // Strong downward spike force
                     ballState.vx = power; // Right toward opponent
-                    ballState.vy = power * 0.15 + downwardForce; // Very low arc with extreme downward force
-                    ballState.vz = (Math.random() - 0.5) * 2;
-                    ballState.rotationSpeed = 30; // Maximum forward spin for dramatic effect
+                    ballState.vy = power * 0.15 + downwardForce; // Low arc with downward force
+                    ballState.vz = (Math.random() - 0.5) * 3; // Some variation in depth
+
+                    // Add realistic topspin (makes ball drop faster)
+                    ballState.spinX = (hitter === 'player') ? 8 : 4; // Strong topspin
+                    ballState.spinZ = (Math.random() - 0.5) * 2; // Slight sidespin variation
+                    ballState.rotationSpeed = 25; // Fast forward spin visual
                     showMessage((hitter === 'player') ? 'POWER SPIKE! 💥' : 'SPIKE! 🔥', 800);
                 } else if (hitType === 'spike' && !canSpike) {
                     // Ball too low to spike - automatically convert to volley
@@ -2864,7 +2928,11 @@
                     ballState.vx = power * 0.6; // Slower horizontal speed
                     ballState.vy = power * 1.8; // Much higher arc for receiving
                     ballState.vz = (Math.random() - 0.5) * 1;
-                    ballState.rotationSpeed = 3; // Minimal spin for control
+
+                    // Bumps have backspin (ball floats slightly)
+                    ballState.spinX = -1; // Slight backspin
+                    ballState.spinZ = (Math.random() - 0.5) * 0.5; // Minimal sidespin
+                    ballState.rotationSpeed = 3; // Minimal visual spin
                     showMessage('BUMP! ⬆️', 800);
                 } else if (hitType === 'volley') {
                     // Volley/Set (E key) - controlled arc with backspin
@@ -2872,7 +2940,11 @@
                     ballState.vx = power * 0.8;
                     ballState.vy = power * 0.8;
                     ballState.vz = (Math.random() - 0.5) * 1;
-                    ballState.rotationSpeed = 5; // Moderate spin
+
+                    // Volleys have controlled backspin (ball floats for setter)
+                    ballState.spinX = -2; // Backspin for control
+                    ballState.spinZ = (Math.random() - 0.5) * 0.8;
+                    ballState.rotationSpeed = 5; // Moderate visual spin
                     showMessage('VOLLEY! 🤲', 800);
                 } else {
                     // Auto hit for AI teammates - use varied hit types
